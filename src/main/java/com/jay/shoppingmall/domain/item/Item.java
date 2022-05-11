@@ -1,14 +1,14 @@
 package com.jay.shoppingmall.domain.item;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class Item {
 
     @Id
@@ -21,6 +21,11 @@ public class Item {
 
     //embeddable로 변경? 파일명, path.
     @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "id", column = @Column(name = "image_name", unique = true)),
+            @AttributeOverride(name = "path", column = @Column(name = "image_path", unique = true))
+
+    })
     private Image image;
 
     private Integer price;
