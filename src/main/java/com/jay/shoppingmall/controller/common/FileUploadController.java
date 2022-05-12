@@ -1,8 +1,7 @@
 package com.jay.shoppingmall.controller.common;
 
-import com.jay.shoppingmall.service.FileUploadService;
+import com.jay.shoppingmall.service.FileHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,11 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class FileUploadController {
 
-    private final FileUploadService fileUploadService;
+    private final FileHandler fileHandler;
 
-    @PostMapping("/image")
-    public String image(MultipartFile image) {
-
-        return fileUploadService.fileUpload(image);
-    }
+//    @PostMapping("/image")
+//    public String image(MultipartFile image) {
+//
+//        return fileHandler.fileUpload(image);
+//    }
 }

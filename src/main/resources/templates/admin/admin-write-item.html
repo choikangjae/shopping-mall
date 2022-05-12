@@ -18,7 +18,7 @@
 <div class="row">
     <div class="col-3"></div>
     <div class="col-6">
-        <form method="post" th:action="@{/admin/write}" th:object="${writeItemRequest}">
+        <form method="post" th:action="@{/admin/write}" th:object="${writeItemRequest}" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="item" class="form-label">상품명</label>
                 <input th:field="*{name}" type="text" class="form-control" id="item" aria-describedby="itemHelp">
@@ -39,10 +39,11 @@
                 <input th:field="*{stock}" type="text" class="form-control" id="stock" aria-describedby="stockHelp">
                 <div id="stockHelp" class="form-text">재고를 적어주세요.</div>
             </div>
-<!--            <div class="mb-3">-->
-<!--                <label for="formFileMultiple" class="form-label">사진을 첨부해주세요</label>-->
-<!--                <input th:field="*{image}" class="form-control" type="file" id="formFileMultiple" multiple>-->
-<!--            </div>-->
+            <div class="mb-3">
+                <label for="formFileMultiple" class="form-label">사진을 첨부해주세요</label>
+                <input class="form-control" type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple" multiple>
+<!--                <input type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple"/>-->
+            </div>
 
             <!--    <div class="mb-3 form-check">-->
             <!--        <input type="checkbox" class="form-check-input" id="exampleCheck1">-->

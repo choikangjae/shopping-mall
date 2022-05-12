@@ -1,14 +1,15 @@
 package com.jay.shoppingmall.domain.item;
 
+import com.jay.shoppingmall.domain.image.Image;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class Item {
 
     @Id
@@ -19,14 +20,11 @@ public class Item {
 
     private String description;
 
-    //embeddable로 변경? 파일명, path.
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "id", column = @Column(name = "image_name", unique = true)),
-            @AttributeOverride(name = "path", column = @Column(name = "image_path", unique = true))
-
-    })
-    private Image image;
+    @OneToMany(mappedBy = "item",
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            orphanRemoval = true
+    )
+    private List<Image> imageList = new ArrayList<>();
 
     private Integer price;
 
@@ -37,6 +35,22 @@ public class Item {
 
     //임시저장.
     private boolean isTemporary;
+
+    @Builder
+    public Item(String name, String description, Integer price, Integer stock) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+    }
+
+    //Image 테이블에 item_id 필드값 할당.
+    public void addImage(Image image) {
+        imageList.add(image);
+
+        if (image.getItem() != this)
+            image.setItem(this);
+    }
 
 
 }

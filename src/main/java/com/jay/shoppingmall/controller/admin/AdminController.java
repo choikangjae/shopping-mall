@@ -4,12 +4,11 @@ import com.jay.shoppingmall.dto.WriteItemRequest;
 import com.jay.shoppingmall.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -28,8 +27,9 @@ public class AdminController {
         return "admin/admin-write-item";
     }
     @PostMapping("/write")
-    public String adminWriteAction(@Valid @ModelAttribute("writeItemRequest") WriteItemRequest writeItemRequest) {
-        adminService.writeItem(writeItemRequest);
+    public String adminWriteAction(WriteItemRequest writeItemRequest,
+                                   @RequestPart("image") List<MultipartFile> files) {
+        adminService.writeItem(writeItemRequest, files);
         return "redirect:/admin";
     }
 
