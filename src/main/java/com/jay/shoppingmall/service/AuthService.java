@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.dto.SignupRequest;
@@ -19,19 +20,20 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public void signup(SignupRequest signupRequest) {
-        if (userRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
-            throw new UserDuplicatedException("User Duplicated");
-        }
-
-        if (!signupRequest.getPassword().equals(signupRequest.getRepeatPassword())) {
-            throw new PasswordInvalidException("Password does not match");
-        }
+//        if (userRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
+//            throw new UserDuplicatedException("User Duplicated");
+//        }
+//
+//        if (!signupRequest.getPassword().equals(signupRequest.getRepeatPassword())) {
+//            throw new PasswordInvalidException("Password does not match");
+//        }
 
         String password = passwordEncoder.encode(signupRequest.getPassword());
 
         User user = User.builder()
                 .email(signupRequest.getEmail())
                 .password(password)
+                .role(Role.ROLE_USER)
                 .build();
 
         userRepository.save(user);

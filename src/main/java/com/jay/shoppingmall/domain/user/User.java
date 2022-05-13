@@ -22,6 +22,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
     //나중에 embeddable로 변경해서 사용할 것.
     private String address;
 
@@ -31,9 +35,10 @@ public class User {
     private String phoneNumber;
 
     @Builder
-    public User(String email, String password) {
+    public User(String email, String password, Role role) {
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
 

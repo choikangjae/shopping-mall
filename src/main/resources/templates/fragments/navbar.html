@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -19,9 +19,13 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                 <li class="nav-item"><a class="nav-link active" aria-current="page" th:href="@{/admin}" href="#">예비 어드민</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/cs}" href="#">고객센터</a></li>
+                <div sec:authorize="!isAuthenticated()">
                 <li class="nav-item"><a class="nav-link" th:href="@{/auth/login}" href="#">로그인</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/auth/signup}" href="#">회원가입</a></li>
-
+                </div>
+                <div sec:authorize="isAuthenticated()">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/logout}" href="#">로그아웃</a></li>
+                </div>
 <!--                <li class="nav-item dropdown">-->
 <!--                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>-->
 <!--                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">-->
