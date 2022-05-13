@@ -18,30 +18,31 @@
 <div class="row">
     <div class="col-3"></div>
     <div class="col-6">
-        <form method="post" th:action="@{/admin/write}" th:object="${writeItemRequest}" enctype="multipart/form-data">
+        <form class="needs-validation" novalidate method="post" th:action="@{/admin/write}" th:object="${writeItemRequest}" enctype="multipart/form-data" >
             <div class="mb-3">
                 <label for="item" class="form-label">상품명</label>
-                <input th:field="*{name}" type="text" class="form-control" id="item" aria-describedby="itemHelp">
+                <input th:field="*{name}" type="text" class="form-control" id="item" aria-describedby="itemHelp" required>
                 <div id="itemHelp" class="form-text">상품명을 적어주세요.</div>
             </div>
             <div class="mb-3">
                 <label for="description" class="form-label">설명</label>
-                <input th:field="*{description}" type="text" class="form-control" id="description" aria-describedby="descriptionHelp">
+                <input th:field="*{description}" type="text" class="form-control" id="description" aria-describedby="descriptionHelp" required>
                 <div id="descriptionHelp" class="form-text">설명을 적어주세요.</div>
             </div>
             <div class="mb-3">
                 <label for="price" class="form-label">가격</label>
-                <input th:field="*{price}" type="text" class="form-control" id="price" aria-describedby="priceHelp">
+                <input th:field="*{price}" type="text" class="form-control" id="price" aria-describedby="priceHelp" required>
                 <div id="priceHelp" class="form-text">가격을 적어주세요.</div>
             </div>
             <div class="mb-3">
                 <label for="stock" class="form-label">재고</label>
-                <input th:field="*{stock}" type="text" class="form-control" id="stock" aria-describedby="stockHelp">
+                <input th:field="*{stock}" type="text" class="form-control" id="stock" aria-describedby="stockHelp" required>
                 <div id="stockHelp" class="form-text">재고를 적어주세요.</div>
             </div>
             <div class="mb-3">
-                <label for="formFileMultiple" class="form-label">사진을 첨부해주세요</label>
-                <input class="form-control" type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple" multiple>
+                <label for="formFileMultiple" class="form-label">대표 사진을 첨부해주세요</label>
+                <input class="form-control" type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple" aria-describedby="imageHelp">
+                <div id="imageHelp" class="form-text">750x500(3:2 비율) 크기의 .JPEG, .PNG 확장자만 업로드해주세요.</div>
 <!--                <input type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple"/>-->
             </div>
 
@@ -59,6 +60,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
+        crossorigin="anonymous">
+
+</script>
 
 </html>

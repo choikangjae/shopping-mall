@@ -27,7 +27,7 @@ public class AdminController {
         return "admin/admin-write-item";
     }
     @PostMapping("/write")
-    public String adminWriteAction(WriteItemRequest writeItemRequest,
+    public String adminWriteAction(@Valid WriteItemRequest writeItemRequest,
                                    @RequestPart("image") List<MultipartFile> files) {
         adminService.writeItem(writeItemRequest, files);
         return "redirect:/admin";

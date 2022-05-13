@@ -16,26 +16,34 @@
 
         <div th:replace="fragments/header :: header"></div>
 
-        <!-- Page content-->
+        <!-- 전체 틀 -->
         <section class="py-5">
             <div class="container px-4 px-lg-5 mt-5">
                 <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-                    <div class="col mb-5">
+                    <!-- 하나 하나 -->
+                    <div class="col mb-5 font-monospace" th:each="item : ${items}">
                         <div class="card h-100">
                             <!-- Product image-->
-                            <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+<!--                            <div th:if="${item.image}">-->
+                            <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none" >
+                            <img class="card-img-top" th:src="'data:image/jpeg;base64,'+${item.image}" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
+                            </a>
+<!--                            </div>-->
                             <!-- Product details-->
                             <div class="card-body p-4">
                                 <div class="text-center">
                                     <!-- Product name-->
-                                    <h5 class="fw-bolder">Fancy Product</h5>
+                                    <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none" >
+                                    <h5 class="fw-bolder" th:text="${item.name}">상품 이름</h5>
+                                    </a>
                                     <!-- Product price-->
-                                    $40.00 - $80.00
+                                    <h6 th:text="${item.price} + 원">가격</h6>
+                                    <h6>평점</h6>
                                 </div>
                             </div>
                             <!-- Product actions-->
                             <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">View options</a></div>
+                                <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="#">Buy Now</a></div>
                             </div>
                         </div>
                     </div>

@@ -2,9 +2,7 @@ package com.jay.shoppingmall.dto;
 
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.item.Item;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
@@ -13,6 +11,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 public class WriteItemRequest {
 

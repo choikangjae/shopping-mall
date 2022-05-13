@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -25,14 +24,14 @@ public class FileHandler {
         List<Image> imageList = new ArrayList<>();
 
         if(!CollectionUtils.isEmpty(files)) {
-            //파일명을 업로드 한 날짜로 변환 후 저장
+            //폴더명을 업로드 한 날짜로 변환 후 저장
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
             String currentDate = now.format(dateTimeFormatter);
 
-            //절대 경로를 설정.
+            //프로젝트 내에 저장하기 위해 절대 경로를 설정.
             //File.separator는 OS마다 다른 path 구분자를 처리하기 위함.
-            String absolutPath = new File("").getAbsolutePath() + File.separator + File.separator;
+            String absolutePath = new File("").getAbsolutePath() + File.separator + File.separator;
 
             //파일 저장 세부 경로 설정.
             String path = "images" + File.separator + currentDate;
@@ -84,7 +83,7 @@ public class FileHandler {
                 imageList.add(image);
 
                 //업로드 한 파일 데이터를 지정한 파일에 저장.
-                file = new File(absolutPath + path + File.separator + fileName);
+                file = new File(absolutePath + path + File.separator + fileName);
                 try {
                     multipartFile.transferTo(file);
                 } catch (IOException e) {
