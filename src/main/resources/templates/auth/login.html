@@ -1,105 +1,90 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout.html}">
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
     <title>로그인</title>
 </head>
-<body class="bg-gradient-primary">
-
-<div th:replace="fragments/navbar :: navbar"></div>
-
-<div class="container">
-
-    <!-- Outer Row -->
-    <div class="row justify-content-center">
-
-        <div class="col-xl-10 col-lg-12 col-md-9">
-
-            <div class="card o-hidden border-0 shadow-lg my-5">
-                <div class="card-body p-0">
-                    <!-- Nested Row within Card Body -->
-                    <div class="row">
-<!--                        <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>-->
-<!--                        <div class="col-lg-6">-->
-                            <div class="p-5">
-                                <div class="text-center">
-                                    <h1 class="h4 text-gray-900 mb-4">로그인</h1>
-                                </div>
-                                <form class="user" method="post" th:action="@{/auth/login}">
-                                    <div th:if="${param.error}"  class="alert alert-danger" role="alert">
-                                        이메일이나 비밀번호가 일치하지 않습니다
+<body>
+<div layout:fragment="content">
+    <div class="bg-gradient-primary">
+        <div class="container">
+            <!-- Outer Row -->
+            <div class="row justify-content-center">
+                <div class="col-xl-10 col-lg-12 col-md-9">
+                    <div class="card o-hidden border-0 shadow-lg my-5">
+                        <div class="card-body p-0">
+                            <!-- Nested Row within Card Body -->
+                            <div class="row">
+                                <!--                        <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>-->
+                                <!--                        <div class="col-lg-6">-->
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h1 class="h4 text-gray-900 mb-4">로그인</h1>
                                     </div>
-
-                                    <div class="form-group">
-                                        <input type="email" class="form-control form-control-user"
-                                               name="username" aria-describedby="emailHelp"
-                                               placeholder="이메일 주소" autofocus>
-                                    </div>
-                                    <hr>
-                                    <div class="form-group">
-                                        <input type="password" class="form-control form-control-user"
-                                               name="password" placeholder="비밀번호">
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="custom-control custom-checkbox small">
-                                            <input type="checkbox" class="custom-control-input" name="remember-me" id="remember-me">
-                                            <label class="custom-control-label" for="remember-me">로그인 유지</label>
+                                    <form class="user" method="post" th:action="@{/auth/login}">
+                                        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                                            이메일이나 비밀번호가 일치하지 않습니다
                                         </div>
-                                    </div>
-                                    <hr>
-                                    <button type="submit" class="btn btn-primary btn-user btn-block">
-                                        로그인
-                                    </button>
-                                    <hr>
-                                </form>
+
+                                        <div class="form-group">
+                                            <input type="email" class="form-control form-control-user"
+                                                   name="username" aria-describedby="emailHelp"
+                                                   placeholder="이메일 주소" autofocus>
+                                        </div>
+                                        <hr>
+                                        <div class="form-group">
+                                            <input type="password" class="form-control form-control-user"
+                                                   name="password" placeholder="비밀번호">
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox small">
+                                                <input type="checkbox" class="custom-control-input" name="remember-me"
+                                                       id="remember-me">
+                                                <label class="custom-control-label" for="remember-me">로그인 유지</label>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                                            로그인
+                                        </button>
+                                        <hr>
+                                    </form>
                                     <a href="index.html" class="btn btn-google btn-user btn-block">
                                         <i class="fab fa-google fa-fw"></i> 구글로 로그인
                                     </a>
                                     <a href="index.html" class="btn btn-facebook btn-user btn-block">
                                         <i class="fab fa-facebook-f fa-fw"></i> 페이스북으로 로그인
                                     </a>
-                                <form class="user" method="post" th:action="@{/auth/login}">
-                                    <input type="hidden" name="username" value="role@role"/>
-                                    <input type="hidden" name="password" value="role123123"/>
-                                    <button type="submit" class="btn btn-primary btn-user btn-block">
-                                        DEMO USER
-                                    </button>
-                                </form>
-                                <form class="user" method="post" th:action="@{/auth/login}">
-                                    <input type="hidden" name="username" value="role@role"/>
-                                    <input type="hidden" name="password" value="role123123"/>
-                                    <button type="submit" class="btn btn-warning btn-user btn-block">
-                                        DEMO ADMIN
-                                    </button>
-                                </form>
-                                <hr>
-                                <div class="text-center">
-                                    <a class="small" href="/auth/forgot-password">비밀번호를 잊으셨나요?</a>
-                                </div>
-                                <div class="text-center">
-                                    <a class="small" href="/auth/signup">아이디가 아직 없으신가요? 회원가입</a>
+                                    <form class="user" method="post" th:action="@{/auth/login}">
+                                        <input type="hidden" name="username" value="role@role"/>
+                                        <input type="hidden" name="password" value="role123123"/>
+                                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                                            DEMO USER
+                                        </button>
+                                    </form>
+                                    <form class="user" method="post" th:action="@{/auth/login}">
+                                        <input type="hidden" name="username" value="role@role"/>
+                                        <input type="hidden" name="password" value="role123123"/>
+                                        <button type="submit" class="btn btn-warning btn-user btn-block">
+                                            DEMO ADMIN
+                                        </button>
+                                    </form>
+                                    <hr>
+                                    <div class="text-center">
+                                        <a class="small" href="/auth/forgot-password">비밀번호를 잊으셨나요?</a>
+                                    </div>
+                                    <div class="text-center">
+                                        <a class="small" href="/auth/signup">아이디가 아직 없으신가요? 회원가입</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
-
 </div>
-<footer th:replace="fragments/footer :: footer"></footer>
-<!-- Bootstrap core JS-->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Core theme JS-->
-<script src="js/scripts.js"></script>
 </body>
 </html>

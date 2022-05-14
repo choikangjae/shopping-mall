@@ -27,4 +27,9 @@ public class MeController {
     public String myCart() {
         return "me/cart";
     }
+
+    @GetMapping("/update")
+    public String meUpdate() {
+        return "me/update";
+    }
 }
