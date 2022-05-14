@@ -7,14 +7,12 @@
 </head>
 <body>
 <div layout:fragment="content">
-
-    <h1>나의 정보 나올 장소</h1>
-
-    <div class="row">
-        <div th:replace="fragments/me-list :: me-list"></div>
-
+    <div>
+        <h1>개인 정보 수정</h1>
+    </div>
+    <div th:replace="fragments/me-list :: me-list">
         <!--본문 들어갈 곳-->
-        <div class="col-10">
+        <div>
             <span th:text="${#authentication.principal.user.email}"></span>
         </div>
     </div>

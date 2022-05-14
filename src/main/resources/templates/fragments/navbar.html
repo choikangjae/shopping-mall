@@ -1,48 +1,93 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+    <link href="../navbar-top.css" rel="stylesheet">
+</head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light" th:fragment="navbar">
-    <div class="container px-4 px-lg-5">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4" th:fragment="navbar">
+    <div class="container-fluid">
         <a class="navbar-brand" href="/">쇼핑몰</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                <li class="nav-item"><a class="nav-link active" aria-current="page" th:href="@{/admin}" href="#">예비 어드민</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/cs}" href="#">고객센터</a></li>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <div sec:authorize="!isAuthenticated()">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/auth/login}" aria-current="page" href="#">로그인</a>
+                </li>
+                    </div>
+                    <div sec:authorize="isAuthenticated()">
+                        <li class="nav-item"><a class="nav-link" th:href="@{/logout}" href="#">로그아웃</a></li>
+                    </div>
+                <div sec:authorize="!isAuthenticated()">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/auth/signup}" href="#">회원가입</a>
+                </li>
+                </div>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/me}" href="#">마이페이지</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/me/cart}" href="#">장바구니</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin}" href="#">어드민</a>
+                </li>
 
-                <div sec:authorize="!isAuthenticated()">
-                <li class="nav-item"><a class="nav-link" th:href="@{/auth/login}" href="#">로그인</a></li>
-                </div>
-                <div sec:authorize="isAuthenticated()">
-                    <li class="nav-item"><a class="nav-link" th:href="@{/logout}" href="#">로그아웃</a></li>
-                </div>
-                <div sec:authorize="!isAuthenticated()">
-                <li class="nav-item"><a class="nav-link" th:href="@{/auth/signup}" href="#">회원가입</a></li>
-                </div>
-                <!--                <li class="nav-item dropdown">-->
-<!--                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>-->
-<!--                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">-->
-<!--                        <li><a class="dropdown-item" href="#!">All Products</a></li>-->
-<!--                        <li><hr class="dropdown-divider" /></li>-->
-<!--                        <li><a class="dropdown-item" href="#!">Popular Items</a></li>-->
-<!--                        <li><a class="dropdown-item" href="#!">New Arrivals</a></li>-->
-<!--                    </ul>-->
-<!--                </li>-->
             </ul>
-
-                <a th:href="@{/me}" class="btn btn-outline-dark" type="submit">
-                    <i class="bi-cart-fill me-1"></i>
-                    My Page
-                </a>
-                <a th:href="@{/me/cart}" class="btn btn-outline-dark" type="submit">
-                    <i class="bi-cart-fill me-1"></i>
-                    Cart
-                    <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
-                </a>
-
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
         </div>
     </div>
 </nav>
+
+<!--<nav class="navbar navbar-expand-lg navbar-light bg-light" th:fragment="navbar">-->
+<!--    <div class="container px-4 px-lg-5">-->
+<!--        <a class="navbar-brand" href="/">쇼핑몰</a>-->
+<!--        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>-->
+<!--        <div class="collapse navbar-collapse" id="navbarSupportedContent">-->
+<!--            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">-->
+<!--                <li class="nav-item"><a class="nav-link active" aria-current="page" th:href="@{/admin}" href="#">예비 어드민</a></li>-->
+<!--                <li class="nav-item"><a class="nav-link" th:href="@{/cs}" href="#">고객센터</a></li>-->
+
+<!--                <div sec:authorize="!isAuthenticated()">-->
+<!--                <li class="nav-item"><a class="nav-link" th:href="@{/auth/login}" href="#">로그인</a></li>-->
+<!--                </div>-->
+<!--                <div sec:authorize="isAuthenticated()">-->
+<!--                    <li class="nav-item"><a class="nav-link" th:href="@{/logout}" href="#">로그아웃</a></li>-->
+<!--                </div>-->
+<!--                <div sec:authorize="!isAuthenticated()">-->
+<!--                <li class="nav-item"><a class="nav-link" th:href="@{/auth/signup}" href="#">회원가입</a></li>-->
+<!--                </div>-->
+<!--                <li class="nav-item"><a class="nav-link" th:href="@{/index}" href="#">잠깐</a></li>-->
+<!--                &lt;!&ndash;                <li class="nav-item dropdown">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <li><a class="dropdown-item" href="#!">All Products</a></li>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <li><hr class="dropdown-divider" /></li>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <li><a class="dropdown-item" href="#!">Popular Items</a></li>&ndash;&gt;-->
+<!--&lt;!&ndash;                        <li><a class="dropdown-item" href="#!">New Arrivals</a></li>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </ul>&ndash;&gt;-->
+<!--&lt;!&ndash;                </li>&ndash;&gt;-->
+<!--            </ul>-->
+
+<!--                <a th:href="@{/me}" class="btn btn-outline-dark" type="submit">-->
+<!--                    <i class="bi-cart-fill me-1"></i>-->
+<!--                    My Page-->
+<!--                </a>-->
+<!--                <a th:href="@{/me/cart}" class="btn btn-outline-dark" type="submit">-->
+<!--                    <i class="bi-cart-fill me-1"></i>-->
+<!--                    Cart-->
+<!--                    <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>-->
+<!--                </a>-->
+
+<!--        </div>-->
+<!--    </div>-->
+<!--</nav>-->
 
 <!--<nav class="navbar navbar-expand-lg navbar-light bg-light" >-->
 <!--    <div class="container-fluid">-->

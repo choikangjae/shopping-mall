@@ -9,12 +9,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.HttpSession;
+
 @RequiredArgsConstructor
 @RequestMapping("/me")
 @Controller
 public class MeController {
 
     private final MeService meService;
+    HttpSession session;
 
     @GetMapping
     public String me(Model model) {
@@ -24,7 +27,10 @@ public class MeController {
     }
 
     @GetMapping("/cart")
-    public String myCart() {
+    public String myCart(Model model) {
+        if (session != null) {
+//            model.addAttribute("myCart", myCartResponse);
+        }
         return "me/cart";
     }
 

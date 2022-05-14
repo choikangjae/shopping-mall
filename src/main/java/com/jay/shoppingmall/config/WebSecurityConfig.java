@@ -29,27 +29,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                //TODO 로그인 후 /auth/null로 redirect 되는 버그 고치기.
                     .csrf().disable()
-//                    .headers().frameOptions().disable()
-//                .and()
                 .rememberMe()
                     .key("123")
                     .rememberMeParameter("remember-me")
                     //1달
                     .tokenValiditySeconds(86400 * 30)
                     .userDetailsService(customUserDetailsService)
-                    .authenticationSuccessHandler(loginSuccessHandler())
                 .and()
                     .authorizeRequests()
-                    .antMatchers("/h2-console/**", "/auth/login", "/auth/signup", "/", "/item/**", "/auth/forgot-password").permitAll()
-                    .antMatchers("/admin/**").hasRole("ADMIN")
+                    .antMatchers( "/js/**", "/assets/**", "/auth/login", "/auth/signup", "/", "/item/**", "/auth/forgot-password").permitAll()
+//                    .antMatchers("/admin/**").hasRole("ADMIN")
+                    .antMatchers("/admin/**").hasRole("USER")
                     .anyRequest().authenticated()
                 .and()
                     .formLogin()
                     .loginPage("/auth/login")
+                .loginProcessingUrl("/auth/login")
                     .successHandler(loginSuccessHandler())
-//                    .defaultSuccessUrl("/")
                 .and()
                     .logout()
                     .logoutSuccessUrl("/auth/login")

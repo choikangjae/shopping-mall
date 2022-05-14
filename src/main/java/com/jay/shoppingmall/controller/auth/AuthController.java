@@ -12,7 +12,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/auth")
@@ -22,9 +26,10 @@ public class AuthController {
     private final AuthService authService;
     private final UserValidator userValidator;
 
-    //principal이 authenticated라면 "/"으로 redirect.
+    //TODO principal이 authenticated라면 "/"으로 redirect.
     @GetMapping("/login")
-    public String login() {
+    public String login(HttpSession session) {
+
         return "auth/login";
     }
 
@@ -57,5 +62,21 @@ public class AuthController {
     public String privacyAgree() {
 
         return "auth/signup-done";
+    }
+//    @PostMapping("/logout")
+//    public String logout(HttpServletResponse response) {
+//        expireCookie(response, "memberId");
+//        return "redirect:/";
+//    }
+//    private void expireCookie(HttpServletResponse response, String cookieName) {
+//        Cookie cookie = new Cookie(cookieName, null);
+//        cookie.setMaxAge(0);
+//        response.addCookie(cookie);
+//    }
+
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
     }
 }
