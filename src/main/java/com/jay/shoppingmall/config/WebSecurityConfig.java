@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.config;
 
 import com.jay.shoppingmall.security.CustomUserDetailsService;
+import com.jay.shoppingmall.security.LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -27,8 +29,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+                //TODO 로그인 후 /auth/null로 redirect 되는 버그 고치기.
                     .csrf().disable()
-                    .headers().frameOptions().disable()
+//                    .headers().frameOptions().disable()
+//                .and()
+                .rememberMe()
+                    .key("123")
+                    .rememberMeParameter("remember-me")
+                    //1달
+                    .tokenValiditySeconds(86400 * 30)
+                    .userDetailsService(customUserDetailsService)
+                    .authenticationSuccessHandler(loginSuccessHandler())
                 .and()
                     .authorizeRequests()
                     .antMatchers("/h2-console/**", "/auth/login", "/auth/signup", "/", "/item/**", "/auth/forgot-password").permitAll()
@@ -37,12 +48,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .formLogin()
                     .loginPage("/auth/login")
+                    .successHandler(loginSuccessHandler())
 //                    .defaultSuccessUrl("/")
                 .and()
                     .logout()
                     .logoutSuccessUrl("/auth/login")
                     .invalidateHttpSession(true);
 
+    }
+
+    @Bean
+    public LoginSuccessHandler loginSuccessHandler() {
+
+        return new LoginSuccessHandler();
     }
 
     @Bean

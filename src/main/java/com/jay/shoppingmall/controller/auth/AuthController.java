@@ -22,6 +22,7 @@ public class AuthController {
     private final AuthService authService;
     private final UserValidator userValidator;
 
+    //principal이 authenticated라면 "/"으로 redirect.
     @GetMapping("/login")
     public String login() {
         return "auth/login";
