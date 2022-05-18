@@ -7,14 +7,23 @@
 </head>
 <body>
 <div layout:fragment="content">
+    <div class="container">
     <div>
         <h1>마이 페이지</h1>
     </div>
-    <div th:replace="fragments/me-list :: me-list">
+<!--    <div th:replace="fragments/me-list :: me-list">-->
         <!--본문 들어갈 곳-->
         <div class="container position-relative">
-            <span th:text="${#authentication.principal.user.email}"></span>
-            <span th:text="${#authentication.principal.user.password}"></span>
+            <div th:if="${user.getAgree().getIsMandatoryAgree() == false}">
+                <form action="/me/privacy" method="post">
+                <h5 th:text="${user.getEmail()}"></h5>
+                    회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요 </br>
+                <button type="submit" class="btn btn-primary">개인정보 입력하러 가기</button>
+                </form>
+            </div>
+
+            <a type="button" href="me/update" class="btn btn-primary mt-3">개인정보 수정</a>
+
         </div>
     </div>
 </div>

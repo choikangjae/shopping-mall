@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.domain.item;
 
+import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.image.Image;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Item {
+public class Item extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,6 +29,8 @@ public class Item {
 
     private Integer price;
 
+    private Integer salePrice;
+
     private Integer stock;
 
     //삭제.
@@ -37,10 +40,11 @@ public class Item {
     private boolean isTemporary;
 
     @Builder
-    public Item(String name, String description, Integer price, Integer stock) {
+    public Item(String name, String description, Integer price, Integer salePrice, Integer stock) {
         this.name = name;
         this.description = description;
         this.price = price;
+        this.salePrice = salePrice;
         this.stock = stock;
     }
 
@@ -51,6 +55,7 @@ public class Item {
         if (image.getItem() != this)
             image.setItem(this);
     }
+
 
 
 }

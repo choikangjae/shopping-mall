@@ -31,6 +31,8 @@ dependencies {
 //	I/O
 	implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
 	implementation group: 'commons-io', name: 'commons-io', version: '2.10.0'
+	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.14'
+
 
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'

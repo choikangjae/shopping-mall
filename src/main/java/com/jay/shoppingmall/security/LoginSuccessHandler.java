@@ -26,21 +26,20 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         final HttpServletResponse response,
                                         final Authentication authentication) throws IOException, ServletException {
 
+//        HttpSession session = request.getSession();
+//        session.setAttribute("user", authentication);
 
         String url = "/";
-
 
         RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
         //강제로 인터셉트 당했을 때의 정보
         RequestCache requestCache = new HttpSessionRequestCache();
-        System.out.println(requestCache.toString());
         SavedRequest savedRequest = requestCache.getRequest(request, response);
-        System.out.println(savedRequest);
 
         //직접 로그인 버튼을 눌렀을 때의 정보
         String prevPage = (String) request.getSession().getAttribute("prevPage");
-        if (savedRequest.equals("/auth/null")) {
-            response.sendRedirect("/me/cart");
+        if (savedRequest == null) {
+            response.sendRedirect("/");
         } else if (prevPage != null) {
             response.sendRedirect(prevPage);
         }

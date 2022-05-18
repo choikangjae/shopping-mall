@@ -8,6 +8,8 @@ import lombok.*;
 @Builder
 public class ItemDetailResponse {
 
+    private Long id;
+
     private String name;
 
     private String description;

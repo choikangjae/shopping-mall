@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
       layout:decorate="~{layouts/layout.html}">
 <head>
     <title>홈페이지</title>
@@ -13,7 +14,7 @@
         <section class="py-5 text-center container">
             <div class="row py-lg-5">
                 <div class="col-lg-6 col-md-8 mx-auto">
-                    <h1 class="fw-light">Album example</h1>
+                    <h1 class="fw-light">쇼핑몰 프로젝트</h1>
                     <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it entirely.</p>
                     <p>
                         <a href="#" class="btn btn-primary my-2">Main call to action</a>
@@ -25,7 +26,6 @@
 
         <div class="album py-5 bg-light">
             <div class="container">
-
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                     <div class="col">
                         <div class="card shadow-sm">
@@ -42,6 +42,7 @@
                             </div>
                         </div>
                     </div>
+<!--                    <th:block th:each="item : ${items}"></th:block>-->
                     <div class="col" th:each="item : ${items}">
                         <div class="card shadow-sm">
                             <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none">
@@ -55,12 +56,16 @@
                                 <h5 class="fw-bolder" th:text="${item.name}">상품 이름</h5>
                                 </a>
                                 </p>
+                                <h5 class="fw-bolder" th:text="${item.price} + ' 원'">상품 가격</h5>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">찜하기</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary">즉시구매</button>
+                                        <button id="addToWishList" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-heart"></i> 찜하기
+                                        </button>
+                                        <button id="buyNow" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-shopping-cart"></i> 바로구매
+                                        </button>
                                     </div>
-<!--                                    <small class="text-muted">9 mins</small>-->
                                 </div>
                             </div>
                         </div>
@@ -71,7 +76,8 @@
 
     </main>
 
-
+    <script th:src="@{/js/add_to_wish_list.js}"></script>
+    <script th:src="@{/js/buy_now.js}"></script>
 </div>
 </body>
 </html>

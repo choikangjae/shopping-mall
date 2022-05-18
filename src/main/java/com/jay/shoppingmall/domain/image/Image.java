@@ -27,15 +27,18 @@ public class Image {
 
     private Long fileSize;
 
+    private boolean isMainImage;
+
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
 
     @Builder
-    public Image(String originalFileName, String filePath, Long fileSize) {
+    public Image(String originalFileName, String filePath, Long fileSize, boolean isMainImage) {
         this.originalFileName = originalFileName;
         this.filePath = filePath;
         this.fileSize = fileSize;
+        this.isMainImage = isMainImage;
     }
 
     //상품 정보 저장

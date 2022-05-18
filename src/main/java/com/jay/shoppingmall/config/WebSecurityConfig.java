@@ -31,25 +31,27 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity
                     .csrf().disable()
                 .rememberMe()
-                    .key("123")
                     .rememberMeParameter("remember-me")
-                    //1달
+                    //토큰 유효기간 1달
                     .tokenValiditySeconds(86400 * 30)
+//                    .alwaysRemember(true)
                     .userDetailsService(customUserDetailsService)
                 .and()
                     .authorizeRequests()
-                    .antMatchers( "/js/**", "/assets/**", "/auth/login", "/auth/signup", "/", "/item/**", "/auth/forgot-password").permitAll()
+                    .antMatchers( "/auth/me","/js/**", "/assets/**", "/auth/login", "/auth/signup", "/", "/item/**", "/auth/forgot-password").permitAll()
 //                    .antMatchers("/admin/**").hasRole("ADMIN")
-                    .antMatchers("/admin/**").hasRole("USER")
+                    .antMatchers("/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated()
                 .and()
                     .formLogin()
                     .loginPage("/auth/login")
-                .loginProcessingUrl("/auth/login")
+                    .loginProcessingUrl("/auth/login")
                     .successHandler(loginSuccessHandler())
                 .and()
                     .logout()
                     .logoutSuccessUrl("/auth/login")
+                    //로그아웃시 세션을 통해 발급한 모든 쿠키 삭제.
+                    .deleteCookies("JSESSIONID", "remember-me")
                     .invalidateHttpSession(true);
 
     }

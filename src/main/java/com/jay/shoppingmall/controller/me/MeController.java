@@ -1,15 +1,25 @@
 package com.jay.shoppingmall.controller.me;
 
+import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.domain.cart.Cart;
+import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.AgreeRequest;
 import com.jay.shoppingmall.dto.MeDetailResponse;
+import com.jay.shoppingmall.service.CartService;
 import com.jay.shoppingmall.service.MeService;
+import com.jay.shoppingmall.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/me")
@@ -17,21 +27,37 @@ import javax.servlet.http.HttpSession;
 public class MeController {
 
     private final MeService meService;
-    HttpSession session;
 
     @GetMapping
-    public String me(Model model) {
-//        MeDetailResponse meDetailResponse = meService.findById(id);
-//        model.addAttribute("meDetailResponse", meDetailResponse);
+    public String me(@CurrentUser User user, Model model) {
+        model.addAttribute("user", user);
+
         return "me/home";
     }
 
-    @GetMapping("/cart")
-    public String myCart(Model model) {
-        if (session != null) {
-//            model.addAttribute("myCart", myCartResponse);
+    @PostMapping("/privacy")
+    public String showPersonalInformationAgreementForm(@CurrentUser User user, Model model) {
+        if (user == null) {
+            return "redirect:/";
         }
-        return "me/cart";
+        if (user.getAddress() != null || user.getName() != null || user.getPhoneNumber() != null) {
+            return "redirect:/";
+        }
+        model.addAttribute("user", user);
+        return "me/agreement";
+    }
+
+    @PostMapping("/privacy/agree")
+    public ResponseEntity<?> agreeCheck(@Valid @RequestBody AgreeRequest agreeRequest, @CurrentUser User user) {
+        if (user == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        Long id = user.getId();
+
+        if (!meService.agreeCheck(agreeRequest, id)) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        return ResponseEntity.ok().body(true);
     }
 
     @GetMapping("/update")

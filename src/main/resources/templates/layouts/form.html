@@ -33,13 +33,6 @@
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR&display=swap" rel="stylesheet">
 
     <style>
-    input::-webkit-inner-spin-button {
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    }
-
-
     .font01 {
         font-family: 'Noto Sans KR', sans-serif;
       }
@@ -98,12 +91,8 @@
 </head>
 
 <body class="font01">
-<div th:replace="fragments/navbar :: navbar"></div>
 
 <div layout:fragment="content"></div>
-
-<footer th:replace="fragments/footer :: footer"></footer>
-
 <th:block th:includ="fragments/commonScript :: commonScript"></th:block>
 </body>
 </html>

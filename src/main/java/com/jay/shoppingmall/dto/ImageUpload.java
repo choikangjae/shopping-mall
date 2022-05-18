@@ -15,11 +15,14 @@ public class ImageUpload {
 
     private Long fileSize;
 
+    private boolean isMainImage;
+
     public Image toEntity() {
         return Image.builder()
                 .originalFileName(originalFileName)
                 .filePath(filePath)
                 .fileSize(fileSize)
+                .isMainImage(isMainImage)
                 .build();
     }
 }

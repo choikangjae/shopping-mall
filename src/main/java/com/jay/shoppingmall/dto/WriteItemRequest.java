@@ -23,8 +23,12 @@ public class WriteItemRequest {
 
     private List<MultipartFile> image;
 
+    private Image mainImage;
+
     @NotNull
     private Integer price;
+
+    private Integer salePrice;
 
     @NotNull
     private Integer stock;
@@ -34,6 +38,7 @@ public class WriteItemRequest {
                 .name(name)
                 .description(description)
                 .price(price)
+                .salePrice(salePrice)
                 .stock(stock)
                 .build();
     }

@@ -23,23 +23,24 @@ public class AdminService {
 
     public Long writeItem(WriteItemRequest writeItemRequest, final List<MultipartFile> files) {
 
-//        Item item = Item.builder()
-//                .name(writeItemRequest.getName())
-//                .description(writeItemRequest.getDescription())
-//                .price(writeItemRequest.getPrice())
-//                .stock(writeItemRequest.getStock())
-//                .build();
+//        Item item = new Item(writeItemRequest.getName(), writeItemRequest.getDescription(), writeItemRequest.getPrice(), writeItemRequest.getSalePrice(), writeItemRequest.getStock());
 
-        Item item = new Item(writeItemRequest.getName(), writeItemRequest.getDescription(), writeItemRequest.getPrice(), writeItemRequest.getStock());
+//        Image mainImage = fileHandler.saveImage(file);
+        List<Image> imageList = fileHandler.parseFilesInfo(files);
+//        imageList.add(mainImage);
 
-        List<Image> imageList = fileHandler.parseFileInfo(files);
+        Item item = Item.builder()
+                .name(writeItemRequest.getName())
+                .description(writeItemRequest.getDescription())
+                .price(writeItemRequest.getPrice())
+                .stock(writeItemRequest.getStock())
+                .build();
 
         if (!imageList.isEmpty()) {
             for (Image image : imageList) {
                 item.addImage(imageRepository.save(image));
             }
         }
-
         return itemRepository.save(item).getId();
     }
 }

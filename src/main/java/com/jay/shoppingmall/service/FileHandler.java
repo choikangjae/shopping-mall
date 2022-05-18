@@ -1,8 +1,12 @@
 package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.image.Image;
+import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.dto.ImageUpload;
 import com.jay.shoppingmall.exception.FileException;
+import lombok.RequiredArgsConstructor;
+import net.coobird.thumbnailator.Thumbnails;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -10,17 +14,61 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class FileHandler {
 
-    public List<Image> parseFileInfo(List<MultipartFile> files) {
+    private final ImageRepository imageRepository;
+
+    public Image saveImage(MultipartFile file) {
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String currentDate = now.format(dateTimeFormatter);
+
+        System.out.println(currentDate);
+
+        String absolutePath = new File("").getAbsolutePath() + File.separator + File.separator;
+
+        System.out.println(absolutePath);
+
+        String path = "images" + File.separator + currentDate;
+        File filePath = new File(path);
+
+        if (!filePath.exists())
+            filePath.mkdirs();
+
+        if (file.getContentType() == null || file.getContentType().equals("image/jpeg") || file.getContentType().equals("image/png"))
+            throw new FileException("확장자가 없거나 jpg, png가 아닙니다");
+
+        String fileName = String.valueOf(System.nanoTime());
+
+        Image image = Image.builder()
+                .originalFileName(file.getOriginalFilename())
+                .filePath(path + File.separator + fileName)
+                .fileSize(file.getSize())
+                .build();
+
+        try {
+            file.transferTo(new File(path));
+        } catch (Exception e) {
+            throw new FileException("File I/O failed");
+        }
+
+        return image;
+    }
+
+    public List<Image> parseFilesInfo(List<MultipartFile> files) {
         List<Image> imageList = new ArrayList<>();
 
         if(!CollectionUtils.isEmpty(files)) {
@@ -36,15 +84,16 @@ public class FileHandler {
             //파일 저장 세부 경로 설정.
             String path = "images" + File.separator + currentDate;
             File file = new File(path);
+            File thumbnailFile = new File(path + File.separator + "thumbnails");
 
-            //경로가 중복되지 않을 경우
+            //폴더가 존재하지 않으면 만듬
+            //없는 폴더에 파일을 넣으려고 하면 I/O 익셉션 발생
             if (!file.exists()) {
-                boolean wasSuccessful = file.mkdirs();
-
-                if(!wasSuccessful) {
-                    throw new FileException("Duplicated files");
-                }
+                file.mkdirs();
             }
+            if (!thumbnailFile.exists())
+                thumbnailFile.mkdirs();
+
             //모든 파일에 대해 처리
             for (MultipartFile multipartFile : files) {
                 //파일의 확장자 추출
@@ -70,6 +119,7 @@ public class FileHandler {
                         .originalFileName(multipartFile.getOriginalFilename())
                         .filePath(path + File.separator + fileName)
                         .fileSize(multipartFile.getSize())
+                        .isMainImage(false)
                         .build();
 
 //                Image image = imageUpload.toEntity();
@@ -77,26 +127,44 @@ public class FileHandler {
                 Image image = new Image(
                         imageUpload.getOriginalFileName(),
                         imageUpload.getFilePath(),
-                        imageUpload.getFileSize()
+                        imageUpload.getFileSize(),
+                        imageUpload.isMainImage()
                 );
-
                 imageList.add(image);
 
                 //업로드 한 파일 데이터를 지정한 파일에 저장.
                 file = new File(absolutePath + path + File.separator + fileName);
                 try {
                     multipartFile.transferTo(file);
+                    Thumbnails.of(file)
+                            .size(100, 100)
+                            .toFile(thumbnailFile + File.separator + fileName);
                 } catch (IOException e) {
                     throw new FileException("File I/O failed");
                 }
 
-                file.setWritable(true);
-                file.setReadable(true);
-
             }
-
         }
-
         return imageList;
     }
+
+    public String getStringImage(Image image) {
+        String absolutePath = new File("").getAbsolutePath() + File.separator;
+        String path = absolutePath + image.getFilePath();
+        String stringImage = null;
+
+        try {
+            InputStream inputStream = new FileInputStream(path);
+            byte[] imageBytes = IOUtils.toByteArray(inputStream);
+            stringImage = Base64.getEncoder().encodeToString(imageBytes);
+
+           inputStream.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return stringImage;
+    }
+
+
 }
