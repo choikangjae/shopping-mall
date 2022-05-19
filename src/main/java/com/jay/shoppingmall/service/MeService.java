@@ -8,6 +8,7 @@ import com.jay.shoppingmall.dto.MeDetailResponse;
 import com.jay.shoppingmall.exception.AgreeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +18,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class MeService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
+    public boolean passwordCheck(String password, User user) {
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            return false;
+        }
+        return true;
+    }
 
     public MeDetailResponse findById(final Long id) {
         User user = userRepository.findById(id).orElseThrow(()-> new UsernameNotFoundException("User Not Found"));
@@ -38,12 +47,12 @@ public class MeService {
             throw new AgreeException("You have to agree the mandatory one");
         }
 
-        Agree agree = Agree.builder()
-                .isMandatoryAgree(agreeRequest.getIsMandatoryAgree())
-                .isMarketingAgree(agreeRequest.getIsMarketingAgree())
-                .build();
-
-        user.setAgree(agree);
+//        Agree agree = Agree.builder()
+//                .isMandatoryAgree(agreeRequest.getIsMandatoryAgree())
+//                .isMarketingAgree(agreeRequest.getIsMarketingAgree())
+//                .build();
+//
+//        user.setAgree(agree);
 
         return true;
     }

@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.controller.admin;
+package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.dto.WriteItemRequest;
 import com.jay.shoppingmall.service.AdminService;

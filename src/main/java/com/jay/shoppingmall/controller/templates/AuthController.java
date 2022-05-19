@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.controller.auth;
+package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.controller.common.UserValidator;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -33,24 +34,10 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserValidator userValidator;
-    private final UserDetailsService userDetailsService;
 
-    @GetMapping("/me")
-    public String getUserProfile(@CurrentUser User user) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("principal : " + authentication.getPrincipal());
-        System.out.println("Implementing class of UserDetails: " + authentication.getPrincipal().getClass());
-        System.out.println("Implementing class of UserDetailsService: " + userDetailsService.getClass());
-        return "/auth/me";
-    }
-
-
-    //TODO principal이 authenticated라면 "/"으로 redirect.
     @GetMapping("/login")
-    public String login(@CurrentUser User user) {
-
+    public String login(HttpServletRequest request, @CurrentUser User user) {
         if (user != null) {
-            System.out.println(user);
             return "redirect:/";
         }
         return "auth/login";
@@ -58,7 +45,6 @@ public class AuthController {
 
     @GetMapping("/signup")
     public String signup(SignupRequest signupRequest, @CurrentUser User user) {
-
         if (user != null) {
             return "redirect:/";
         }
@@ -70,13 +56,11 @@ public class AuthController {
         if (user != null) {
             return "redirect:/";
         }
-
         return "/auth/forgot-password";
     }
 
     @PostMapping("/signup")
     public String signupAction(@Valid SignupRequest signupRequest, BindingResult result, Model model) {
-
         userValidator.validate(signupRequest, result);
 
         if (result.hasErrors()) {

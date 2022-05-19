@@ -32,6 +32,11 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/cart}" href="#">장바구니</a>
                 </li>
+                <div sec:authorize="hasRole('SELLER')">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin}" href="#">판매자</a>
+                    </li>
+                </div>
                 <div sec:authorize="hasRole('ADMIN')">
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/admin}" href="#">어드민</a>

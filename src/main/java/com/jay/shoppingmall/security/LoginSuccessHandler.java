@@ -1,12 +1,18 @@
 package com.jay.shoppingmall.security;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
@@ -17,51 +23,57 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 
+@Getter
+@Setter
 @RequiredArgsConstructor
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
+    private String username;
+    private String defaultUrl;
+
+    public LoginSuccessHandler(final String username, final String defaultUrl) {
+        this.username = username;
+        this.defaultUrl = defaultUrl;
+    }
 
     @Override
     public void onAuthenticationSuccess(final HttpServletRequest request,
                                         final HttpServletResponse response,
                                         final Authentication authentication) throws IOException, ServletException {
 
-//        HttpSession session = request.getSession();
-//        session.setAttribute("user", authentication);
+        String requestUsername = request.getParameter(username);
+        clearAuthenticationExceptions(request);
+        resultRedirectStrategy(request, response, authentication);
+//        response.sendRedirect(request.getHeader("referer"));
+    }
 
-        String url = "/";
 
-        RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-        //강제로 인터셉트 당했을 때의 정보
-        RequestCache requestCache = new HttpSessionRequestCache();
-        SavedRequest savedRequest = requestCache.getRequest(request, response);
+    private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    private final RequestCache requestCache = new HttpSessionRequestCache();
 
-        //직접 로그인 버튼을 눌렀을 때의 정보
-        String prevPage = (String) request.getSession().getAttribute("prevPage");
-        if (savedRequest == null) {
-            response.sendRedirect("/");
-        } else if (prevPage != null) {
-            response.sendRedirect(prevPage);
+    protected void resultRedirectStrategy(final HttpServletRequest request,
+                                          final HttpServletResponse response,
+                                          final Authentication authentication) throws IOException, ServletException {
+
+        SavedRequest savedRequest = (SavedRequest) request.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+            redirectStrategy.sendRedirect(request, response, "/admin");
         }
-        else {
-            response.sendRedirect(url);
+        else if (savedRequest != null) {
+            String targetUrl = savedRequest.getRedirectUrl();
+            System.out.println("targetUrl: " + targetUrl);
+            redirectStrategy.sendRedirect(request, response, targetUrl);
+        } else {
+            System.out.println("defaultUrl: " + defaultUrl);
+            redirectStrategy.sendRedirect(request, response, defaultUrl);
         }
-//
-//        if (prevPage != null) {
-//            request.getSession().removeAttribute("prevPage");
-//        }
-//
-//        if (savedRequest != null) {
-//            url = savedRequest.getRedirectUrl();
-//            redirectStrategy.sendRedirect(request, response, url);
-//
-//            requestCache.removeRequest(request, response);
-//            System.out.println(url);
-//
-//        } else if (prevPage != null && !prevPage.equals("")){
-//            redirectStrategy.sendRedirect(request, response, prevPage);
-//        } else {
-//            redirectStrategy.sendRedirect(request, response, url);
-//        }
+    }
+
+    //에러 세션 삭제
+    protected void clearAuthenticationExceptions(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session != null)
+            session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
     }
 }

@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.controller.item;
+package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.dto.ItemDetailResponse;
 import com.jay.shoppingmall.dto.ItemResponse;

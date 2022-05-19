@@ -10,5 +10,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER) //이 애노테이션을 붙일 수 있는 곳 : PARAMETER
 @Retention(RetentionPolicy.RUNTIME) // 언제까지 이 애노테이션 정보를 유지 : RUNTIME
 @AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : user")
+//@AuthenticationPrincipal(expression = "user")
 public @interface CurrentUser {
 }

@@ -14,10 +14,13 @@
 <!--    <div th:replace="fragments/me-list :: me-list">-->
         <!--본문 들어갈 곳-->
         <div class="container position-relative">
+            <div>
+                <span th:text="${user.getEmail() + '님 안녕하세요'}"></span>
+            </div>
             <div th:if="${user.getAgree().getIsMandatoryAgree() == false}">
                 <form action="/me/privacy" method="post">
-                <h5 th:text="${user.getEmail()}"></h5>
-                    회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요 </br>
+                <h5 th:text="${user.getEmail() + '회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요'}"></h5>
+                     </br>
                 <button type="submit" class="btn btn-primary">개인정보 입력하러 가기</button>
                 </form>
             </div>

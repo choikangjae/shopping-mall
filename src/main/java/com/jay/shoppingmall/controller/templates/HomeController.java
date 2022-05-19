@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.controller;
+package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.dto.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
@@ -25,12 +25,4 @@ public class HomeController {
 
         return "home";
     }
-
-    @GetMapping("/index")
-    public String index() {
-        return "example";
-    }
-
-
-
 }

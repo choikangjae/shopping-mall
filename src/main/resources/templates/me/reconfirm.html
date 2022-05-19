@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>마이 페이지</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <div>
+            <h1>비밀번호 재확인</h1>
+        </div>
+        <!--본문 들어갈 곳-->
+        <div class="container position-relative">
+            <div class="col-6">
+                <label for="email" class="form-label">이메일</label>
+                <input type="email" class="form-control" id="email" th:value="${user.getEmail()}" disabled>
+            </div>
+            <div class="col-6">
+                <label for="email" class="form-label">비밀번호 확인</label>
+                <input type="password" class="form-control" id="password">
+            </div>
+            <button id="confirmPassword" type="submit" class="btn btn-primary mt-3">확인</button>
+        </div>
+    </div>
+
+    <script>
+            window.addEventListener('load', (e) => {
+                const confirmPassword = document.getElementById('confirmPassword');
+
+                confirmPassword.addEventListener('click', (e) => {
+                    // e.preventDefault();
+
+                    let password = document.getElementById('password').value;
+
+                    let data = {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            password
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    };
+
+                    fetch(`/api/v1/reconfirm`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                alert('비밀번호를 확인해주세요');
+                            }
+                            if (res.ok) {
+                                window.location.replace('http://localhost:8080/me/update')
+                            }
+                            res.json();
+                        })
+                        .then(json => {
+                            console.log(json)
+                        })
+                        .catch(err => {
+                            alert(err.message);
+                        });
+                })
+            })
+        </script>
+</div>
+</body>
+</html>

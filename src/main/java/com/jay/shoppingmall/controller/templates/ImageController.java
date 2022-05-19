@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.controller.image;
+package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.service.FileHandler;
 import lombok.RequiredArgsConstructor;

@@ -4,18 +4,152 @@
       layout:decorate="~{layouts/layout.html}">
 <head>
     <title>개인정보 수정</title>
+    <link href="../css/form-validation.css" rel="stylesheet">
+
 </head>
 <body>
 <div layout:fragment="content">
-    <div>
-        <h1>개인 정보 수정</h1>
-    </div>
-    <div th:replace="fragments/me-list :: me-list">
-        <!--본문 들어갈 곳-->
+    <div class="container">
         <div>
-            <span th:text="${#authentication.principal.user.email}"></span>
+            <h1>개인 정보 수정</h1>
+        </div>
+
+        <div class="col-md-7 col-lg-8 mt-5">
+            <form class="needs-validation" novalidate>
+                <div class="row g-3">
+
+                    <div class="col-12">
+                        <label for="email" class="form-label">이메일</label>
+                        <input type="email" class="form-control" id="email" th:value="${user.getEmail()}" disabled>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-8">
+                                <label for="password" class="form-label">비밀번호</label>
+                                <input type="password" class="form-control" id="password" placeholder="********"
+                                       disabled>
+                            </div>
+                            <div class="col-4 position-relative fixed-bottom">
+                                <a class="btn btn-primary" type="button">비밀번호 변경하기</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="firstName" class="form-label">성</label>
+                        <input type="text" class="form-control" id="firstName" placeholder="홍" value="" required>
+                        <div class="invalid-feedback">
+                            성을 적어주세요
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="lastName" class="form-label">이름</label>
+                        <input type="text" class="form-control" id="lastName" placeholder="길동" value="" required>
+                        <div class="invalid-feedback">
+                            이름을 적어주세요
+                        </div>
+                    </div>
+
+                        <div class="col-md-6">
+                            <label for="zipcode" class="form-label">우편번호</label>
+                            <input type="text" class="form-control" id="zipcode" placeholder="우편번호" readonly required>
+                            <div class="invalid-feedback">
+                                우편번호를 입력해주세요
+                            </div>
+                        </div>
+                        <div class="col-4 position-relative">
+                            <a class="btn btn-primary" onclick="getAddressApi()" type="button">주소 검색</a>
+                        </div>
+
+                    <div class="col-12">
+                        <label for="address" class="form-label">주소</label>
+                        <input type="text" class="form-control" id="address" placeholder="도로명 주소" readonly
+                               required>
+                        <div class="invalid-feedback">
+                            도로명 주소를 입력해주세요
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <label for="detailAddress" class="form-label">상세 주소</label>
+                        <input type="text" class="form-control" id="detailAddress" placeholder="상세 주소" required>
+                        <div class="invalid-feedback">
+                            상세 주소를 입력해주세요
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="extraAddress" class="form-label">참고항목</label>
+                        <input type="text" class="form-control" id="extraAddress" readonly>
+                    </div>
+                </div>
+
+                <div class="form-check mt-3">
+                    <input type="checkbox" class="form-check-input" id="mainAddress">
+                    <label class="form-check-label" for="mainAddress">나의 대표 주소로 설정합니다</label>
+                </div>
+
+                <hr class="my-4">
+
+                <button class="w-100 btn btn-primary btn-lg" type="submit">개인정보 입력 완료</button>
+            </form>
+
         </div>
     </div>
+    <script src="../js/form-validation.js"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+    function getAddressApi() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var addr = ''; // 주소 변수
+                var extraAddr = ''; // 참고항목 변수
+
+                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    addr = data.roadAddress;
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                    addr = data.jibunAddress;
+                }
+
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if(data.userSelectedType === 'R'){
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if(data.buildingName !== '' && data.apartment === 'Y'){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if(extraAddr !== ''){
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 조합된 참고항목을 해당 필드에 넣는다.
+                    document.getElementById("extraAddress").value = extraAddr;
+
+                } else {
+                    document.getElementById("extraAddress").value = '';
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('zipcode').value = data.zonecode;
+                document.getElementById("address").value = addr;
+                // 커서를 상세주소 필드로 이동한다.
+                document.getElementById("detailAddress").focus();
+            }
+        }).open();
+    }
+
+    </script>
+
 </div>
 </body>
 </html>

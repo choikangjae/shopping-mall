@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.controller.me;
+package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.cart.Cart;
@@ -47,21 +47,15 @@ public class MeController {
         return "me/agreement";
     }
 
-    @PostMapping("/privacy/agree")
-    public ResponseEntity<?> agreeCheck(@Valid @RequestBody AgreeRequest agreeRequest, @CurrentUser User user) {
-        if (user == null) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        Long id = user.getId();
-
-        if (!meService.agreeCheck(agreeRequest, id)) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        return ResponseEntity.ok().body(true);
+    @GetMapping("/update")
+    public String meUpdate(@CurrentUser User user, Model model) {
+        model.addAttribute("user", user);
+        return "me/update";
     }
 
-    @GetMapping("/update")
-    public String meUpdate() {
-        return "me/update";
+    @GetMapping("/reconfirm")
+    public String reConfirm(@CurrentUser User user, Model model) {
+        model.addAttribute("user", user);
+        return "me/reconfirm";
     }
 }

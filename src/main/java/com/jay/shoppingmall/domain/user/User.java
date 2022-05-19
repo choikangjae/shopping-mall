@@ -19,7 +19,7 @@ public class User extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     @Email
     private String email;
 
@@ -33,7 +33,6 @@ public class User extends BaseTimeEntity {
     @Embedded
     @Setter
     private Agree agree;
-
 
     @Embedded
     private Address address;
