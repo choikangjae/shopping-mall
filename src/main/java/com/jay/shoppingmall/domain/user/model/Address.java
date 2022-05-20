@@ -15,15 +15,18 @@ public class Address {
     private String zipcode;
 
     @NotEmpty
-    private String address1;
+    private String address;
 
     @NotEmpty
-    private String address2;
+    private String detailAddress;
+
+    private String extraAddress;
 
     @Builder
-    public Address(final String zipcode, final String address1, final String address2) {
+    public Address(final String zipcode, final String address, final String detailAddress, final String extraAddress) {
         this.zipcode = zipcode;
-        this.address1 = address1;
-        this.address2 = address2;
+        this.address = address;
+        this.detailAddress = detailAddress;
+        this.extraAddress = extraAddress;
     }
 }

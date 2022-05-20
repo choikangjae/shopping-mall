@@ -50,5 +50,10 @@ public class User extends BaseTimeEntity {
         this.role = role;
     }
 
-
+    public void userUpdate(final Address address, final Name name, final Agree agree, final PhoneNumber phoneNumber) {
+        this.address = address;
+        this.name = name;
+        this.agree = agree;
+        this.phoneNumber = phoneNumber;
+    }
 }

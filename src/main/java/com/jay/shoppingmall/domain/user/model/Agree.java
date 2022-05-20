@@ -17,6 +17,4 @@ public class Agree {
 
     @Column
     private Boolean isMarketingAgree;
-
-
 }

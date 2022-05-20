@@ -18,13 +18,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public void signup(SignupRequest signupRequest) {
-//        if (userRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
-//            throw new UserDuplicatedException("User Duplicated");
-//        }
-//
-//        if (!signupRequest.getPassword().equals(signupRequest.getRepeatPassword())) {
-//            throw new PasswordInvalidException("Password does not match");
-//        }
 
         String password = passwordEncoder.encode(signupRequest.getPassword());
 

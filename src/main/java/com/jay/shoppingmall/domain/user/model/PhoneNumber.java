@@ -30,6 +30,9 @@ public class PhoneNumber {
         this.middle = middle;
         this.last = last;
     }
+    public String getFullNumber() {
+        return String.format("%s-%s-%s", this.first, this.middle, this.last);
+    }
 }
 
 

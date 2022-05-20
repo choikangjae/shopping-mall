@@ -34,8 +34,6 @@ public class UserValidator implements Validator {
         if (!signupRequest.getPassword().equals(signupRequest.getRepeatPassword())) {
             errors.rejectValue("password", "PasswordNotMatch", "비밀번호가 같지 않습니다.");
             errors.rejectValue("repeatPassword", "PasswordNotMatch", "비밀번호가 같지 않습니다.");
-
         }
-
     }
 }

@@ -20,7 +20,7 @@
 
                     <div class="col-12">
                         <label for="email" class="form-label">이메일</label>
-                        <input type="email" class="form-control" id="email" th:value="${user.getEmail()}" disabled>
+                        <input type="email" class="form-control" id="email" th:value="${user?.getEmail()}" disabled>
                     </div>
 
                     <div class="col-12">
@@ -37,16 +37,16 @@
                     </div>
 
                     <div class="col-sm-6">
-                        <label for="firstName" class="form-label">성</label>
-                        <input type="text" class="form-control" id="firstName" placeholder="홍" value="" required>
+                        <label for="lastName" class="form-label">성</label>
+                        <input type="text" class="form-control" id="lastName" placeholder="홍" value="" th:value="${user.getName()?.getLast()}" required>
                         <div class="invalid-feedback">
                             성을 적어주세요
                         </div>
                     </div>
-
+                    
                     <div class="col-sm-6">
-                        <label for="lastName" class="form-label">이름</label>
-                        <input type="text" class="form-control" id="lastName" placeholder="길동" value="" required>
+                        <label for="firstName" class="form-label">이름</label>
+                        <input type="text" class="form-control" id="firstName" placeholder="길동" value="" th:value="${user.getName()?.getFirst()}" required>
                         <div class="invalid-feedback">
                             이름을 적어주세요
                         </div>
@@ -56,7 +56,7 @@
 
                     <div class="col-md-6">
                         <label for="zipcode" class="form-label">우편번호</label>
-                        <input type="text" class="form-control" id="zipcode" placeholder="우편번호" readonly required>
+                        <input type="text" class="form-control" id="zipcode" placeholder="우편번호" readonly th:value="${user.getAddress()?.getZipcode()}" required>
                         <div class="invalid-feedback">
                             우편번호를 입력해주세요
                         </div>
@@ -67,7 +67,7 @@
 
                     <div class="col-12">
                         <label for="address" class="form-label">주소</label>
-                        <input type="text" class="form-control" id="address" placeholder="도로명 주소" readonly
+                        <input type="text" class="form-control" id="address" placeholder="도로명 주소" th:value="${user.getAddress()?.getAddress()}" readonly
                                required>
                         <div class="invalid-feedback">
                             도로명 주소를 입력해주세요
@@ -76,14 +76,14 @@
 
                     <div class="col-6">
                         <label for="detailAddress" class="form-label">상세 주소</label>
-                        <input type="text" class="form-control" id="detailAddress" placeholder="상세 주소" required>
+                        <input type="text" class="form-control" id="detailAddress" placeholder="상세 주소" th:value="${user.getAddress()?.getDetailAddress()}" required>
                         <div class="invalid-feedback">
                             상세 주소를 입력해주세요
                         </div>
                     </div>
                     <div class="col-6">
                         <label for="extraAddress" class="form-label">참고항목</label>
-                        <input type="text" class="form-control" id="extraAddress" readonly>
+                        <input type="text" class="form-control" id="extraAddress" th:value="${#objects.nullSafe(user.getAddress()?.getExtraAddress(),'')}" readonly>
                     </div>
                 </div>
 
@@ -97,7 +97,7 @@
                 <div class="row g-3">
                     <div class="col-6">
                         <label for="phoneNumber" class="form-label">휴대폰 번호</label>
-                        <input type="text" class="form-control" id="phoneNumber" placeholder="010-1234-5678" required>
+                        <input type="text" class="form-control" id="phoneNumber" placeholder="010(-)1234(-)5678" th:value="${user.getPhoneNumber()?.getFullNumber()}" required>
                         <div class="invalid-feedback">
                             휴대폰 번호를 입력해주세요
                         </div>
@@ -109,7 +109,7 @@
 
                 <hr class="my-4">
 
-                <button class="w-100 btn btn-primary btn-lg" type="submit">개인정보 입력 완료</button>
+                <button id="validationCheck" class="w-100 btn btn-primary btn-lg" type="submit">개인정보 입력 완료</button>
             </form>
 
         </div>
@@ -165,8 +165,59 @@
         }).open();
     }
 
+    window.addEventListener('load', (e) => {
+                const validationCheck = document.getElementById('validationCheck');
 
+                validationCheck.addEventListener('click', (e) => {
+                    e.preventDefault();
 
+                    let firstName = document.getElementById('firstName').value;
+                    let lastName = document.getElementById('lastName').value;
+                    let zipcode = document.getElementById('zipcode').value;
+                    let address = document.getElementById('address').value;
+                    let detailAddress = document.getElementById('detailAddress').value;
+                    let extraAddress = document.getElementById('extraAddress').value;
+                    let phoneNumber = document.getElementById('phoneNumber').value;
+
+                    let data = {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            firstName,
+                            lastName,
+                            zipcode,
+                            address,
+                            detailAddress,
+                            extraAddress,
+                            phoneNumber
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    };
+
+                    const onSuccess = res => {
+                        res.text()
+                        .then(() =>
+                            // setTimeout(()=>{window.location.replace('http://localhost:8080/me/update')}, 500 ))
+                            alert('변경되었습니다'));
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
+                    fetch(`/api/v1/privacy/update`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            alert(err.message);
+                        });
+                })
+            })
     </script>
 
 </div>

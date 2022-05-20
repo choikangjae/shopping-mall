@@ -21,11 +21,12 @@ public class WebConfig implements WebMvcConfigurer {
         return new LayoutDialect();
     }
 
-//    @Override
-//    public void addInterceptors(final InterceptorRegistry registry) {
-//        registry.addInterceptor(passwordInterceptor)
-//                .addPathPatterns("/me/update");
-//    }
+    @Override
+    public void addInterceptors(final InterceptorRegistry registry) {
+        registry.addInterceptor(passwordInterceptor)
+                .addPathPatterns("/me/update")
+                ;
+    }
 
     //    @Value("${resources.path}")
 //    private String uploadImagePath;

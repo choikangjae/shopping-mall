@@ -23,12 +23,9 @@ public class PasswordInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {
 
-        ServletInputStream inputStream = request.getInputStream();
-        String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
-
-        System.out.println("messageBody = " + messageBody);
-
-        response.sendRedirect("/me/reconfirm");
+        if (request.getSession().getAttribute("password") == null) {
+            response.sendRedirect("/me/reconfirm");
+        }
         return true;
     }
 }

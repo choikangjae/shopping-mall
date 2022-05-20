@@ -14,19 +14,19 @@ import javax.validation.constraints.NotEmpty;
 public class Name {
 
     @NotEmpty
-    @Column(name = "family_name", length = 50)
-    private String family;
+    @Column(name = "last_name", length = 50)
+    private String last;
 
     @NotEmpty
-    @Column(name = "personal_name", length = 50)
-    private String personal;
+    @Column(name = "first_name", length = 50)
+    private String first;
 
     @Builder
-    public Name(final String family, final String personal) {
-        this.family = family;
-        this.personal = personal;
+    public Name(final String first, final String last) {
+        this.last = last;
+        this.first = first;
     }
     public String getFullName() {
-        return String.format("%s %s", this.family, this.personal);
+        return String.format("%s %s", this.last, this.first);
     }
 }
