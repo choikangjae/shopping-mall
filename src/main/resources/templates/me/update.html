@@ -52,16 +52,18 @@
                         </div>
                     </div>
 
-                        <div class="col-md-6">
-                            <label for="zipcode" class="form-label">우편번호</label>
-                            <input type="text" class="form-control" id="zipcode" placeholder="우편번호" readonly required>
-                            <div class="invalid-feedback">
-                                우편번호를 입력해주세요
-                            </div>
+                    <hr class="my-4">
+
+                    <div class="col-md-6">
+                        <label for="zipcode" class="form-label">우편번호</label>
+                        <input type="text" class="form-control" id="zipcode" placeholder="우편번호" readonly required>
+                        <div class="invalid-feedback">
+                            우편번호를 입력해주세요
                         </div>
-                        <div class="col-4 position-relative">
-                            <a class="btn btn-primary" onclick="getAddressApi()" type="button">주소 검색</a>
-                        </div>
+                    </div>
+                    <div class="col-4 position-relative">
+                        <a class="btn btn-primary" onclick="getAddressApi()" type="button">주소 검색</a>
+                    </div>
 
                     <div class="col-12">
                         <label for="address" class="form-label">주소</label>
@@ -85,9 +87,24 @@
                     </div>
                 </div>
 
-                <div class="form-check mt-3">
+                <div class="form-check mt-5">
                     <input type="checkbox" class="form-check-input" id="mainAddress">
                     <label class="form-check-label" for="mainAddress">나의 대표 주소로 설정합니다</label>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label for="phoneNumber" class="form-label">휴대폰 번호</label>
+                        <input type="text" class="form-control" id="phoneNumber" placeholder="010-1234-5678" required>
+                        <div class="invalid-feedback">
+                            휴대폰 번호를 입력해주세요
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <a class="btn btn-primary" onclick="" type="button">번호 인증</a>
+                    </div>
                 </div>
 
                 <hr class="my-4">
@@ -147,6 +164,8 @@
             }
         }).open();
     }
+
+
 
     </script>
 

@@ -55,19 +55,21 @@
                         }
                     };
 
+                    const onSuccess = res => {
+                        window.location.replace('http://localhost:8080/me/update')
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
                     fetch(`/api/v1/privacy/agree`, agreeData)
                         .then(res => {
                             if (!res.ok) {
-                                alert('필수 항목은 반드시 체크해야합니다');
+                                throw res;
                             }
-                            if (res.ok) {
-                                window.location.replace('http://localhost:8080/me/update')
-                            }
-                            res.json();
+                            return res
                         })
-                        .then(json => {
-                            console.log(json)
-                        })
+                        .then(onSuccess, onFailure)
                         .catch(err => {
                             alert(err.message);
                         });

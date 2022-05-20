@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.exception;
+package com.jay.shoppingmall.exception.exceptions;
 
 public class AgreeException extends RuntimeException {
     public AgreeException(String message) {

@@ -6,16 +6,13 @@ import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.dto.ItemResponse;
 import com.jay.shoppingmall.dto.ItemDetailResponse;
-import com.jay.shoppingmall.exception.ItemNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.RequiredArgsConstructor;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Service
