@@ -34,9 +34,12 @@ public class CartController {
             return "/auth/login";
         }
         final List<Cart> cartList = cartService.CartItemsList(user);
-
+        int total = 0;
+        for (Cart cart : cartList) {
+            total += cart.getItem().getPrice() * cart.getQuantity();
+        }
+        model.addAttribute("total", total);
         model.addAttribute("cartList", cartList);
-
         return "/me/cart";
     }
 

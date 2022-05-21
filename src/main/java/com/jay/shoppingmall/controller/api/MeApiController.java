@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.controller.api;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.controller.common.UpdateValidator;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.AgreeRequest;
 import com.jay.shoppingmall.dto.PasswordCheckRequest;
@@ -22,6 +23,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +40,7 @@ public class MeApiController {
 
     private final MeService meService;
     private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder passwordEncoder;
+    private final UpdateValidator updateValidator;
 
     @PostMapping("/privacy/agree")
     public ResponseEntity<?> agreeCheck(@Valid @RequestBody AgreeRequest agreeRequest, @CurrentUser User user, HttpServletRequest request) {
@@ -69,8 +72,27 @@ public class MeApiController {
     }
 
     @PostMapping("/privacy/update")
-    public ResponseEntity<ErrorResponse> updateMe(@Valid @RequestBody UserUpdateRequest request,
+    public ResponseEntity<ErrorResponse> updateMe(@Valid @RequestBody UserUpdateRequest request, BindingResult bindingResult,
                                                   @CurrentUser User user, HttpServletRequest servletRequest) {
+        updateValidator.validate(request, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            FieldError error = bindingResult.getFieldError();
+            String e = error.getField();
+            System.out.println(e);
+            if (e.equals("phoneNumber")) {
+                return ResponseEntity.badRequest().body(ErrorResponse.builder()
+                        .message("전화번호가 형식에 맞지않습니다")
+                        .code("INVALID_PHONE_NUMBER")
+                        .build());
+            } else {
+                return ResponseEntity.badRequest().body(ErrorResponse.builder()
+                        .message("비어있는 값이 있습니다")
+                        .code("NULL_NOT_ACCEPTED")
+                        .build());
+            }
+        }
+
         Long id = user.getId();
         Object isMarketingAgree = servletRequest.getSession().getAttribute("isMarketingAgree") != null;
         meService.updateInfo(request, isMarketingAgree, id);

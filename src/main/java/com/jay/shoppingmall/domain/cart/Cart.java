@@ -3,6 +3,7 @@ package com.jay.shoppingmall.domain.cart;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.exception.exceptions.QuantityException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,7 +39,7 @@ public class Cart extends BaseTimeEntity {
 
     public void manipulateQuantity(Integer quantity) {
         if (quantity < 1 || quantity > item.getStock()) {
-            throw new ArithmeticException("Something is off about the quantity");
+            throw new QuantityException("주문할 수 있는 재고 "+ item.getStock() +"개를 넘어섰습니다.");
         }
         this.quantity = quantity;
     }
