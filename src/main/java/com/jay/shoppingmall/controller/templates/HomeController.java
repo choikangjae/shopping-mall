@@ -1,6 +1,6 @@
 package com.jay.shoppingmall.controller.templates;
 
-import com.jay.shoppingmall.dto.ItemResponse;
+import com.jay.shoppingmall.dto.response.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;

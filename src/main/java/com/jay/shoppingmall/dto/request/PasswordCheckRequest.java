@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.dto;
+package com.jay.shoppingmall.dto.request;
 
 import lombok.Getter;
 

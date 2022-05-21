@@ -1,154 +1,223 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layouts/layout.html}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+    layout:decorate="~{layouts/layout.html}">
+
 <head>
     <title>장바구니</title>
 </head>
+
 <body>
 
-<div layout:fragment="content">
-<!--    <div th:replace="fragments/me-list :: me-list"></div>-->
-    <section class="h-100" style="background-color: #eee;">
-        <div class="container h-100 py-5">
-            <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-10">
+    <div layout:fragment="content">
+        <!--    <div th:replace="fragments/me-list :: me-list"></div>-->
+        <section class="h-100" style="background-color: #eee;">
+            <div class="container h-100 py-5">
+                <div class="row d-flex justify-content-center align-items-center h-100">
+                    <div class="col-10">
 
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="fw-normal mb-0 text-black">장바구니</h3>
-                        <div>
-                            <p class="mb-0"><span class="text-muted">Sort by:</span> <a href="#!" class="text-body">price <i
-                                    class="fas fa-angle-down mt-1"></i></a></p>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-normal mb-0 text-black">장바구니</h3>
+                            <div>
+                                <p class="mb-0"><span class="text-muted">Sort by:</span> <a href="#!"
+                                        class="text-body">price <i class="fas fa-angle-down mt-1"></i></a></p>
+                            </div>
                         </div>
-                    </div>
-                    <div th:if="${#lists.isEmpty(cartList)}">
-                        <h3>장바구니가 비어있습니다</h3>
-                    </div>
+                        <div th:if="${#lists.isEmpty(cartList)}">
+                            <h3>장바구니가 비어있습니다</h3>
+                        </div>
 
-                    <th:block th:each="cart : ${cartList}">
-                    <div class="card rounded-3 mb-2" th:with="item = ${cart.item}">
-                        <div class="card-body p-4">
-                            <div class="row d-flex justify-content-between align-items-center">
+                        <th:block th:each="cart : ${cartList}">
+                            <div class="card rounded-3 mb-2" th:with="item = ${cart.item}">
+                                <div class="card-body p-4">
+                                    <div class="row d-flex justify-content-between align-items-center">
 
-                                <div class="col-md-2 col-lg-2 col-xl-2">
-<!--                                    <img class="bd-placeholder-img card-img-top" width="100%" height="500"-->
-<!--                                         th:src="'data:image/jpeg;base64,'+${response.image}"-->
-<!--                                         alt="..."/>-->
-<!--                                    <img-->
-<!--                                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"-->
-<!--                                            class="img-fluid rounded-3" alt="Cotton T-shirt">-->
+                                        <div class="col-md-2 col-lg-2 col-xl-2">
+                                            <!--                                    <img class="bd-placeholder-img card-img-top" width="100%" height="500"-->
+                                            <!--                                         th:src="'data:image/jpeg;base64,'+${response.image}"-->
+                                            <!--                                         alt="..."/>-->
+                                            <!--                                    <img-->
+                                            <!--                                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"-->
+                                            <!--                                            class="img-fluid rounded-3" alt="Cotton T-shirt">-->
+                                        </div>
+                                        <div class="col-md-3 col-lg-3 col-xl-3">
+                                            <div th:id="${item.id}" th:text="${item.id}" hidden></div>
+                                            <a th:href="@{'/item/details/' + ${item.id}}"
+                                                class="text-reset text-decoration-none">
+                                                <p class="lead fw-normal mb-2" th:text="${item.name}">이름</p>
+                                            </a>
+                                            <p><span class="text-muted">Size: </span>M <span class="text-muted">Color:
+                                                </span>Grey</p>
+                                        </div>
+                                        <div class="col-2">
+                                            <h5 class="mb-0" th:id="'eachPrice' + ${item.id}"
+                                                th:text="${#numbers.formatDecimal(item.price, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                                개당 가격</h5>
+                                            <h5>원 </h5>
+                                        </div>
+                                        <div class="col-md-3 col-lg-3 col-xl-2 d-flex" >
+                                            <a class="btn btn-link px-2"
+                                                onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                                <i class="fas fa-minus"></i>
+                                            </a>
+                                            <input th:id="'quantity' + ${item.id}" min="1" name="quantity"
+                                                th:value="${cart.quantity}" type="number"
+                                                class="form-control form-control-sm" />
+                                            <a class="btn btn-link px-2"
+                                                onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                                <i class="fas fa-plus"></i>
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3 col-lg-2 col-xl-2">
+                                            <h5 class="mb-0" th:id="'multipliedPrice' + ${item.id}"
+                                                th:text="${#numbers.formatDecimal(item.price * cart.quantity, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                                                합산 가격</h5>
+                                        </div>
+                                        <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                            <a href="#!" th:id="'updateButton' + ${item.id}"
+                                                th:onclick="|updateItem('${item.id}');|" class="text-white mr-2"><i
+                                                    class="fas fa-redo-alt fa-lg"></i></a>
+                                            <a href="#!" th:id="'deleteButton' + ${item.id}" class="text-danger"><i
+                                                    class="fas fa-trash fa-lg"></i></a>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-3 col-lg-3 col-xl-3">
-                                    <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none">
-                                    <p class="lead fw-normal mb-2" th:text="${item.name}">이름</p>
-                                    </a>
-                                    <p><span class="text-muted">Size: </span>M <span class="text-muted">Color: </span>Grey</p>
+                            </div>
+                        </th:block>
+
+                        <div class="card rounded-3 mb-4">
+                            <div class="card-body p-4">
+                                <div class="row d-flex justify-content-between align-items-center">
+                                    <div class="col-md-2 col-lg-2 col-xl-2">
+                                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
+                                            class="img-fluid rounded-3" alt="Cotton T-shirt">
+                                    </div>
+                                    <div class="col-md-3 col-lg-3 col-xl-3">
+                                        <p class="lead fw-normal mb-2">Basic T-shirt</p>
+                                        <p><span class="text-muted">Size: </span>M <span class="text-muted">Color:
+                                            </span>Grey</p>
+                                    </div>
+                                    <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+                                        <a class="btn btn-link px-2"
+                                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                            <i class="fas fa-minus"></i>
+                                        </a>
+
+                                        <input id="form123" min="0" name="quantity" value="2" type="number"
+                                            class="form-control form-control-sm" />
+
+                                        <a class="btn btn-link px-2"
+                                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                            <i class="fas fa-plus"></i>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                                        <h5 class="mb-0">$499.00</h5>
+                                    </div>
+                                    <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                        <a href="#!" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--                    th:with="item = ${cart.item}"-->
+                        <!--                    th:each="cart : ${cartList}"-->
+                        <div class="card mb-4">
+                            <div class="card-body p-4 d-flex flex-row">
+                                <div class="col-1">
+                                </div>
+                                <div class="col-3">
+                                    <h4>상품가격 <th:block
+                                            th:text="${#numbers.formatDecimal(total, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                        </th:block> 원</h4>
+                                </div>
+                                <div class="col-1">
+                                    <h4><i class="fas fa-plus"></i></h4>
                                 </div>
                                 <div class="col-2">
-                                    <h5 class="mb-0" th:text="${#numbers.formatDecimal(item.price, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">개당 가격</h5>
+                                    <h4>배송비 <th:block th:if="${total} < 30000" th:text="'3,000'"></th:block>
+                                        <th:block th:unless="${total} < 30000" th:text="'0'"></th:block> 원
+                                    </h4>
                                 </div>
-                                <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                                    <a class="btn btn-link px-2"
-                                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                                        <i class="fas fa-minus"></i>
-                                    </a>
-                                    <input id="form1" min="1" name="quantity" th:value="${cart.quantity}" type="number"
-                                           class="form-control form-control-sm" />
-                                    <a class="btn btn-link px-2"
-                                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                                        <i class="fas fa-plus"></i>
-                                    </a>
+                                <div class="col-1">
+                                    <h4><i class="fas fa-equals"></i></h4>
                                 </div>
-                                <div class="col-md-3 col-lg-2 col-xl-2">
-                                    <h5 class="mb-0" th:text="${#numbers.formatDecimal(item.price * cart.quantity, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">가격</h5>
+                                <div class="col-3">
+                                    <h4>총 가격 <span class="text-primary" id="totalPrice">
+                                            <th:block th:if="${total} < 30000"
+                                                th:text="${#numbers.formatDecimal(total + 3000, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                            </th:block>
+                                            <th:block th:unless="${total} < 30000"
+                                                th:text="${#numbers.formatDecimal(total, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                            </th:block>
+                                        </span> 원</h4>
                                 </div>
-                                <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                                    <a href="#!" th:id="'updateButton' + ${item.id}" class="text-white mr-2"><i class="fas fa-redo-alt fa-lg"></i></a>
-                                    <a href="#!" th:id="'deleteButton' + ${item.id}" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
-                                </div>
+
+
+                                <!--                            <div class="form-outline flex-fill">-->
+                                <!--                                <input type="text" id="form1" class="form-control form-control-lg" />-->
+                                <!--                                <label class="form-label" for="form1">Discound code</label>-->
+                                <!--                            </div>-->
+                                <!--                            <button type="button" class="btn btn-outline-warning btn-lg ms-3">Apply</button>-->
                             </div>
                         </div>
-                    </div>
-                    </th:block>
 
-                    <div class="card rounded-3 mb-4">
-                        <div class="card-body p-4">
-                            <div class="row d-flex justify-content-between align-items-center">
-                                <div class="col-md-2 col-lg-2 col-xl-2">
-                                    <img
-                                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
-                                            class="img-fluid rounded-3" alt="Cotton T-shirt">
-                                </div>
-                                <div class="col-md-3 col-lg-3 col-xl-3">
-                                    <p class="lead fw-normal mb-2">Basic T-shirt</p>
-                                    <p><span class="text-muted">Size: </span>M <span class="text-muted">Color: </span>Grey</p>
-                                </div>
-                                <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
-                                    <a class="btn btn-link px-2"
-                                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                                        <i class="fas fa-minus"></i>
-                                    </a>
-
-                                    <input id="form123" min="0" name="quantity" value="2" type="number"
-                                           class="form-control form-control-sm" />
-
-                                    <a class="btn btn-link px-2"
-                                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                                        <i class="fas fa-plus"></i>
-                                    </a>
-                                </div>
-                                <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                    <h5 class="mb-0">$499.00</h5>
-                                </div>
-                                <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                                    <a href="#!" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>
-                                </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <button type="button" class="btn btn-warning btn-block btn-lg">Proceed to Pay</button>
                             </div>
                         </div>
+
                     </div>
-<!--                    th:with="item = ${cart.item}"-->
-<!--                    th:each="cart : ${cartList}"-->
-                    <div class="card mb-4" >
-                        <div class="card-body p-4 d-flex flex-row" >
-                            <div class="col-1">
-                            </div>
-                            <div class="col-3">
-                                <h4>상품가격 <th:block th:text="${#numbers.formatDecimal(total, 0, 'DEFAULT', 0, 'DEFAULT')}"></th:block> 원</h4>
-                            </div>
-                            <div class="col-1">
-                            <h4><i class="fas fa-plus"></i></h4>
-                            </div>
-                            <div class="col-2">
-                                <h4>배송비 <th:block th:if="${total} < 30000" th:text="'3,000'"></th:block>
-                                    <th:block th:unless="${total} < 30000" th:text="'0'"></th:block> 원</h4>
-                            </div>
-                            <div class="col-1">
-                                <h4><i class="fas fa-equals"></i></h4>
-                            </div>
-                            <div class="col-3">
-                                <h4>총 가격 <span class="text-primary"><th:block th:if="${total} < 30000" th:text="${#numbers.formatDecimal(total + 3000, 0, 'DEFAULT', 0, 'DEFAULT')}"></th:block>
-                                    <th:block th:unless="${total} < 30000" th:text="${#numbers.formatDecimal(total, 0, 'DEFAULT', 0, 'DEFAULT')}"></th:block></span> 원</h4>
-                            </div>
-
-
-<!--                            <div class="form-outline flex-fill">-->
-<!--                                <input type="text" id="form1" class="form-control form-control-lg" />-->
-<!--                                <label class="form-label" for="form1">Discound code</label>-->
-<!--                            </div>-->
-<!--                            <button type="button" class="btn btn-outline-warning btn-lg ms-3">Apply</button>-->
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-body">
-                            <button type="button" class="btn btn-warning btn-block btn-lg">Proceed to Pay</button>
-                        </div>
-                    </div>
-
                 </div>
             </div>
-        </div>
-    </section>
-</div>
+        </section>
+        <script>
+            function updateItem(id) {
+
+                const quantity = document.getElementById('quantity' + id).value;
+                const totalPrice = '[[${total}]]';
+                // const eachPrice = document.getElementById('eachPrice' + id).value;
+                // const multipliedPrice = document.getElementById('multipliedPrice' + id).html;
+
+                let data = {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        id,
+                        quantity,
+                        totalPrice
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                const onSuccess = res => {
+                    res.json()
+                        .then(data => {
+                            // totalPrice.innerHTML = data.totalPrice;
+                            document.getElementById('totalPrice').innerHTML = data.totalPrice;
+                            document.getElementById('multipliedPrice' + id).innerHTML = data.multipliedPrice;
+
+                        });
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                fetch(`/api/v1/cart/update`, data)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+            }
+        </script>
+    </div>
+    <!--End of Content-->
 </body>
+
 </html>

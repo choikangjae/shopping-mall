@@ -1,11 +1,9 @@
 package com.jay.shoppingmall.controller.common;
 
 import com.jay.shoppingmall.domain.user.UserRepository;
-import com.jay.shoppingmall.dto.SignupRequest;
-import com.jay.shoppingmall.dto.UserUpdateRequest;
+import com.jay.shoppingmall.dto.request.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 

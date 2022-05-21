@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
       layout:decorate="~{layouts/layout.html}">
 <head>
     <title>상품 상세</title>
@@ -33,14 +33,14 @@
                 </ul>
 
                 <form method="post">
-                    <input type="hidden" name="id" th:value="${response.id}"/>
+                    <input type="hidden" name="id" id="id" th:value="${response.id}"/>
                 <div class="col-6 d-flex">
                     <a class="btn btn-link px-2"
                             onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
                         <i class="fas fa-minus"></i>
                     </a>
 
-                    <input id="form1" min="1" th:max="${response.stock}" name="quantity" value="1" type="number"
+                    <input id="quantity" min="1" th:max="${response.stock}" name="quantity" value="1" type="number"
                            class="form-control form-control-sm"/>
                     <a class="btn btn-link px-2"
                             onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
@@ -48,14 +48,34 @@
                     </a>
                 </div>
                 <hr>
-                <button type="submit" class="btn btn-outline-dark" formaction="/cart/add">
+                <!-- <button type="submit" class="btn btn-outline-dark" formaction="/cart/add">
                     <i class="fas fa-shopping-cart"></i>
                     장바구니
                 </button>
                 <button type="submit" class="btn btn-outline-dark" formaction="/order/now">
                     <i class="fas fa-cash-register"></i>
                     바로구매
+                </button> -->
+                    <a href="/auth/login" sec:authorize="!isAuthenticated()">
+                        <button type="button" class="btn btn-outline-dark">
+                            <i class="fas fa-shopping-cart"></i>
+                            장바구니
+                        </button>
+                        <button type="button" class="btn btn-outline-dark">
+                            <i class="fas fa-cash-register"></i>
+                            바로구매
+                        </button>
+                    </a>
+                    <th:block sec:authorize="isAuthenticated()">
+                <button type="button" class="btn btn-outline-dark" id="addToCart">
+                    <i class="fas fa-shopping-cart"></i>
+                    장바구니
                 </button>
+                <button type="button" class="btn btn-outline-dark" id="orderNow">
+                    <i class="fas fa-cash-register"></i>
+                    바로구매
+                </button>
+                    </th:block>
                 </form>
             </div>
         </div>
@@ -95,7 +115,52 @@
     <script th:src="@{/js/add_to_cart.js}"></script>
     <script th:src="@{/js/buy_now.js}"></script>
 
-</div>
+    <script>
+        window.addEventListener('load', (e) => {
+            const addToCart = document.getElementById('addToCart');
+            const orderNow = document.getElementById('orderNow');
 
+            addToCart.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                let quantity = document.getElementById('quantity').value;
+                let id = document.getElementById('id').value;
+
+                let data = {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        quantity,
+                        id
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                const onSuccess = res => {
+                        res.text()
+                            .then(() =>
+                                alert('변경되었습니다'));
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
+                fetch(`/api/v1/cart/add`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            alert(err.message);
+                        });
+            })
+        })
+    </script>
+
+</div>
+<!--End of Content-->
 </body>
 </html>

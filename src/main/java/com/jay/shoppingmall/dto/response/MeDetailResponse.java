@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.dto;
+package com.jay.shoppingmall.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

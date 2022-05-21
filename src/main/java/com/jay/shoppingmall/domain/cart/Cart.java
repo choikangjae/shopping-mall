@@ -37,10 +37,11 @@ public class Cart extends BaseTimeEntity {
         this.user = user;
     }
 
-    public void manipulateQuantity(Integer quantity) {
+    public Integer manipulateQuantity(Integer quantity) {
         if (quantity < 1 || quantity > item.getStock()) {
             throw new QuantityException("주문할 수 있는 재고 "+ item.getStock() +"개를 넘어섰습니다.");
         }
         this.quantity = quantity;
+        return quantity;
     }
 }

@@ -3,35 +3,25 @@ package com.jay.shoppingmall.controller.api;
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.controller.common.UpdateValidator;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.AgreeRequest;
-import com.jay.shoppingmall.dto.PasswordCheckRequest;
-import com.jay.shoppingmall.dto.UserUpdateRequest;
-import com.jay.shoppingmall.dto.UserUpdateResponse;
+import com.jay.shoppingmall.dto.request.AgreeRequest;
+import com.jay.shoppingmall.dto.request.PasswordCheckRequest;
+import com.jay.shoppingmall.dto.request.UserUpdateRequest;
 import com.jay.shoppingmall.exception.ErrorResponse;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
-import com.jay.shoppingmall.security.UserAdapter;
 import com.jay.shoppingmall.service.MeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController

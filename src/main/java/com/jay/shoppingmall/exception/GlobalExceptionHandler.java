@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.exception;
 
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
+import com.jay.shoppingmall.exception.exceptions.AlreadyExistsException;
 import com.jay.shoppingmall.exception.exceptions.QuantityException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleUserException(QuantityException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()
                 .code("STOCK_NOT_VALID")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<?> handleUserException(AlreadyExistsException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("ALREADY_EXISTS")
                 .message(e.getMessage())
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);

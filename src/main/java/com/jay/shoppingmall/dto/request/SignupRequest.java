@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.dto;
+package com.jay.shoppingmall.dto.request;
 
 import com.jay.shoppingmall.domain.user.User;
 import lombok.AllArgsConstructor;

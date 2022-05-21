@@ -2,7 +2,7 @@ package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
-import com.jay.shoppingmall.dto.ImageUpload;
+import com.jay.shoppingmall.dto.request.ImageUpload;
 import com.jay.shoppingmall.exception.exceptions.FileException;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;

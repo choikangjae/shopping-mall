@@ -3,16 +3,10 @@ package com.jay.shoppingmall.controller.templates;
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.controller.common.UserValidator;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.PasswordResetRequest;
-import com.jay.shoppingmall.dto.SignupRequest;
-import com.jay.shoppingmall.security.UserAdapter;
+import com.jay.shoppingmall.dto.request.PasswordResetRequest;
+import com.jay.shoppingmall.dto.request.SignupRequest;
 import com.jay.shoppingmall.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,12 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.security.Principal;
 
 @Controller
 @RequestMapping("/auth")

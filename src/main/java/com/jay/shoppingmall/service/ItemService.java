@@ -4,8 +4,8 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
-import com.jay.shoppingmall.dto.ItemResponse;
-import com.jay.shoppingmall.dto.ItemDetailResponse;
+import com.jay.shoppingmall.dto.response.ItemResponse;
+import com.jay.shoppingmall.dto.response.ItemDetailResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.RequiredArgsConstructor;
 

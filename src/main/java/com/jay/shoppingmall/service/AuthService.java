@@ -3,7 +3,7 @@ package com.jay.shoppingmall.service;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
-import com.jay.shoppingmall.dto.SignupRequest;
+import com.jay.shoppingmall.dto.request.SignupRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
