@@ -30,7 +30,9 @@
                     <a id="my-page" class="nav-link" th:href="@{/me}" href="#">마이페이지</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/cart}" href="#">장바구니</a>
+                    <a class="nav-link" th:href="@{/cart}" href="#">장바구니
+<!--                        <span class="badge bg-primary rounded-pill"><span th:text="${orderTotalCount}"></span></span>-->
+                    </a>
                 </li>
                 <div sec:authorize="hasRole('SELLER')">
                     <li class="nav-item">

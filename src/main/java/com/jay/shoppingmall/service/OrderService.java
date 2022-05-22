@@ -2,10 +2,23 @@ package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
+import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.order.DeliveryStatus;
+import com.jay.shoppingmall.domain.order.Order;
+import com.jay.shoppingmall.domain.order.OrderRepository;
+import com.jay.shoppingmall.domain.payment.Payment;
+import com.jay.shoppingmall.domain.payment.PaymentRepository;
+import com.jay.shoppingmall.domain.payment.PaymentType;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.request.PaymentRequest;
 import com.jay.shoppingmall.dto.response.CartOrderResponse;
 import com.jay.shoppingmall.dto.response.CartResponse;
+import com.jay.shoppingmall.dto.response.ItemResponse;
+import com.jay.shoppingmall.dto.response.OrderResultResponse;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
+import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.PaymentFailedException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +32,11 @@ import java.util.List;
 @Service
 public class OrderService {
 
+    private final PaymentService paymentService;
+    private final PaymentRepository paymentRepository;
+    private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
+    private final ItemRepository itemRepository;
 
     public List<CartOrderResponse> orderProcess(User user) {
 
@@ -38,6 +55,7 @@ public class OrderService {
         }
         return cartOrderResponses;
     }
+
     public Integer orderTotalPrice(User user) {
         int totalPrice = 0;
         List<Cart> cartList = cartRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
@@ -49,6 +67,7 @@ public class OrderService {
         }
         return totalPrice;
     }
+
     public Integer orderTotalCount(User user) {
         int totalCount = 0;
         List<Cart> cartList = cartRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
@@ -59,5 +78,45 @@ public class OrderService {
             totalCount += cart.getQuantity();
         }
         return totalCount;
+    }
+
+    public OrderResultResponse doOrderPaymentProcess(PaymentRequest paymentRequest, User user) {
+        Payment payment = paymentService.doPayment(paymentRequest.getItemId(), paymentRequest.getPaymentType(), paymentRequest.getTotalPrice());
+
+        List<Cart> cartList = cartRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
+        List<Item> itemList = new ArrayList<>();
+
+        //재고 변경
+        for (Cart cart : cartList) {
+            Item item = itemRepository.findById(cart.getItem().getId()).orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
+            item.setStock(item.getStock() - paymentRequest.getItemQuantity());
+//            itemRepository.save(item);
+            itemList.add(item);
+        }
+        Order order = Order.builder()
+                .payment(payment)
+                .itemList(itemList)
+                .deliveryStatus(payment.getPaymentType() == PaymentType.MUTONGJANG? DeliveryStatus.WAITING_FOR_PAYMENT : DeliveryStatus.PAYMENT_DONE)
+                .build();
+
+        cartRepository.deleteByItemId(paymentRequest.getItemId());
+        orderRepository.saveAndFlush(order);
+
+        List<ItemResponse> itemResponseList = new ArrayList<>();
+        for (Item item : itemList) {
+            itemResponseList.add(ItemResponse.builder()
+                    .id(item.getId())
+                    .name(item.getName())
+                    .price(item.getPrice())
+//                    .image(item.getImageList())
+                            .build()
+            );
+        }
+        return OrderResultResponse.builder()
+                .itemResponseList(itemResponseList)
+                .totalPrice(payment.getTotalPrice())
+                .paymentType(payment.getPaymentType())
+                .isShippingFeeFree(payment.getIsShippingFeeFree())
+                .build();
     }
 }

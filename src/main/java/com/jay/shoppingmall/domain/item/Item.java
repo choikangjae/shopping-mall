@@ -2,6 +2,7 @@ package com.jay.shoppingmall.domain.item;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.image.Image;
+import com.jay.shoppingmall.domain.order.Order;
 import lombok.*;
 
 import javax.persistence.*;
@@ -31,6 +32,7 @@ public class Item extends BaseTimeEntity {
 
     private Integer salePrice;
 
+    @Setter
     private Integer stock;
 
     //삭제.
@@ -38,6 +40,10 @@ public class Item extends BaseTimeEntity {
 
     //임시저장.
     private boolean isTemporary;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
 
     @Builder
     public Item(String name, String description, Integer price, Integer salePrice, Integer stock) {
@@ -55,7 +61,5 @@ public class Item extends BaseTimeEntity {
         if (image.getItem() != this)
             image.setItem(this);
     }
-
-
 
 }

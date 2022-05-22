@@ -2,15 +2,21 @@ package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.request.PaymentRequest;
 import com.jay.shoppingmall.dto.response.CartOrderResponse;
+import com.jay.shoppingmall.dto.response.OrderResultResponse;
 import com.jay.shoppingmall.service.OrderService;
+import com.jay.shoppingmall.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -52,5 +58,26 @@ public class OrderController {
         model.addAttribute("orderTotalCount", orderTotalCount);
 
         return "/order/payment";
+    }
+    //payment정보.상품정보.받는사람정보. payment로 돈을 받았다고치고 카트에서 제거하고 상품을 불러와서 재고 깎고
+    @PostMapping("/payment")
+    public String paymentAction(@Valid PaymentRequest paymentRequest, @CurrentUser User user, RedirectAttributes redirectAttributes) {
+        OrderResultResponse response = orderService.doOrderPaymentProcess(paymentRequest, user);
+
+        redirectAttributes.addFlashAttribute("response", response);
+
+        return "redirect:/order/payment-result";
+    }
+
+    @GetMapping("/payment-result")
+    public String paymentResult(@ModelAttribute OrderResultResponse response, Model model) {
+        model.addAttribute("response", response);
+        //TODO 결제 진행창과 결제 완료창 템플릿 만들기.
+        response.getItemResponseList();
+        response.getPaymentType();
+        response.getIsShippingFeeFree();
+        response.getTotalPrice();
+
+        return "/order/payment-result";
     }
 }
