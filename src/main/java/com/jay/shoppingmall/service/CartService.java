@@ -91,8 +91,9 @@ public class CartService {
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
         Image image = imageRepository.findByItemId(request.getId());
         Cart cart = cartRepository.findByUserAndItem(user, item);
-
+        if (cart == null) {
+            throw new ItemNotFoundException("해당 상품이 존재하지않습니다");
+        }
         cartRepository.delete(cart);
-
     }
 }

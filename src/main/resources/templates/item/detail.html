@@ -138,8 +138,11 @@
                 };
                 const onSuccess = res => {
                         res.text()
-                            .then(() =>
-                                alert('변경되었습니다'));
+                            .then(() => {
+                                if (confirm("장바구니에 추가되었습니다. 장바구니로 이동하시겠습니까?")) {
+                                    window.location.replace('http://localhost:8080/cart')
+                                }
+                            })
                     }
                     const onFailure = res => {
                         return res.json().then(json => alert(json.message));

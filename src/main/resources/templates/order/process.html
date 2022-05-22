@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout.html}">
+
+<head>
+    <title>주문 진행</title>
+    <!-- Custom styles for this template -->
+    <link href="../css/form-validation.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+<div layout:fragment="content">
+    <div class="container">
+        <main>
+            <div class="py-5 text-center">
+                <h1 class="text-danger">어떠한 개인 정보도 입력하지 마십시오 본 사이트는 데모용입니다</h1>
+                <h1 class="text-danger">DO NOT ENTER ANY OF YOUR PERSONAL INFORMATION.
+                    THIS IS A DEMO SITE.</h1>
+                <img class="d-block mx-auto mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72"
+                     height="57">
+                <h2><strong class="text-primary">주문 진행</strong> <i class="fas fa-arrow-right"></i>
+                    결제 진행 <i class="fas fa-arrow-right"></i>
+                    결제 완료
+                </h2>
+            </div>
+
+            <div class="row g-5">
+                <div class="col-md-5 col-lg-4 order-md-last">
+                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-primary">장바구니</span>
+                        <span class="badge bg-primary rounded-pill"><span th:text="${orderTotalCount}"></span></span>
+                    </h4>
+
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between lh-sm"
+                            th:each="cart : ${cartOrderResponses}">
+                            <div th:with="item = ${cart.item}">
+                                <div>
+                                    <h6 th:text="${item.getName()}" class="my-0"></h6>
+                                    <small th:text="${#numbers.formatDecimal(cart.getQuantity(), 0, 'DEFAULT', 0, 'DEFAULT')}"
+                                           class="text-muted">개수</small><small>
+                                    개</small>
+                                </div>
+                                <span class="text-muted"
+                                      th:text="${#numbers.formatDecimal(item.getPrice() * cart.getQuantity(), 0, 'DEFAULT', 0, 'DEFAULT')}">가격</span>
+                                <span> 원</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <h4>
+                                <span>총합</span>
+
+                                <strong><span class="text-success"
+                                              th:text="${#numbers.formatDecimal(orderTotalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
+                                    원</strong>
+                            </h4>
+                        </li>
+                    </ul>
+
+                    <a class="w-100 btn btn-primary btn-lg" th:href="@{/order/payment}" type="button">결제하러 가기</a>
+                </div>
+
+
+                <div class="col-md-7 col-lg-8">
+
+                    <form class="needs-validation" novalidate>
+                        <h4 class="mb-3">구매자 정보</h4>
+                        <div class="row g-3">
+
+                            <div class="col-sm-6">
+                                <label for="buyerFullName" class="form-label">이름</label>
+                                <input th:value="${user.getName().getFullName()}" type="text" class="form-control"
+                                       id="buyerFullName" placeholder="" value="" required disabled>
+                            </div>
+                            <div class="col-12">
+                                <label for="buyerAddress" class="form-label">주소</label>
+                                <input th:value="${user.getAddress().getFullAddress()}" type="text" class="form-control"
+                                       id="buyerAddress" placeholder="1234 Main St" required readonly>
+                                <div class="invalid-feedback">
+                                    주소를 입력해주세요
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="buyerPhoneNumber" class="form-label">휴대폰 번호</label>
+                                <input th:value="${user.getPhoneNumber().getFullNumber()}" type="text"
+                                       class="form-control"
+                                       id="buyerPhoneNumber" placeholder="" value="" required disabled>
+                            </div>
+                            <div class="col-12">
+                                <label for="buyerEmail" class="form-label">이메일</label>
+                                <input th:value="${user.getEmail()}" type="text" class="form-control"
+                                       id="buyerEmail" placeholder="" value="" required disabled>
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h4 class="mb-3">받는 사람 정보</h4>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label for="receiverFullName" class="form-label">이름</label>
+                                <input th:value="${user.getName().getFullName()}" type="text" class="form-control"
+                                       id="receiverFullName" placeholder="" value="" required readonly>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="receiverAddress" class="form-label">주소</label>
+                                <input th:value="${user.getAddress().getFullAddress()}" type="text" class="form-control"
+                                       id="receiverAddress" placeholder="1234 Main St" required readonly>
+                                <div class="invalid-feedback">
+                                    주소를 입력해주세요
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="receiverPhoneNumber" class="form-label">휴대폰 번호</label>
+                                <input th:value="${user.getPhoneNumber().getFullNumber()}" type="text"
+                                       class="form-control"
+                                       id="receiverPhoneNumber" placeholder="" value="" required readonly>
+                            </div>
+                            <div class="col-12">
+                                <label for="receiverEmail" class="form-label">이메일</label>
+                                <input th:value="${user.getEmail()}" type="text" class="form-control"
+                                       id="receiverEmail" placeholder="" value="" required readonly>
+                            </div>
+
+                            <hr class="my-4">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+        <script src="../js/form-validation.js"></script>
+    </div>
+</div>
+</body>
+
+</html>

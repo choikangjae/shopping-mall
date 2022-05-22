@@ -27,6 +27,6 @@ public class Name {
         this.first = first;
     }
     public String getFullName() {
-        return String.format("%s %s", this.last, this.first);
+        return String.format("%s%s", this.last, this.first);
     }
 }

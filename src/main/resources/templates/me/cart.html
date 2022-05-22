@@ -22,13 +22,14 @@
                                         class="text-body">price <i class="fas fa-angle-down mt-1"></i></a></p>
                             </div>
                         </div>
-                        <div th:if="${#lists.isEmpty(cartList)}">
+                        <div class="container" th:if="${#lists.isEmpty(cartList)}">
                             <h3>장바구니가 비어있습니다</h3>
+                            <a th:href="@{/}"><i class="fas fa-home fa-4x"></i></a>
                         </div>
 
                         <th:block th:each="cart : ${cartList}">
                             <div class="card rounded-3 mb-2" th:with="item = ${cart.item}">
-                                <div class="card-body p-4">
+                                <div class="card-body p-4" th:id="${item.id}">
                                     <div class="row d-flex justify-content-between align-items-center">
 
                                         <div class="col-md-2 col-lg-2 col-xl-2">
@@ -54,7 +55,7 @@
                                                 개당 가격</h5>
                                             <h5>원 </h5>
                                         </div>
-                                        <div class="col-md-3 col-lg-3 col-xl-2 d-flex" >
+                                        <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
                                             <a class="btn btn-link px-2"
                                                 onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
                                                 <i class="fas fa-minus"></i>
@@ -69,14 +70,16 @@
                                         </div>
                                         <div class="col-md-3 col-lg-2 col-xl-2">
                                             <h5 class="mb-0" th:id="'multipliedPrice' + ${item.id}"
-                                                th:text="${#numbers.formatDecimal(item.price * cart.quantity, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                                                th:text="${#numbers.formatDecimal(item.price * cart.quantity, 0, 'DEFAULT', 0, 'DEFAULT')}">
                                                 합산 가격</h5>
+                                                <h5>원 </h5>
                                         </div>
                                         <div class="col-md-1 col-lg-1 col-xl-1 text-end">
                                             <a href="#!" th:id="'updateButton' + ${item.id}"
-                                                th:onclick="|updateItem('${item.id}');|" class="text-white mr-2"><i
+                                                th:onclick="|updateItem('${item.id}');|" class="text-success mr-2"><i
                                                     class="fas fa-redo-alt fa-lg"></i></a>
-                                            <a href="#!" th:id="'deleteButton' + ${item.id}" class="text-danger"><i
+                                            <a href="#!" th:id="'deleteButton' + ${item.id}"
+                                                th:onclick="|deleteItem('${item.id}');|" class="text-danger"><i
                                                     class="fas fa-trash fa-lg"></i></a>
                                         </div>
                                     </div>
@@ -163,7 +166,7 @@
 
                         <div class="card">
                             <div class="card-body">
-                                <button type="button" class="btn btn-warning btn-block btn-lg">Proceed to Pay</button>
+                                <a type="button" th:href="@{/order/process}"class="btn btn-warning btn-block btn-lg">주문하기</a>
                             </div>
                         </div>
 
@@ -172,6 +175,50 @@
             </div>
         </section>
         <script>
+            function deleteItem(id) {
+
+                const quantity = document.getElementById('quantity' + id).value;
+                const totalPrice = '[[${total}]]';
+                // const eachPrice = document.getElementById('eachPrice' + id).value;
+                // const multipliedPrice = document.getElementById('multipliedPrice' + id).html;
+
+                let data = {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        id,
+                        quantity,
+                        totalPrice
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                const onSuccess = res => {
+                    res.json()
+                        .then(data => {
+                            // totalPrice.innerHTML = data.totalPrice;
+                            // document.getElementById('totalPrice').innerHTML = data.totalPrice;
+                            // document.getElementById('multipliedPrice' + id).innerHTML = data.multipliedPrice;
+                            // alert('선택한 상품이 삭제되었습니다');
+                        });
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                fetch(`/api/v1/cart/delete`, data)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+            }
+
             function updateItem(id) {
 
                 const quantity = document.getElementById('quantity' + id).value;

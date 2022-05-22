@@ -29,4 +29,11 @@ public class Address {
         this.detailAddress = detailAddress;
         this.extraAddress = extraAddress;
     }
+
+    public String getFullAddress() {
+        if (extraAddress.isEmpty()) {
+            return String.format("%s %s", this.address, this.detailAddress);
+        }
+        return String.format("%s %s %s", this.address, this.detailAddress, extraAddress);
+    }
 }
