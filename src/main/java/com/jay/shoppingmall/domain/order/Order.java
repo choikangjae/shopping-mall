@@ -15,16 +15,17 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Table(name = "orders")
 public class Order extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    //1toN
-    @OneToMany(mappedBy = "order")
-    private List<Item> itemList = new ArrayList<>();
+//    @OneToMany(mappedBy = "order")
+//    private List<Item> itemList = new ArrayList<>();
 
-    //1to1
+    @OneToOne
+    @JoinColumn(name = "payment_id", referencedColumnName = "id", nullable = false)
     private Payment payment;
 
     private DeliveryStatus deliveryStatus;

@@ -3,7 +3,6 @@ package com.jay.shoppingmall.domain.review;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.item.Item;
-import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.user.User;
 import lombok.*;
 
@@ -25,15 +24,19 @@ public class Review extends BaseTimeEntity {
     @Column(nullable = false)
     private String description;
 
-    private Image image;
+//    private Image image;
 
     @Column(name = "star", nullable = false)
     @Enumerated(EnumType.STRING)
     private Star star;
 
     //nto1
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     //nto1
+    @ManyToOne
+    @JoinColumn(name = "item_id")
     private Item item;
 }

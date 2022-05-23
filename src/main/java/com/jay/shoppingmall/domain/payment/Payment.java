@@ -21,5 +21,5 @@ public class Payment extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType;
 
-    private Boolean isShippingFeeFree;
+//    private Boolean isShippingFeeFree;
 }

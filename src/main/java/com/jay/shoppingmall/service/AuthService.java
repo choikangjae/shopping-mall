@@ -3,6 +3,7 @@ package com.jay.shoppingmall.service;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
+import com.jay.shoppingmall.domain.user.model.Agree;
 import com.jay.shoppingmall.dto.request.SignupRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +25,7 @@ public class AuthService {
         User user = User.builder()
                 .email(signupRequest.getEmail())
                 .password(password)
+                .agree(new Agree(false, false))
                 .role(Role.ROLE_USER)
                 .build();
 

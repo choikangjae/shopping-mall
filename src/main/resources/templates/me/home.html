@@ -17,7 +17,7 @@
             <div>
                 <span th:text="${user.getEmail() + '님 안녕하세요'}"></span>
             </div>
-            <div th:if="${user.getAgree().getIsMandatoryAgree() == false}">
+            <div th:if="${user.getAgree()?.getIsMandatoryAgree() == null}">
                 <form action="/me/privacy" method="post">
                 <h5 th:text="${user.getEmail() + '회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요'}"></h5>
                      </br>

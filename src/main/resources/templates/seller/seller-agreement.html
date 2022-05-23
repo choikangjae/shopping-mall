@@ -1,53 +1,79 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
-    layout:decorate="~{layouts/layout.html}">
+      layout:decorate="~{layouts/layout.html}">
 
 <head>
-    <title>개인정보동의</title>
+    <title>판매자 동의</title>
 </head>
 
 <body>
 
-    <div layout:fragment="content">
-        <div class="container">
-            <div>
-                <h1 class="text-danger">해당 페이지는 어떠한 법적 효력이 없는 데모용입니다.</h1>
-                <h1>개인 정보 동의</h1>
-            </div>
-            <br>
-            <!--본문 들어갈 곳-->
-            <h5>
-                <span th:text="${user.getEmail()}"></span> 님의 개인 정보 동의
-            </h5>
-            <br>
+<div layout:fragment="content">
+    <div class="container">
+        <div>
+            <h1 class="text-danger">해당 페이지는 어떠한 법적 효력도 없는 데모용입니다.</h1>
+            <h1>필수 및 선택 정보 동의</h1>
+        </div>
+
+        <br>
+        <!--본문 들어갈 곳-->
+        <h5>
+            <span th:text="${user.getEmail()}"></span> 님의 <strong>판매자 전환을 위한 필수 및 선택 목적</strong>에 대한 동의
+        </h5>
+
+        <br>
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="isSellerCheck" required>
+            <label class="form-check-label" for="isSellerCheck">
+                판매 이용약관 <strong>(필수)</strong>
+            </label>
+        </div>
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="" id="isLawCheck" required>
+            <label class="form-check-label" for="isLawCheck">
+                전자금융거래 이용약관 <strong>(필수)</strong>
+            </label>
+        </div>
+
+        <div th:if="${!user.getAgree().getIsMandatoryAgree()}">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="isMandatoryCheck" required>
                 <label class="form-check-label" for="isMandatoryCheck">
                     개인정보 수집 및 이용 동의 <strong>(필수)</strong>
                 </label>
             </div>
+        </div>
+
+        <div th:if="${!user.getAgree().getIsMarketingAgree()}">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="isMarketingCheck">
                 <label class="form-check-label" for="isMarketingCheck">
                     광고 및 이벤트 목적의 개인정보 수집 및 이용 동의 (선택)
                 </label>
             </div>
-            <br>
-            <button id="agree-button" class="btn btn-primary">약관 동의하고 가입하기</button>
         </div>
-        <script>
+        <br>
+        <button id="agree-button" class="btn btn-primary">약관 동의하고 가입하기</button>
+    </div>
+    <script>
             window.addEventListener('load', (e) => {
                 const agreeButton = document.getElementById('agree-button');
 
                 agreeButton.addEventListener('click', (e) => {
                     // e.preventDefault();
 
+                    let isSellerAgree = document.getElementById('isSellerCheck').checked;
+                    let isLawAgree = document.getElementById('isLawCheck').checked;
                     let isMandatoryAgree = document.getElementById('isMandatoryCheck').checked;
                     let isMarketingAgree = document.getElementById('isMarketingCheck').checked;
 
                     let agreeData = {
                         method: 'POST',
                         body: JSON.stringify({
+                            isSellerAgree,
+                            isLawAgree,
                             isMandatoryAgree,
                             isMarketingAgree
                         }),
@@ -57,7 +83,7 @@
                     };
 
                     const onSuccess = res => {
-                        window.location.replace('http://localhost:8080/me/update')
+                        window.location.replace('http://localhost:8080/seller')
                     }
                     const onFailure = res => {
                         return res.json().then(json => alert(json.message));
@@ -76,8 +102,10 @@
                         });
                 })
             })
-        </script>
-    </div>
+
+
+    </script>
+</div>
 </body>
 <script>
 
@@ -95,6 +123,8 @@
 
     //     })
     // })
+
+
 </script>
 
 </html>

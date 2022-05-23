@@ -20,7 +20,7 @@
 
 <body class="text-center font01" layout:fragment="content">
 <main class="form-signin w-100 m-auto">
-    <form class="user" method="post" th:action="@{/auth/login}">
+    <form method="post" th:action="@{/auth/login}">
         <div th:if="${param.error}" class="alert alert-danger" role="alert">
             이메일이나 비밀번호가 일치하지 않습니다
         </div>
@@ -30,14 +30,17 @@
         <h1 class="h3 mb-3 fw-normal">로그인</h1>
 
         <div class="form-floating">
-            <input type="email" name="username" class="form-control" id="floatingInput" placeholder="name@example.com"
+            <input type="email" th:if="${param.error}" th:value="${username}" name="username" class="form-control" id="floatingInputError" placeholder="name@example.com">
+            <input type="email" th:unless="${param.error}" th:value="${username}" name="username" class="form-control" id="floatingInput" placeholder="name@example.com"
                    autofocus>
             <label for="floatingInput">이메일</label>
         </div>
         <div class="form-floating">
-            <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password">
+            <input type="password" th:if="${param.error}" name="password" class="form-control" id="floatingPasswordError" placeholder="Password" autofocus>
+            <input type="password" th:unless="${param.error}" name="password" class="form-control" id="floatingPassword" placeholder="Password">
             <label for="floatingPassword">비밀번호</label>
         </div>
+
 
         <div class="checkbox mb-3">
             <label>

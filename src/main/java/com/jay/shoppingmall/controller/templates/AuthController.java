@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.controller.common.SellerValidator;
 import com.jay.shoppingmall.controller.common.UserValidator;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PasswordResetRequest;
@@ -13,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -24,12 +26,22 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserValidator userValidator;
+    private final SellerValidator sellerValidator;
 
     @GetMapping("/login")
     public String login(HttpServletRequest request, @CurrentUser User user) {
         if (user != null) {
             return "redirect:/";
         }
+        return "auth/login";
+    }
+    @PostMapping("/login")
+    public String loginAction(HttpServletRequest request, Model model, @CurrentUser User user) {
+        if (user != null) {
+            return "redirect:/";
+        }
+        model.addAttribute("username", request.getAttribute("username"));
+
         return "auth/login";
     }
 
@@ -51,11 +63,33 @@ public class AuthController {
 
     @PostMapping("/signup")
     public String signupAction(@Valid SignupRequest signupRequest, BindingResult result, Model model) {
-        userValidator.validate(signupRequest, result);
+        sellerValidator.validate(signupRequest, result);
 
         if (result.hasErrors()) {
 //            model.addAttribute("signupRequest", signupRequest);
             return "auth/signup";
+        }
+
+        authService.signup(signupRequest);
+
+        return "redirect:/auth/signup-done";
+    }
+
+    @GetMapping("/seller-signup")
+    public String sellerSignup(SignupRequest signupRequest, @CurrentUser User user) {
+        if (user != null) {
+            return "redirect:/";
+        }
+        user.getAgree().getIsMandatoryAgree().equals(false);
+        return "auth/seller-signup";
+    }
+    @PostMapping("/seller-signup")
+    public String sellerSignupAction(@Valid SignupRequest signupRequest, BindingResult result, Model model) {
+        userValidator.validate(signupRequest, result);
+
+        if (result.hasErrors()) {
+//            model.addAttribute("signupRequest", signupRequest);
+            return "auth/seller-signup";
         }
 
         authService.signup(signupRequest);
@@ -68,20 +102,5 @@ public class AuthController {
 
         return "auth/signup-done";
     }
-//    @PostMapping("/logout")
-//    public String logout(HttpServletResponse response) {
-//        expireCookie(response, "memberId");
-//        return "redirect:/";
-//    }
-//    private void expireCookie(HttpServletResponse response, String cookieName) {
-//        Cookie cookie = new Cookie(cookieName, null);
-//        cookie.setMaxAge(0);
-//        response.addCookie(cookie);
-//    }
 
-//    @PostMapping("/logout")
-//    public String logout(HttpSession session) {
-//        session.setAttribute("email","");
-//        return "redirect:/";
-//    }
 }

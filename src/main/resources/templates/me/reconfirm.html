@@ -13,15 +13,25 @@
         </div>
         <!--본문 들어갈 곳-->
         <div class="container position-relative">
+<!--            <form class="user" method="post" th:action="@{/auth/signup}" th:object="${signupRequest}">-->
+
+            <form method="post" th:action="@{/me/reconfirm}" th:object="${passwordCheckRequest}">
             <div class="col-6">
                 <label for="email" class="form-label">이메일</label>
-                <input type="email" class="form-control" id="email" th:value="${user.getEmail()}" disabled>
+                <input type="email" class="form-control" id="email" th:value="${user?.getEmail()}" disabled>
             </div>
             <div class="col-6">
-                <label for="email" class="form-label">비밀번호 확인</label>
-                <input type="password" class="form-control" id="password">
+                <label for="password" class="form-label">비밀번호 확인</label>
+                <input th:field="*{password}" type="password" class="form-control" id="password">
             </div>
-            <button id="confirmPassword" type="submit" class="btn btn-primary mt-3">확인</button>
+            <button type="submit" class="btn btn-primary mt-3">확인</button>
+                <div class="text-center" th:if="${#fields.hasErrors('password')}">
+                    <hr>
+                    <p class="alert alert-danger" role="alert"
+                       th:errors="*{password}">비밀번호가 올바르지 않습니다.</p>
+                </div>
+<!--            <button id="confirmPassword" type="submit" class="btn btn-primary mt-3">확인</button>-->
+            </form>
         </div>
     </div>
 

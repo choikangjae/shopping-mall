@@ -3,6 +3,7 @@ package com.jay.shoppingmall.domain.item;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.order.Order;
+import com.jay.shoppingmall.domain.seller.Seller;
 import lombok.*;
 
 import javax.persistence.*;
@@ -44,6 +45,10 @@ public class Item extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
 
     @Builder
     public Item(String name, String description, Integer price, Integer salePrice, Integer stock) {

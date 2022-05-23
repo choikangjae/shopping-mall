@@ -73,6 +73,7 @@ public class OrderController {
     public String paymentResult(@ModelAttribute OrderResultResponse response, Model model) {
         model.addAttribute("response", response);
         //TODO 결제 진행창과 결제 완료창 템플릿 만들기.
+        //TODO payment.html과 payment-result.html. Seller 만들고 나서.
         response.getItemResponseList();
         response.getPaymentType();
         response.getIsShippingFeeFree();

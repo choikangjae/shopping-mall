@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       layout:decorate="~{layouts/layout.html}">
 <head>
-    <title>회원가입</title>
+    <title>판매자 회원가입</title>
 </head>
 <body>
 <div layout:fragment="content">
@@ -18,12 +18,11 @@
                         <div class="p-5">
                             <div class="text-center">
                                 <a href="/">
-                                    <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72"
-                                         height="57">
+                                    <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
                                 </a>
-                                <h1 class="h4 text-gray-900 mb-4">회원가입</h1>
+                                <h1 class="h4 text-gray-900 mb-4">판매자 회원가입</h1>
                             </div>
-                            <form class="user" method="post" th:action="@{/auth/signup}" th:object="${signupRequest}">
+                            <form class="user" method="post" th:action="@{/auth/seller-signup}" th:object="${signupRequest}">
                                 <div class="form-group row">
                                 </div>
                                 <div class="form-group">
@@ -34,6 +33,7 @@
                                         <hr>
                                         <p class="alert alert-danger" role="alert"
                                            th:errors="*{email}">이메일 주소가 올바르지 않습니다.</p>
+                                        <a th:href="@{/seller/start}">해당 이메일로 로그인하시고 판매자로 전환해보세요</a>
                                     </div>
                                 </div>
                                 <hr>
@@ -50,31 +50,20 @@
                                                pattern="^[A-Za-z[0-9]]{10,20}$" required>
                                     </div>
                                 </div>
-
-                                <div class="text-center" th:if="${#fields.hasErrors('password')}">
-                                    <hr>
-                                    <p class="alert alert-danger" role="alert"
-                                       th:errors="*{password}">비밀번호가 올바르지 않습니다.</p>
-                                </div>
                                 <hr>
+                                <div class="text-center">
+                                    <p class="alert alert-danger" role="alert" th:if="${#fields.hasErrors('password')}"
+                                       th:errors="*{password}">비밀번호가 올바르지 않습니다.
+                                    </p>
+                                </div>
                                 <button type="submit" class="btn btn-primary">회원가입</button>
                                 <hr>
-                                <a href="index.html" class="btn btn-google btn-user btn-block">
-                                    <i class="fab fa-google fa-fw"></i> 구글로 로그인
-                                </a>
-                                <a href="index.html" class="btn btn-facebook btn-user btn-block">
-                                    <i class="fab fa-facebook-f fa-fw"></i> 페이스북으로 로그인
-                                </a>
                             </form>
-                            <hr>
                             <div class="text-center text-decoration-none">
                                 <a class="small" href="/auth/forgot-password">비밀번호를 잊으셨나요?</a>
                             </div>
                             <div class="text-center text-decoration-none">
                                 <a class="small" href="/auth/login">로그인하기</a>
-                            </div>
-                            <div class="text-center text-decoration-none">
-                                <a class="small" href="/auth/seller-signup">판매자로 회원가입하기</a>
                             </div>
                         </div>
                     </div>

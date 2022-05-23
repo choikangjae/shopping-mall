@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.config;
 
 import com.jay.shoppingmall.security.CustomUserDetailsService;
+import com.jay.shoppingmall.security.LoginFailureHandler;
 import com.jay.shoppingmall.security.LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
@@ -47,39 +49,49 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                    .csrf().disable()
+                .csrf().disable()
 //                    .requestCache().requestCache(requestCache())
 //                .and()
-                .rememberMe()
-                    .rememberMeParameter("remember-me")
-                    //토큰 유효기간 1달
-                    .tokenValiditySeconds(86400 * 30)
+//                .rememberMe()
+//                .rememberMeParameter("remember-me")
+                //토큰 유효기간 1달
+//                .tokenValiditySeconds(86400 * 30)
 //                    .alwaysRemember(true)
-                    .userDetailsService(customUserDetailsService)
+//                .userDetailsService(customUserDetailsService)
+//                .and()
+                .authorizeRequests()
+                .antMatchers("/auth/login**", "/seller/null", "/admin/null", "/auth/null", "/null", "/css/**", "/js/**", "/assets/**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/", "/item/**", "/auth/forgot-password").permitAll()
+                .antMatchers("/me/**", "/seller/start", "/seller/agree").hasRole("USER")
+                .antMatchers("/seller/**").hasRole("SELLER")
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+                .expressionHandler(expressionHandler())
                 .and()
-                    .authorizeRequests()
-                    .antMatchers( "/auth/null", "/null", "/css/**", "/js/**", "/assets/**", "/auth/signup", "/", "/item/**", "/auth/forgot-password").permitAll()
-                    .antMatchers("/me/**").hasRole("USER")
-                    .antMatchers("/seller/**").hasRole("SELLER")
-                    .antMatchers("/admin/**").hasRole("ADMIN")
-                    .anyRequest().authenticated()
-                    .expressionHandler(expressionHandler())
+                .formLogin()
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .loginPage("/auth/login")
+                .permitAll()
+                .successHandler(loginSuccessHandler())
+                .failureHandler(loginFailureHandler())
+//                .failureUrl("/auth/login?error")
+                .permitAll()
                 .and()
-                    .formLogin()
-                    .loginPage("/auth/login")
-                    .permitAll()
-                    .successHandler(loginSuccessHandler())
-                .and()
-                    .logout()
-                    .logoutSuccessUrl("/auth/login")
-                    //로그아웃시 세션을 통해 발급한 모든 쿠키 삭제.
-                    .deleteCookies("JSESSIONID", "remember-me")
-                    .invalidateHttpSession(true);
+                .logout()
+                .logoutSuccessUrl("/auth/login")
+                //로그아웃시 세션을 통해 발급한 모든 쿠키 삭제.
+                .deleteCookies("JSESSIONID", "remember-me")
+                .invalidateHttpSession(true);
     }
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
         return super.authenticationManager();
+    }
+
+    @Bean
+    public LoginFailureHandler loginFailureHandler() {
+        return new LoginFailureHandler();
     }
 
     @Bean
@@ -91,6 +103,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     //권한별 계층 구조 설정
     @Bean
     public RoleHierarchyImpl roleHierarchy() {
@@ -98,6 +111,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_SELLER > ROLE_USER");
         return roleHierarchy;
     }
+
     //권한 계층 구조 등록
     @Bean
     public SecurityExpressionHandler<FilterInvocation> expressionHandler() {

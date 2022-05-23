@@ -80,22 +80,28 @@ public class OrderService {
         return totalCount;
     }
 
+    /**
+     * seller_id를 기준으로 item을 검색해서 총 비용을 확인하고 그 비용이 seller shippingfee에 부합하는지 확인은 따로하고.
+     *
+     */
     public OrderResultResponse doOrderPaymentProcess(PaymentRequest paymentRequest, User user) {
+        //결제 완료
         Payment payment = paymentService.doPayment(paymentRequest.getItemId(), paymentRequest.getPaymentType(), paymentRequest.getTotalPrice());
 
+        //재고 변경
         List<Cart> cartList = cartRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
         List<Item> itemList = new ArrayList<>();
 
-        //재고 변경
         for (Cart cart : cartList) {
             Item item = itemRepository.findById(cart.getItem().getId()).orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
             item.setStock(item.getStock() - paymentRequest.getItemQuantity());
 //            itemRepository.save(item);
             itemList.add(item);
         }
+        //결제 정보 생성
         Order order = Order.builder()
                 .payment(payment)
-                .itemList(itemList)
+//                .itemList(itemList)
                 .deliveryStatus(payment.getPaymentType() == PaymentType.MUTONGJANG? DeliveryStatus.WAITING_FOR_PAYMENT : DeliveryStatus.PAYMENT_DONE)
                 .build();
 
@@ -116,7 +122,6 @@ public class OrderService {
                 .itemResponseList(itemResponseList)
                 .totalPrice(payment.getTotalPrice())
                 .paymentType(payment.getPaymentType())
-                .isShippingFeeFree(payment.getIsShippingFeeFree())
                 .build();
     }
 }

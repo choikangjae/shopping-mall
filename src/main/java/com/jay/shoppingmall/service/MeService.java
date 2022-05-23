@@ -7,9 +7,11 @@ import com.jay.shoppingmall.domain.user.model.Agree;
 import com.jay.shoppingmall.domain.user.model.Name;
 import com.jay.shoppingmall.domain.user.model.PhoneNumber;
 import com.jay.shoppingmall.dto.request.AgreeRequest;
+import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.response.MeDetailResponse;
 import com.jay.shoppingmall.dto.request.UserUpdateRequest;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
+import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,10 +29,7 @@ public class MeService {
 
     public boolean passwordCheck(String password, User user) {
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            return false;
-        }
-        return true;
+        return passwordEncoder.matches(password, user.getPassword());
     }
 
     public MeDetailResponse findById(final Long id) {
@@ -53,12 +52,12 @@ public class MeService {
             throw new AgreeException("필수 항목을 반드시 동의하셔야 합니다");
         }
 
-//        Agree agree = Agree.builder()
-//                .isMandatoryAgree(agreeRequest.getIsMandatoryAgree())
-//                .isMarketingAgree(agreeRequest.getIsMarketingAgree())
-//                .build();
-//
-//        user.setAgree(agree);
+        Agree agree = Agree.builder()
+                .isMandatoryAgree(agreeRequest.getIsMandatoryAgree())
+                .isMarketingAgree(agreeRequest.getIsMarketingAgree())
+                .build();
+
+        user.setAgree(agree);
 
         return true;
     }
@@ -109,5 +108,13 @@ public class MeService {
                         phoneNumber.substring(3, 6))
                 .last(phoneNumber.substring(phoneNumber.length()-4))
                 .build();
+    }
+
+    public void deleteMe(final DeleteMeRequest request, final User user) {
+
+        if (!passwordCheck(request.getPassword(), user)) {
+            throw new PasswordInvalidException("비밀번호가 일치하지 않습니다");
+        }
+        userRepository.delete(user);
     }
 }

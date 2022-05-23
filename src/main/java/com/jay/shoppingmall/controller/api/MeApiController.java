@@ -19,9 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
@@ -49,15 +51,15 @@ public class MeApiController {
     }
 
     @PostMapping("/reconfirm")
-    public ResponseEntity<?> reConfirm(@RequestBody PasswordCheckRequest password, @CurrentUser User user, HttpServletRequest request) {
+    public ResponseEntity<?> reConfirm(@RequestBody PasswordCheckRequest password, @CurrentUser User user, RedirectAttributes redirectAttributes) {
         if (password.getPassword().isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
         if (!meService.passwordCheck(password.getPassword(), user)) {
             return ResponseEntity.badRequest().body(null);
         }
-        request.getSession().setAttribute("password", password.getPassword());
-
+//        request.getSession().setAttribute("password", password.getPassword());HttpServletRequest request
+        redirectAttributes.addFlashAttribute("password", password.getPassword());
         return ResponseEntity.ok().body(true);
     }
 
@@ -68,8 +70,7 @@ public class MeApiController {
 
         if (bindingResult.hasErrors()) {
             FieldError error = bindingResult.getFieldError();
-            String e = error.getField();
-            System.out.println(e);
+            String e = Objects.requireNonNull(error).getField();
             if (e.equals("phoneNumber")) {
                 return ResponseEntity.badRequest().body(ErrorResponse.builder()
                         .message("전화번호가 형식에 맞지않습니다")
