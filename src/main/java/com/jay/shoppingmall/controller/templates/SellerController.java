@@ -2,6 +2,7 @@ package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +18,10 @@ public class SellerController {
     @GetMapping
     public String sellerHome() {
         return "seller/seller-home";
+    }
+    @GetMapping("/write")
+    public String adminWrite(WriteItemRequest writeItemRequest) {
+        return "seller/seller-write-item";
     }
     @GetMapping("/start")
     public String sellerStart() {

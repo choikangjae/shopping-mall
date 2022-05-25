@@ -14,16 +14,16 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final PasswordInterceptor passwordInterceptor;
 
-    @Bean
-    public LayoutDialect layoutDialect() {
-        return new LayoutDialect();
-    }
-
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(passwordInterceptor)
                 .addPathPatterns("/me/update")
                 ;
+    }
+
+    @Bean
+    public LayoutDialect layoutDialect() {
+        return new LayoutDialect();
     }
 
     //    @Value("${resources.path}")

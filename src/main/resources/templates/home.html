@@ -15,10 +15,10 @@
             <div class="row py-lg-5">
                 <div class="col-lg-6 col-md-8 mx-auto">
                     <h1 class="fw-light">쇼핑몰 프로젝트</h1>
-                    <p class="lead text-muted">Something short and leading about the collection below—its contents, the creator, etc. Make it short and sweet, but not too short so folks don’t simply skip over it entirely.</p>
+                    <p class="lead text-muted">판매량 TOP 10 확인하기</p>
                     <p>
-                        <a href="#" class="btn btn-primary my-2">Main call to action</a>
-                        <a href="#" class="btn btn-secondary my-2">Secondary action</a>
+                        <a href="#" class="btn btn-primary my-2">확인하러 가기!</a>
+                        <a href="#" class="btn btn-secondary my-2">I'M FEELING LUCKY</a>
                     </p>
                 </div>
             </div>
@@ -49,6 +49,7 @@
                                 <img class="bd-placeholder-img card-img-top" width="100%" height="225" th:src="'data:image/jpeg;base64,'+${item.image}"
                                       alt="..."/>
                             </a>
+<!--                            <input type="hidden" id = "itemId" th:value="${item.id}">-->
 
                             <div class="card-body">
                                 <p class="card-text">
@@ -56,11 +57,13 @@
                                         <h5 class="fw-bolder" th:text="${item.name}">상품 이름</h5>
                                     </a>
                                 </p>
-                                <h5 class="fw-bolder" th:text="${item.price} + ' 원'">상품 가격</h5>
+                                <h5 class="fw-bolder" th:text="${#numbers.formatDecimal(item.price, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">상품 가격</h5>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
-                                        <button id="addToWishList" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-heart"></i> 찜하기
+                                        <button th:onclick="|addToWishList('${item.id}');|" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-heart"></i>
+                                            <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${item.id}" th:text="${#objects.nullSafe(item.zzim,'0')}"></span></span>
+
                                         </button>
                                         <a href="/order/now" class="btn btn-sm btn-outline-secondary">
                                             <i class="fas fa-shopping-cart"></i> 바로구매
@@ -75,9 +78,8 @@
         </div>
 
     </main>
+    <script type="text/javascript" th:src="@{/js/add_to_wish_list.js}"></script>
 
-    <script th:src="@{/js/add_to_wish_list.js}"></script>
-<!--    <script th:src="@{/js/buy_now.js}"></script>-->
 </div>
 </body>
 </html>

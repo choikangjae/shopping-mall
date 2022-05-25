@@ -13,4 +13,8 @@ public class CartRequest {
     private Integer quantity;
 
     private Integer totalPrice;
+
+    private Integer totalQuantity;
+//    @Setter
+//    private String totalPrice;
 }

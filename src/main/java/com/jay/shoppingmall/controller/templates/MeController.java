@@ -1,9 +1,12 @@
 package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.request.PasswordCheckRequest;
+import com.jay.shoppingmall.dto.response.ItemResponse;
+import com.jay.shoppingmall.dto.response.ZzimResponse;
 import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
 import com.jay.shoppingmall.service.MeService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/me")
@@ -69,13 +73,23 @@ public class MeController {
             return "me/reconfirm";
         }
         request.getSession().setAttribute("password", passwordCheckRequest.getPassword());
-//        redirectAttributes.addAttribute("password", passwordCheckRequest.getPassword());
-        System.out.println(request.getSession().getAttribute("password"));
         return "redirect:/me/update";
+    }
+    @GetMapping("/zzim")
+    public String showMeZzim(@CurrentUser User user, Model model) {
+        if (user == null) {
+            return "redirect:/";
+        }
+        List<ItemResponse> itemResponses = meService.getAllMeZzim(user);
+        model.addAttribute("items", itemResponses);
+        return "me/zzim";
     }
 
     @GetMapping("/delete")
     public String deleteMe(DeleteMeRequest deleteMeRequest, @CurrentUser User user, Model model) {
+        if (user.getRole().equals(Role.ROLE_ADMIN)) {
+            return "redirect:/";
+        }
         model.addAttribute("deleteMeRequest", deleteMeRequest);
         model.addAttribute("user", user);
         return "me/delete";
@@ -83,7 +97,7 @@ public class MeController {
 
     @PostMapping("delete")
     public String deleteMeAction(DeleteMeRequest deleteMeRequest, BindingResult result, @CurrentUser User user, RedirectAttributes redirectAttributes) {
-        if (user == null) {
+        if (user.getRole().equals(Role.ROLE_ADMIN)) {
             return "redirect:/";
         }
         meService.deleteMe(deleteMeRequest, user);

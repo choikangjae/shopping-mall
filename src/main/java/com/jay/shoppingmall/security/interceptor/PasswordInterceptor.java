@@ -15,11 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 @Component
-@RequiredArgsConstructor
 public class PasswordInterceptor implements HandlerInterceptor {
-
-//    private final MeService meService;
-    private final UserRepository userRepository;
 
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {

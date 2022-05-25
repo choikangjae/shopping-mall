@@ -4,6 +4,7 @@ import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.seller.Seller;
+import com.jay.shoppingmall.domain.user.User;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,6 +37,11 @@ public class Item extends BaseTimeEntity {
     @Setter
     private Integer stock;
 
+    @Setter
+    private Integer zzim;
+
+    private Integer viewCount;
+
     //삭제.
     private boolean isDeleted;
 
@@ -49,6 +55,10 @@ public class Item extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "seller_id")
     private Seller seller;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Builder
     public Item(String name, String description, Integer price, Integer salePrice, Integer stock) {

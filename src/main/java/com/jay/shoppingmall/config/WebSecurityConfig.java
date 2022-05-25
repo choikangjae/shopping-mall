@@ -41,10 +41,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomUserDetailsService customUserDetailsService;
 
-//    @Override
-//    public void configure(WebSecurity web) {
-//        web.ignoring().antMatchers("/css/**","/js/**","/assets/**");
-//    }
+    @Override
+    public void configure(WebSecurity web) {
+        web.ignoring().antMatchers("/css/**","/js/**","/assets/**","item/**");
+    }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
@@ -60,7 +60,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .userDetailsService(customUserDetailsService)
 //                .and()
                 .authorizeRequests()
-                .antMatchers("/auth/login**", "/seller/null", "/admin/null", "/auth/null", "/null", "/css/**", "/js/**", "/assets/**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/", "/item/**", "/auth/forgot-password").permitAll()
+                .antMatchers("/item/details/null", "/api/v1/item/zzim", "/api/v1/cart/total", "/swagger-ui.html#", "/search**", "/auth/login**", "/seller/null", "/admin/null", "/auth/null", "/null", "/css/**", "/js/**", "/assets/**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/", "/item/**","/item/details/**", "/auth/forgot-password").permitAll()
                 .antMatchers("/me/**", "/seller/start", "/seller/agree").hasRole("USER")
                 .antMatchers("/seller/**").hasRole("SELLER")
                 .antMatchers("/admin/**").hasRole("ADMIN")

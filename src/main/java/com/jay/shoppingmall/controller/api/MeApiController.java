@@ -50,18 +50,17 @@ public class MeApiController {
         return ResponseEntity.ok().body(true);
     }
 
-    @PostMapping("/reconfirm")
-    public ResponseEntity<?> reConfirm(@RequestBody PasswordCheckRequest password, @CurrentUser User user, RedirectAttributes redirectAttributes) {
-        if (password.getPassword().isEmpty()) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        if (!meService.passwordCheck(password.getPassword(), user)) {
-            return ResponseEntity.badRequest().body(null);
-        }
-//        request.getSession().setAttribute("password", password.getPassword());HttpServletRequest request
-        redirectAttributes.addFlashAttribute("password", password.getPassword());
-        return ResponseEntity.ok().body(true);
-    }
+//    @PostMapping("/reconfirm")
+//    public ResponseEntity<?> reConfirm(@RequestBody PasswordCheckRequest password, @CurrentUser User user, RedirectAttributes redirectAttributes) {
+//        if (password.getPassword().isEmpty()) {
+//            return ResponseEntity.badRequest().body(null);
+//        }
+//        if (!meService.passwordCheck(password.getPassword(), user)) {
+//            return ResponseEntity.badRequest().body(null);
+//        }
+//        request.getSession().setAttribute("password", password.getPassword());
+//        return ResponseEntity.ok().body(true);
+//    }
 
     @PostMapping("/privacy/update")
     public ResponseEntity<ErrorResponse> updateMe(@Valid @RequestBody UserUpdateRequest request, BindingResult bindingResult,
@@ -90,9 +89,8 @@ public class MeApiController {
         servletRequest.getSession().removeAttribute("isMarketingAgree");
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Authentication newAuthentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authentication.getPrincipal(), servletRequest.getSession().getAttribute("password")));;
+        Authentication newAuthentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authentication.getPrincipal(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(newAuthentication);
-//        servletRequest.getSession().removeAttribute("password");
 
         return ResponseEntity.ok().body(null);
     }

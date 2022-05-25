@@ -9,6 +9,8 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,7 +22,6 @@ public class User extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false, unique = true, updatable = false)
-    @Email
     private String email;
 
     @Column(nullable = false)

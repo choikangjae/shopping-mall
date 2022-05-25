@@ -33,6 +33,7 @@ public class AuthController {
         if (user != null) {
             return "redirect:/";
         }
+
         return "auth/login";
     }
     @PostMapping("/login")
@@ -62,11 +63,10 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public String signupAction(@Valid SignupRequest signupRequest, BindingResult result, Model model) {
+    public String signupAction(@Valid SignupRequest signupRequest, BindingResult result) {
         sellerValidator.validate(signupRequest, result);
 
         if (result.hasErrors()) {
-//            model.addAttribute("signupRequest", signupRequest);
             return "auth/signup";
         }
 
@@ -77,10 +77,10 @@ public class AuthController {
 
     @GetMapping("/seller-signup")
     public String sellerSignup(SignupRequest signupRequest, @CurrentUser User user) {
-        if (user != null) {
-            return "redirect:/";
-        }
-        user.getAgree().getIsMandatoryAgree().equals(false);
+//        if (user == null) {
+//            return "redirect:/auth/login";
+//        }
+//        user.getAgree().getIsMandatoryAgree().equals(false);
         return "auth/seller-signup";
     }
     @PostMapping("/seller-signup")
@@ -92,7 +92,7 @@ public class AuthController {
             return "auth/seller-signup";
         }
 
-        authService.signup(signupRequest);
+        authService.sellerSignup(signupRequest);
 
         return "redirect:/auth/signup-done";
     }

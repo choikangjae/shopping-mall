@@ -4,6 +4,7 @@ import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.response.ItemAndQuantityResponse;
 import com.jay.shoppingmall.service.CartService;
 import com.jay.shoppingmall.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +34,16 @@ public class CartController {
         if (user == null) {
             return "/auth/login";
         }
-        final List<Cart> cartList = cartService.CartItemsList(user);
-        int total = 0;
-        for (Cart cart : cartList) {
-            total += cart.getItem().getPrice() * cart.getQuantity();
+        final List<ItemAndQuantityResponse> itemAndQuantityResponses = cartService.CartItemsList(user);
+        int totalPrice = 0;
+        int totalQuantity = 0;
+        for (ItemAndQuantityResponse response : itemAndQuantityResponses) {
+            totalPrice += response.getPrice() * response.getQuantity();
+            totalQuantity += response.getQuantity();
         }
-        model.addAttribute("total", total);
-        model.addAttribute("cartList", cartList);
+        model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("totalQuantity", totalQuantity);
+        model.addAttribute("items", itemAndQuantityResponses);
         return "/me/cart";
     }
 

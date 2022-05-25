@@ -1,130 +1,107 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml"
-      layout:decorate="~{layouts/layout.html}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.w3.org/1999/xhtml" layout:decorate="~{layouts/layout.html}">
+
 <head>
     <title>상품 상세</title>
 </head>
+
 <body>
 
-<div th:replace="fragments/navbar :: navbar"></div>
+    <div layout:fragment="content">
 
-<div layout:fragment="content">
+        <div class="container">
 
-    <div class="container">
-        <!--  <h1 th:text="${response.name}" class="my-4">상품명</h1>-->
-        <h1></h1>
-        <div class="row">
+            <div class="row">
 
-            <div class="col-md-8">
-                <img class="bd-placeholder-img card-img-top" width="100%" height="500"
-                     th:src="'data:image/jpeg;base64,'+${response.image}"
-                     alt="..."/>
-                <!--      <img class="img-fluid" src="https://via.placeholder.com/750x500" alt="">-->
+                <div class="col-md-8">
+                    <img class="bd-placeholder-img card-img-top" width="100%" height="500"
+                        th:src="'data:image/jpeg;base64,'+${response.image}" alt="..." />
+                    <!--      <img class="img-fluid" src="https://via.placeholder.com/750x500" alt="">-->
+                </div>
+
+                <div class="col-md-4">
+                    <h3 th:text="'이름: ' + ${response.name}" class="my-3">상품 이름</h3>
+                    <h4 th:text="'가격: ' + ${#numbers.formatDecimal(response.price, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                        가격</h4>
+                    <h3 class="my-3">상세설명</h3>
+                    <ul>
+                        <li th:text="'재고: ' + ${response.stock} + ' 개'">재고</li>
+                        <li th:text="'설명: ' + ${response.description}">설명</li>
+                    </ul>
+
+                    <!-- <form method="post"> -->
+                    <!-- <input type="hidden" name="id" id="id" th:value="${response.id}"/> -->
+                    <div class="col-6 d-flex">
+                        <a class="btn btn-link px-2"
+                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                            <i class="fas fa-minus"></i>
+                        </a>
+
+                        <input id="quantity" min="1" th:max="${response.stock}" name="quantity" value="1" type="number"
+                            class="form-control form-control-sm" />
+                        <a class="btn btn-link px-2"
+                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                    </div>
+                    <hr>    
+                    <form th:action="@{/auth/login}" method="post">
+                    <a type="submit" class="btn btn-outline-dark" id="addToCart">
+                        <i class="fas fa-shopping-cart"></i>
+                        장바구니
+                    </a>
+                    <a type="button" class="btn btn-outline-dark" id="orderNow">
+                        <i class="fas fa-cash-register"></i>
+                        바로구매
+                    </a>
+                </form>
+                </div>
             </div>
 
-            <div class="col-md-4">
-                <h3 th:text="'이름: ' + ${response.name}" class="my-3">상품 이름</h3>
-                <h4 th:text="'가격: ' + ${response.price} + ' 원'">가격</h4>
-                <h3 class="my-3">상세설명</h3>
-                <ul>
-                    <li th:text="'재고: ' + ${response.stock} + ' 개'">재고</li>
-                    <li th:text="'설명: ' + ${response.description}">설명</li>
-                </ul>
+            <!-- /.row -->
 
-                <form method="post">
-                    <input type="hidden" name="id" id="id" th:value="${response.id}"/>
-                <div class="col-6 d-flex">
-                    <a class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                        <i class="fas fa-minus"></i>
-                    </a>
+            <!-- Related Projects Row -->
+            <h3 class="my-4">Related Projects</h3>
 
-                    <input id="quantity" min="1" th:max="${response.stock}" name="quantity" value="1" type="number"
-                           class="form-control form-control-sm"/>
-                    <a class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                        <i class="fas fa-plus"></i>
+            <div class="row">
+
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <a href="#">
+                        <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
                     </a>
                 </div>
-                <hr>
-                <!-- <button type="submit" class="btn btn-outline-dark" formaction="/cart/add">
-                    <i class="fas fa-shopping-cart"></i>
-                    장바구니
-                </button>
-                <button type="submit" class="btn btn-outline-dark" formaction="/order/now">
-                    <i class="fas fa-cash-register"></i>
-                    바로구매
-                </button> -->
-                    <a class="text-decoration-none" href="/auth/login" sec:authorize="!isAuthenticated()">
-                        <button type="button" class="btn btn-outline-dark">
-                            <i class="fas fa-shopping-cart"></i>
-                            장바구니
-                        </button>
-                        <button type="button" class="btn btn-outline-dark">
-                            <i class="fas fa-cash-register"></i>
-                            바로구매
-                        </button>
+
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <a href="#">
+                        <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
                     </a>
-                    <th:block sec:authorize="isAuthenticated()">
-                <button type="button" class="btn btn-outline-dark" id="addToCart">
-                    <i class="fas fa-shopping-cart"></i>
-                    장바구니
-                </button>
-                <button type="button" class="btn btn-outline-dark" id="orderNow">
-                    <i class="fas fa-cash-register"></i>
-                    바로구매
-                </button>
-                    </th:block>
-                </form>
+                </div>
+
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <a href="#">
+                        <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <a href="#">
+                        <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
+                    </a>
+                </div>
             </div>
         </div>
 
-    <!-- /.row -->
+        <script>
+            window.addEventListener('load', (e) => {
+            // const addToCart = 
+            // const orderNow = document.getElementById('orderNow');
 
-    <!-- Related Projects Row -->
-    <h3 class="my-4">Related Projects</h3>
-
-    <div class="row">
-
-        <div class="col-md-3 col-sm-6 mb-4">
-            <a href="#">
-                <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
-            </a>
-        </div>
-
-        <div class="col-md-3 col-sm-6 mb-4">
-            <a href="#">
-                <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
-            </a>
-        </div>
-
-        <div class="col-md-3 col-sm-6 mb-4">
-            <a href="#">
-                <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
-            </a>
-        </div>
-
-        <div class="col-md-3 col-sm-6 mb-4">
-            <a href="#">
-                <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
-            </a>
-        </div>
-    </div>
-    </div>
-    <script th:src="@{/js/add_to_cart.js}"></script>
-    <script th:src="@{/js/buy_now.js}"></script>
-
-    <script>
-        window.addEventListener('load', (e) => {
-            const addToCart = document.getElementById('addToCart');
-            const orderNow = document.getElementById('orderNow');
-
-            addToCart.addEventListener('click', (e) => {
+            document.getElementById('addToCart').addEventListener('click', (e) => {
                 e.preventDefault();
 
                 let quantity = document.getElementById('quantity').value;
-                let id = document.getElementById('id').value;
+                let id = '[[${response.id}]]';
 
                 let data = {
                     method: 'POST',
@@ -132,38 +109,49 @@
                         quantity,
                         id
                     }),
+                    // redirect: 'follow',
+                    // credentials: 'include',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        // 'Accept': 'application/json'
                     }
                 };
                 const onSuccess = res => {
-                        res.text()
-                            .then(() => {
-                                if (confirm("장바구니에 추가되었습니다. 장바구니로 이동하시겠습니까?")) {
-                                    window.location.replace('http://localhost:8080/cart')
-                                }
-                            })
-                    }
-                    const onFailure = res => {
-                        return res.json().then(json => alert(json.message));
-                    }
+                    res.text()
+                        .then(() => {
+                            // if (confirm("장바구니에 추가되었습니다. 장바구니로 이동하시겠습니까?")) {
+                            //     window.location.replace('http://localhost:8080/cart');
+                            // }
+                        })
+                }
+                const onFailure = res => {
+                    return res.text()
+                        // .then(json => confirm(json.message));
+                        .then(() => {
+                            if (confirm("이미 장바구니에 상품이 존재합니다. 장바구니로 이동하시겠습니까?")) {
+                                window.location.replace('http://localhost:8080/cart')
+                            }
+                        })
+                }
 
                 fetch(`/api/v1/cart/add`, data)
-                        .then(res => {
-                            if (!res.ok) {
-                                throw res;
-                            }
-                            return res
-                        })
-                        .then(onSuccess, onFailure)
-                        .catch(err => {
-                            alert(err.message);
-                        });
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        console.log(err.message);
+                    });
             })
         })
-    </script>
 
-</div>
-<!--End of Content-->
+        </script>
+
+    </div>
+    <!--End of Content-->
 </body>
+
 </html>

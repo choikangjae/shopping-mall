@@ -10,9 +10,13 @@ public class ItemResponse {
 
     private Long id;
 
+    private String image;
+
     private String name;
+
+    private Integer zzim;
 
     private Integer price;
 
-    private String image;
+    private Integer salePrice;
 }

@@ -16,4 +16,7 @@ public class CartResponse {
     private Integer multipliedPrice;
 
     private Integer totalPrice;
+
+    private Integer totalQuantity;
+
 }

@@ -10,6 +10,7 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.dto.request.CartRequest;
 import com.jay.shoppingmall.dto.response.CartResponse;
+import com.jay.shoppingmall.dto.response.ItemAndQuantityResponse;
 import com.jay.shoppingmall.exception.exceptions.AlreadyExistsException;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,10 +31,26 @@ public class CartService {
     private final ItemRepository itemRepository;
     private final ImageRepository imageRepository;
     private final CartRepository cartRepository;
+    private final FileHandler fileHandler;
 
-    public List<Cart> CartItemsList(User user) {
-         return cartRepository.findByUser(user)
-                .orElseThrow(()-> new UsernameNotFoundException("해당 유저가 없습니다"));
+    public List<ItemAndQuantityResponse> CartItemsList(User user) {
+        final List<Cart> carts = cartRepository.findByUser(user)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
+        List<ItemAndQuantityResponse> itemAndQuantityResponses = new ArrayList<>();
+
+        for (Cart cart : carts) {
+
+            itemAndQuantityResponses.add(ItemAndQuantityResponse.builder()
+                            .id(cart.getItem().getId())
+                            .name(cart.getItem().getName())
+                            .price(cart.getItem().getPrice())
+                            .salePrice(cart.getItem().getSalePrice())
+                            .image(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(cart.getItem().getId())))
+                            .zzim(cart.getItem().getZzim())
+                            .quantity(cart.getQuantity())
+                    .build());
+        }
+        return itemAndQuantityResponses;
     }
     public Integer addItemToCart(Long itemId, Integer quantity, User user) {
         Item item = itemRepository.findById(itemId)
@@ -61,20 +79,19 @@ public class CartService {
     }
 
     public CartResponse updateCart(final CartRequest request, final User user) {
+//        int IntTotalPrice = Integer.parseInt(request.getTotalPrice());
         Item item = itemRepository.findById(request.getId())
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
-        Image image = imageRepository.findByItemId(request.getId());
+//        Image image = imageRepository.findByItemId(request.getId());
         Cart cart = cartRepository.findByUserAndItem(user, item);
 
         if (Objects.equals(request.getQuantity(), cart.getQuantity())) {
-            throw new AlreadyExistsException("상품 개수가 변하지 않았습니다");
+            throw new AlreadyExistsException("상품 개수가 변동되지 않았습니다");
         }
 
         final int oldTotalPrice = request.getTotalPrice() - cart.getQuantity() * cart.getItem().getPrice();
-        final Integer updatedQuantity = cart.manipulateQuantity(request.getQuantity());
-        final Integer multipliedPrice = updatedQuantity * cart.getItem().getPrice();
-
-        final Integer newTotalPrice = oldTotalPrice + updatedQuantity * cart.getItem().getPrice();
+        final int multipliedPrice = cart.manipulateQuantity(request.getQuantity()) * cart.getItem().getPrice();
+        final Integer newTotalPrice = oldTotalPrice + multipliedPrice;
 
         cartRepository.saveAndFlush(cart);
 
@@ -83,10 +100,11 @@ public class CartService {
                 .quantity(cart.getQuantity())
                 .multipliedPrice(multipliedPrice)
                 .totalPrice(newTotalPrice)
+                .totalQuantity(this.getTotalQuantity(user))
                 .build();
     }
     //todo 상품제거하는 기능 구현하기. 삭제된 시간과 롤백 기능.
-    public void deleteCart(final CartRequest request, final User user) {
+    public CartResponse deleteCart(final CartRequest request, final User user) {
         Item item = itemRepository.findById(request.getId())
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
         Image image = imageRepository.findByItemId(request.getId());
@@ -94,6 +112,24 @@ public class CartService {
         if (cart == null) {
             throw new ItemNotFoundException("해당 상품이 존재하지않습니다");
         }
+        final int totalPrice = request.getTotalPrice() - cart.getQuantity() * cart.getItem().getPrice();
+
         cartRepository.delete(cart);
+
+        return CartResponse.builder()
+                .id(cart.getId())
+                .totalPrice(totalPrice)
+                .totalQuantity(this.getTotalQuantity(user))
+                .build();
+    }
+
+    public Integer getTotalQuantity(final User user) {
+        List<Cart> carts = cartRepository.findByUser(user)
+                .orElseThrow(()-> new UsernameNotFoundException("해당 유저가 없습니다"));
+        Integer totalQuantity = 0;
+        for (Cart cart : carts) {
+            totalQuantity += cart.getQuantity();
+        }
+        return totalQuantity;
     }
 }

@@ -18,17 +18,32 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public void signup(SignupRequest signupRequest) {
+    public User signup(SignupRequest signupRequest) {
 
         String password = passwordEncoder.encode(signupRequest.getPassword());
 
+//        User user = signupRequest.toEntity(password);
         User user = User.builder()
                 .email(signupRequest.getEmail())
                 .password(password)
-                .agree(new Agree(false, false))
+//                .agree(new Agree(false, false))
                 .role(Role.ROLE_USER)
                 .build();
 
-        userRepository.save(user);
+        return userRepository.save(user);
+    }
+
+    public User sellerSignup(final SignupRequest signupRequest) {
+        String password = passwordEncoder.encode(signupRequest.getPassword());
+
+//        User user = signupRequest.toEntity(password);
+        User user = User.builder()
+                .email(signupRequest.getEmail())
+                .password(password)
+//                .agree(new Agree(false, false))
+                .role(Role.ROLE_SELLER)
+                .build();
+
+        return userRepository.save(user);
     }
 }

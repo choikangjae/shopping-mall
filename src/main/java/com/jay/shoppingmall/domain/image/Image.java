@@ -28,7 +28,7 @@ public class Image {
 
     private Long fileSize;
 
-    private boolean isMainImage;
+    private Boolean isMainImage;
 
     @ManyToOne
     @JoinColumn(name = "item_id")

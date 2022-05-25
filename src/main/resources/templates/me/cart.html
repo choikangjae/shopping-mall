@@ -16,36 +16,43 @@
                     <div class="col-10">
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h3 class="fw-normal mb-0 text-black">장바구니</h3>
+
+
+                            <h3 class="fw-normal mb-0 text-black">장바구니
+                                <span class="badge bg-primary rounded-pill">
+                                    <span id="totalQuantity" th:text="${totalQuantity}"></span>
+                                </span>
+                            </h3>
                             <div>
                                 <p class="mb-0"><span class="text-muted">Sort by:</span> <a href="#!"
                                         class="text-body">price <i class="fas fa-angle-down mt-1"></i></a></p>
                             </div>
                         </div>
-                        <div class="container" th:if="${#lists.isEmpty(cartList)}">
+                        <div class="container" th:if="${#lists.isEmpty(items)}">
                             <h3>장바구니가 비어있습니다</h3>
                             <a th:href="@{/}"><i class="fas fa-home fa-4x"></i></a>
                         </div>
 
-                        <th:block th:each="cart : ${cartList}">
-                            <div class="card rounded-3 mb-2" th:with="item = ${cart.item}">
-                                <div class="card-body p-4" th:id="${item.id}">
+                        <th:block th:each="item : ${items}">
+                            <div class="card rounded-3 mb-2" th:id="${item.id}">
+                                <div class="card-body p-4">
                                     <div class="row d-flex justify-content-between align-items-center">
 
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                            <input class="form-check-input" type="checkbox" value=""
+                                                id="flexCheckDefault">
                                         </div>
 
                                         <div class="col-md-2 col-lg-2 col-xl-2">
-                                            <!--                                    <img class="bd-placeholder-img card-img-top" width="100%" height="500"-->
-                                            <!--                                         th:src="'data:image/jpeg;base64,'+${response.image}"-->
-                                            <!--                                         alt="..."/>-->
-                                            <!--                                    <img-->
+                                            <img class="bd-placeholder-img card-img-top" width="100%" height="100"
+                                                 th:src="'data:image/jpeg;base64,'+${item.image}"
+                                                 alt="..."/>
+<!--                                                                                <img-->
                                             <!--                                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"-->
                                             <!--                                            class="img-fluid rounded-3" alt="Cotton T-shirt">-->
                                         </div>
                                         <div class="col-md-3 col-lg-3 col-xl-3">
-<!--                                            <div th:id="${item.id}" th:text="${item.id}" hidden></div>-->
+                                            <!--                                            <div th:id="${item.id}" th:text="${item.id}" hidden></div>-->
                                             <a th:href="@{'/item/details/' + ${item.id}}"
                                                 class="text-reset text-decoration-none">
                                                 <p class="lead fw-normal mb-2" th:text="${item.name}">이름</p>
@@ -65,7 +72,7 @@
                                                 <i class="fas fa-minus"></i>
                                             </a>
                                             <input th:id="'quantity' + ${item.id}" min="1" name="quantity"
-                                                th:value="${cart.quantity}" type="number"
+                                                th:value="${item.quantity}" type="number"
                                                 class="form-control form-control-sm" />
                                             <a class="btn btn-link px-2"
                                                 onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
@@ -74,9 +81,9 @@
                                         </div>
                                         <div class="col-md-3 col-lg-2 col-xl-2">
                                             <h5 class="mb-0" th:id="'multipliedPrice' + ${item.id}"
-                                                th:text="${#numbers.formatDecimal(item.price * cart.quantity, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                                th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'DEFAULT', 0, 'DEFAULT')}">
                                                 합산 가격</h5>
-                                                <h5>원 </h5>
+                                            <h5>원 </h5>
                                         </div>
                                         <div class="col-md-1 col-lg-1 col-xl-1 text-end">
                                             <a href="#!" th:id="'updateButton' + ${item.id}"
@@ -133,29 +140,31 @@
                                 <div class="col-1">
                                 </div>
                                 <div class="col-3">
-                                    <h4>상품가격 <th:block
-                                            th:text="${#numbers.formatDecimal(total, 0, 'DEFAULT', 0, 'DEFAULT')}">
-                                        </th:block> 원</h4>
+                                    <h4>상품가격 <span id="totalProductPrice"
+                                            th:text="${#numbers.formatDecimal(totalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                        </span> 원</h4>
                                 </div>
                                 <div class="col-1">
                                     <h4><i class="fas fa-plus"></i></h4>
                                 </div>
                                 <div class="col-2">
-                                    <h4>배송비 <th:block th:if="${total} < 30000" th:text="'3,000'"></th:block>
-                                        <th:block th:unless="${total} < 30000" th:text="'0'"></th:block> 원
+                                    <h4>배송비 <th:block th:if="${totalPrice} < 30000" th:text="'3,000'"></th:block>
+                                        <th:block th:unless="${totalPrice} < 30000" th:text="'0'"></th:block> 원
                                     </h4>
                                 </div>
                                 <div class="col-1">
                                     <h4><i class="fas fa-equals"></i></h4>
                                 </div>
                                 <div class="col-3">
-                                    <h4>총 가격 <span class="text-primary" id="totalPrice">
-                                            <th:block th:if="${total} < 30000"
-                                                th:text="${#numbers.formatDecimal(total + 3000, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                    <h4>총 가격 <span class="text-primary" id="totalPrice"
+                                            th:text="${#numbers.formatDecimal(totalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                            <!-- <th:block th:if="${totalPrice} < 30000"
+                                                th:text="${#numbers.formatDecimal(totalPrice + 3000, 0, 'DEFAULT', 0, 'DEFAULT')}">
                                             </th:block>
-                                            <th:block th:unless="${total} < 30000"
-                                                th:text="${#numbers.formatDecimal(total, 0, 'DEFAULT', 0, 'DEFAULT')}">
-                                            </th:block>
+                                            <th:block th:unless="${totalPrice} < 30000"
+                                                th:text="${#numbers.formatDecimal(totalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                            </th:block> -->
+
                                         </span> 원</h4>
                                 </div>
 
@@ -170,7 +179,8 @@
 
                         <div class="card">
                             <div class="card-body">
-                                <a type="button" th:href="@{/order/process}"class="btn btn-warning btn-block btn-lg">주문하기</a>
+                                <a type="button" th:href="@{/order/process}"
+                                    class="btn btn-warning btn-block btn-lg">주문하기</a>
                             </div>
                         </div>
 
@@ -179,12 +189,14 @@
             </div>
         </section>
         <script>
+
             function deleteItem(id) {
 
                 const quantity = document.getElementById('quantity' + id).value;
-                const totalPrice = '[[${total}]]';
-                // const eachPrice = document.getElementById('eachPrice' + id).value;
-                // const multipliedPrice = document.getElementById('multipliedPrice' + id).html;
+                let totalPrice = document.getElementById('totalPrice').textContent;
+                totalPrice = parseInt(totalPrice.replace(/,/g, ""));
+                let totalQuantity = document.getElementById('totalQuantity').textContent;
+                totalQuantity = parseInt(totalQuantity.replace(/,/g, ""));
 
                 let data = {
                     method: 'POST',
@@ -200,10 +212,12 @@
                 const onSuccess = res => {
                     res.json()
                         .then(data => {
-                            // totalPrice.innerHTML = data.totalPrice;
-                            // document.getElementById('totalPrice').innerHTML = data.totalPrice;
-                            // document.getElementById('multipliedPrice' + id).innerHTML = data.multipliedPrice;
-                            // alert('선택한 상품이 삭제되었습니다');
+                            document.getElementById('totalPrice').innerHTML = data.totalPrice.toLocaleString();
+                            document.getElementById('totalProductPrice').textContent = data.totalPrice.toLocaleString();
+                            document.getElementById('totalQuantity').textContent = data.totalQuantity.toLocaleString();
+                            document.getElementById('cartAmount').textContent = data.totalQuantity.toLocaleString();
+                            document.getElementById(id).remove();
+                            alert('선택 상품이 삭제되었습니다');
                         });
                 }
                 const onFailure = res => {
@@ -226,16 +240,18 @@
             function updateItem(id) {
 
                 const quantity = document.getElementById('quantity' + id).value;
-                const totalPrice = '[[${total}]]';
-                // const eachPrice = document.getElementById('eachPrice' + id).value;
-                // const multipliedPrice = document.getElementById('multipliedPrice' + id).html;
+                let totalPrice = document.getElementById('totalPrice').textContent;
+                totalPrice = parseInt(totalPrice.replace(/,/g, ""));
+                let totalQuantity = document.getElementById('totalQuantity').textContent;
+                totalQuantity = parseInt(totalQuantity.replace(/,/g, ""));
 
                 let data = {
                     method: 'POST',
                     body: JSON.stringify({
                         id,
                         quantity,
-                        totalPrice
+                        totalPrice,
+                        totalQuantity
                     }),
                     headers: {
                         'Content-Type': 'application/json'
@@ -244,15 +260,16 @@
                 const onSuccess = res => {
                     res.json()
                         .then(data => {
-                            // totalPrice.innerHTML = data.totalPrice;
-                            document.getElementById('totalPrice').innerHTML = data.totalPrice;
-                            document.getElementById('multipliedPrice' + id).innerHTML = data.multipliedPrice;
-
+                            document.getElementById('totalPrice').innerHTML = data.totalPrice.toLocaleString();
+                            document.getElementById('multipliedPrice' + id).innerHTML = data.multipliedPrice.toLocaleString();
+                            document.getElementById('totalProductPrice').textContent = data.totalPrice.toLocaleString();
+                            document.getElementById('totalQuantity').textContent = data.totalQuantity.toLocaleString();
+                            document.getElementById('cartAmount').textContent = data.totalQuantity.toLocaleString();
                         });
-                }
+                };
                 const onFailure = res => {
                     return res.json().then(json => alert(json.message));
-                }
+                };
 
                 fetch(`/api/v1/cart/update`, data)
                     .then(res => {
