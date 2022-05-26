@@ -57,4 +57,9 @@ public class User extends BaseTimeEntity {
         this.agree = agree;
         this.phoneNumber = phoneNumber;
     }
+
+    public String getUsername() {
+        int indexOfAt = email.indexOf("@");
+        return email.substring(0, indexOfAt);
+    }
 }

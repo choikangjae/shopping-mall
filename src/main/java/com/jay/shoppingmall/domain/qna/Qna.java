@@ -3,16 +3,16 @@ package com.jay.shoppingmall.domain.qna;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.user.User;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 @Entity
 public class Qna extends BaseTimeEntity {
 
@@ -31,21 +31,11 @@ public class Qna extends BaseTimeEntity {
     private Boolean isEmailNotification;
 
     @Column(nullable = false)
-    @Max(500)
+    @Size(min = 4, max = 500, message = "4글자 이상 작성해주세요")
     private String question;
 
-    @Max(500)
+    @Size(min = 4, max = 500)
     private String answer;
-
-    @Builder
-    public Qna(final QnaCategory qnaCategory, final Boolean isSecret, final Boolean isAnswered, final Boolean isEmailNotification, final String question, final String answer) {
-        this.qnaCategory = qnaCategory;
-        this.isSecret = isSecret;
-        this.isAnswered = isAnswered;
-        this.isEmailNotification = isEmailNotification;
-        this.question = question;
-        this.answer = answer;
-    }
 
     @ManyToOne
     @JoinColumn(name = "user_id")

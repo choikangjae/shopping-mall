@@ -23,7 +23,7 @@ public class ItemController {
             value = "/item/details/{id}",
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
     )
-    public String searchById(@PathVariable(name = "id",required = false) Long id, Model model, @CurrentUser User user) {
+    public String itemDetailByItemId(@PathVariable(name = "id",required = false) Long id, Model model, @CurrentUser User user) {
 
         ItemDetailResponse response = itemService.itemDetail(id);
         model.addAttribute("response", response);
