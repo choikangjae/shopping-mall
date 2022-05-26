@@ -1,5 +1,7 @@
 package com.jay.shoppingmall.controller.templates;
 
+import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.CartRequest;
 import com.jay.shoppingmall.dto.response.ItemDetailResponse;
 import com.jay.shoppingmall.service.ItemService;
@@ -21,9 +23,11 @@ public class ItemController {
             value = "/item/details/{id}",
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
     )
-    public String searchById(@PathVariable(name = "id",required = false) Long id, Model model) {
+    public String searchById(@PathVariable(name = "id",required = false) Long id, Model model, @CurrentUser User user) {
+
         ItemDetailResponse response = itemService.itemDetail(id);
         model.addAttribute("response", response);
+        model.addAttribute("user", user);
 
         return "item/detail";
     }

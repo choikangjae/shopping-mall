@@ -54,9 +54,6 @@
                             <a class="nav-link" th:href="@{/admin}" href="#">어드민</a>
                         </li>
                     </div>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/index}" href="#">임시</a>
-                    </li>
                     <div sec:authorize="isAuthenticated()">
                         <li class="nav-item">
                             <div class="text-white" sec:authentication="principal.authorities"></div>

@@ -61,16 +61,16 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
             redirectStrategy.sendRedirect(request, response, "/admin");
         } else if (request.getSession().getAttribute("requestURI") != null) {
             String requestURI = (String) request.getSession().getAttribute("requestURI");
-            System.out.println("requestURI: " + requestURI);
+//            System.out.println("requestURI: " + requestURI);
             redirectStrategy.sendRedirect(request, response, requestURI);
             request.getSession().removeAttribute("requestURI");
         }
         else if (savedRequest != null) {
             String targetUrl = savedRequest.getRedirectUrl();
-            System.out.println("targetUrl: " + targetUrl);
+//            System.out.println("targetUrl: " + targetUrl);
             redirectStrategy.sendRedirect(request, response, targetUrl);
         } else {
-            System.out.println("defaultUrl: " + defaultUrl);
+//            System.out.println("defaultUrl: " + defaultUrl);
             redirectStrategy.sendRedirect(request, response, defaultUrl);
         }
     }

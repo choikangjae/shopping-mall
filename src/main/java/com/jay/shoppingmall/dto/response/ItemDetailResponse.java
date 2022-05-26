@@ -19,4 +19,6 @@ public class ItemDetailResponse {
     private Integer price;
 
     private Integer stock;
+
+    private Integer zzim;
 }

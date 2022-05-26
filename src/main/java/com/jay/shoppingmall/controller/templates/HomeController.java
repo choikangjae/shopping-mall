@@ -6,6 +6,9 @@ import com.jay.shoppingmall.dto.response.ItemDetailResponse;
 import com.jay.shoppingmall.dto.response.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,8 +28,8 @@ public class HomeController {
             value = "/",
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
     )
-    public String write(Model model) {
-        List<ItemResponse> responses = itemService.itemAll();
+    public String write(Model model, @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        List<ItemResponse> responses = itemService.itemAll(pageable);
         model.addAttribute("items", responses);
 
         return "home";

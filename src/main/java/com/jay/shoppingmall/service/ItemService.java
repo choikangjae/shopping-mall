@@ -13,6 +13,8 @@ import com.jay.shoppingmall.dto.response.ItemDetailResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,10 +31,11 @@ public class ItemService {
     private final FileHandler fileHandler;
     private final ZzimRepository zzimRepository;
 
-    public List<ItemResponse> itemAll() {
+    public List<ItemResponse> itemAll(Pageable pageable) {
         List<ItemResponse> responses = new ArrayList<>();
 
-        List<Item> items = itemRepository.findAll();
+//        List<Item> items = itemRepository.findAll();
+        Slice<Item> items = itemRepository.findAll(pageable);
         for (Item item : items) {
             Image image = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
 
@@ -70,6 +73,7 @@ public class ItemService {
                 .price(item.getPrice())
                 .stock(item.getStock())
                 .image(stringImage)
+                .zzim(item.getZzim())
                 .build();
     }
 

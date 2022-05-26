@@ -29,8 +29,9 @@ public class AuthController {
     private final SellerValidator sellerValidator;
 
     @GetMapping("/login")
-    public String login(@RequestParam(name = "requestURI", required = false) String requestURI, HttpServletRequest request, @CurrentUser User user) {
+    public String login(@RequestParam(name = "requestURI", required = false) String requestURI, @RequestParam(name = "scrollY", required = false) String scrollY, HttpServletRequest request, @CurrentUser User user) {
         request.getSession().setAttribute("requestURI", requestURI);
+        request.getSession().setAttribute("scrollY", scrollY);
         if (user != null) {
             return "redirect:/";
         }

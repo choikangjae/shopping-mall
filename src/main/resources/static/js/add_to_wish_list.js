@@ -4,7 +4,6 @@ function addToWishList(itemId) {
                         method: 'POST',
                         body: JSON.stringify({
                             itemId,
-//                            zzim,
                         }),
                         headers: {
                             'Content-Type': 'application/json'

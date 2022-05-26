@@ -63,7 +63,6 @@
                                         <button th:onclick="|addToWishList('${item.id}');|" class="btn btn-sm btn-outline-secondary">
                                             <i class="fas fa-heart"></i>
                                             <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${item.id}" th:text="${#objects.nullSafe(item.zzim,'0')}"></span></span>
-
                                         </button>
                                         <a href="/order/now" class="btn btn-sm btn-outline-secondary">
                                             <i class="fas fa-shopping-cart"></i> 바로구매
@@ -74,8 +73,15 @@
                         </div>
                     </div>
                 </div>
+                <br>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="button">
+                        <i class="fas fa-plus"></i> 더 보기</button>
+                </div>
             </div>
         </div>
+
+
 
     </main>
     <script type="text/javascript" th:src="@{/js/add_to_wish_list.js}"></script>

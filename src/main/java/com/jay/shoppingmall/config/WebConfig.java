@@ -12,14 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final PasswordInterceptor passwordInterceptor;
 
-    @Override
-    public void addInterceptors(final InterceptorRegistry registry) {
-        registry.addInterceptor(passwordInterceptor)
-                .addPathPatterns("/me/update")
-                ;
-    }
 
     @Bean
     public LayoutDialect layoutDialect() {
