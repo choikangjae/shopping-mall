@@ -3,7 +3,6 @@ package com.jay.shoppingmall.service;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.dto.response.ItemResponse;
-import com.jay.shoppingmall.dto.response.SearchResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

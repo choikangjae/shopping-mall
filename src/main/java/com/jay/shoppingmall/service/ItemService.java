@@ -5,13 +5,11 @@ import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.zzim.Zzim;
 import com.jay.shoppingmall.domain.zzim.ZzimRepository;
 import com.jay.shoppingmall.dto.request.ItemZzimRequest;
 import com.jay.shoppingmall.dto.response.ItemResponse;
 import com.jay.shoppingmall.dto.response.ItemDetailResponse;
-import com.jay.shoppingmall.dto.response.SearchResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.RequiredArgsConstructor;
 

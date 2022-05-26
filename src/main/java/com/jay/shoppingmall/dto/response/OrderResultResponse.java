@@ -15,6 +15,7 @@ public class OrderResultResponse {
     private List<ItemResponse> itemResponseList;
 
     private Integer totalPrice;
+    private CartOrderResponse cartOrderResponse;
 
     private PaymentType paymentType;
 

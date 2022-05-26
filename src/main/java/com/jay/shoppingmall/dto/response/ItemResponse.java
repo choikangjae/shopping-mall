@@ -19,4 +19,6 @@ public class ItemResponse {
     private Integer price;
 
     private Integer salePrice;
+
+    private Integer cartQuantity;
 }

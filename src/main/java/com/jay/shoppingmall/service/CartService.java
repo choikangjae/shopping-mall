@@ -27,7 +27,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CartService {
 
-    private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ImageRepository imageRepository;
     private final CartRepository cartRepository;

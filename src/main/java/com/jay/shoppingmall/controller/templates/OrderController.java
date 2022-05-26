@@ -35,27 +35,19 @@ public class OrderController {
     }
     @GetMapping("/process")
     public String orderProcess(@CurrentUser User user, Model model) {
-        List<CartOrderResponse> cartOrderResponses = orderService.orderProcess(user);
-        Integer orderTotalPrice = orderService.orderTotalPrice(user);
-        Integer orderTotalCount = orderService.orderTotalCount(user);
+        CartOrderResponse cartOrderResponse = orderService.orderProcess(user);
 
-        model.addAttribute("cartOrderResponses", cartOrderResponses);
         model.addAttribute("user", user);
-        model.addAttribute("orderTotalPrice", orderTotalPrice);
-        model.addAttribute("orderTotalCount", orderTotalCount);
+        model.addAttribute("order", cartOrderResponse);
 
         return "/order/process";
     }
     @GetMapping("/payment")
     public String orderPayment(@CurrentUser User user, Model model) {
-        List<CartOrderResponse> cartOrderResponses = orderService.orderProcess(user);
-        Integer orderTotalPrice = orderService.orderTotalPrice(user);
-        Integer orderTotalCount = orderService.orderTotalCount(user);
+        CartOrderResponse cartOrderResponse = orderService.orderProcess(user);
 
-        model.addAttribute("cartOrderResponses", cartOrderResponses);
         model.addAttribute("user", user);
-        model.addAttribute("orderTotalPrice", orderTotalPrice);
-        model.addAttribute("orderTotalCount", orderTotalCount);
+        model.addAttribute("order", cartOrderResponse);
 
         return "/order/payment";
     }
@@ -74,10 +66,6 @@ public class OrderController {
         model.addAttribute("response", response);
         //TODO 결제 진행창과 결제 완료창 템플릿 만들기.
         //TODO payment.html과 payment-result.html. Seller 만들고 나서.
-        response.getItemResponseList();
-        response.getPaymentType();
-        response.getIsShippingFeeFree();
-        response.getTotalPrice();
 
         return "/order/payment-result";
     }

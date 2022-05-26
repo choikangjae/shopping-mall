@@ -2,6 +2,7 @@ package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
+import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
@@ -37,47 +38,40 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
     private final ItemRepository itemRepository;
+    private final FileHandler fileHandler;
+    private final ImageRepository imageRepository;
 
-    public List<CartOrderResponse> orderProcess(User user) {
-
+    public CartOrderResponse orderProcess(User user) {
         List<Cart> cartList = cartRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
         if (cartList.isEmpty()) {
             throw new CartEmptyException("장바구니가 비어있습니다");
         }
-        List<CartOrderResponse> cartOrderResponses = new ArrayList<>();
 
-        for (Cart cart : cartList) {
-            cartOrderResponses.add(CartOrderResponse.builder()
-                    .item(cart.getItem())
-                    .quantity(cart.getQuantity())
-                    .build());
-
-        }
-        return cartOrderResponses;
-    }
-
-    public Integer orderTotalPrice(User user) {
         int totalPrice = 0;
-        List<Cart> cartList = cartRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
-        if (cartList.isEmpty()) {
-            throw new CartEmptyException("장바구니가 비어있습니다");
-        }
-        for (Cart cart : cartList) {
-            totalPrice += cart.getQuantity() * cart.getItem().getPrice();
-        }
-        return totalPrice;
-    }
-
-    public Integer orderTotalCount(User user) {
         int totalCount = 0;
-        List<Cart> cartList = cartRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
-        if (cartList.isEmpty()) {
-            throw new CartEmptyException("장바구니가 비어있습니다");
-        }
+
+        List<ItemResponse> itemResponses = new ArrayList<>();
         for (Cart cart : cartList) {
+            Item item = cart.getItem();
+            totalPrice += cart.getQuantity() * cart.getItem().getPrice();
             totalCount += cart.getQuantity();
+
+            itemResponses.add(ItemResponse.builder()
+                    .id(item.getId())
+                    .name(item.getName())
+                    .zzim(item.getZzim())
+                    .cartQuantity(cart.getQuantity())
+                    .image(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+                    .price(item.getPrice())
+                    .salePrice(item.getSalePrice())
+                    .build());
         }
-        return totalCount;
+
+        return CartOrderResponse.builder()
+                .orderTotalPrice(totalPrice)
+                .orderTotalCount(totalCount)
+                .itemResponses(itemResponses)
+                .build();
     }
 
     /**
@@ -85,6 +79,8 @@ public class OrderService {
      *
      */
     public OrderResultResponse doOrderPaymentProcess(PaymentRequest paymentRequest, User user) {
+        CartOrderResponse cartOrderResponse= orderProcess(user);
+
         //결제 완료
         Payment payment = paymentService.doPayment(paymentRequest.getItemId(), paymentRequest.getPaymentType(), paymentRequest.getTotalPrice());
 

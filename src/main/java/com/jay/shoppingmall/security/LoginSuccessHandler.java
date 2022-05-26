@@ -42,26 +42,27 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         final HttpServletResponse response,
                                         final Authentication authentication) throws IOException, ServletException {
 
-        String requestUsername = request.getParameter(username);
+//        String requestUsername = request.getParameter(username);
         clearAuthenticationExceptions(request);
         resultRedirectStrategy(request, response, authentication);
     }
 
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-    private final RequestCache requestCache = new HttpSessionRequestCache();
+//    private final RequestCache requestCache = new HttpSessionRequestCache();
 
     protected void resultRedirectStrategy(final HttpServletRequest request,
                                           final HttpServletResponse response,
                                           final Authentication authentication) throws IOException, ServletException {
 
         SavedRequest savedRequest = (SavedRequest) request.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             redirectStrategy.sendRedirect(request, response, "/admin");
         } else if (request.getSession().getAttribute("requestURI") != null) {
             String requestURI = (String) request.getSession().getAttribute("requestURI");
             System.out.println("requestURI: " + requestURI);
-            redirectStrategy.sendRedirect(request, response, (String) request.getSession().getAttribute("requestURI"));
+            redirectStrategy.sendRedirect(request, response, requestURI);
             request.getSession().removeAttribute("requestURI");
         }
         else if (savedRequest != null) {

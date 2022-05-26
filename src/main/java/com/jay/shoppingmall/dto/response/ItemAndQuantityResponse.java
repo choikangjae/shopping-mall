@@ -13,8 +13,6 @@ public class ItemAndQuantityResponse {
 
     private String image;
 
-    private Integer quantity;
-
     private String name;
 
     private Integer zzim;
@@ -22,4 +20,6 @@ public class ItemAndQuantityResponse {
     private Integer price;
 
     private Integer salePrice;
+
+    private Integer quantity;
 }

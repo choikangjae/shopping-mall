@@ -16,8 +16,6 @@ import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.response.ItemResponse;
 import com.jay.shoppingmall.dto.response.MeDetailResponse;
 import com.jay.shoppingmall.dto.request.UserUpdateRequest;
-import com.jay.shoppingmall.dto.response.SearchResponse;
-import com.jay.shoppingmall.dto.response.ZzimResponse;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
