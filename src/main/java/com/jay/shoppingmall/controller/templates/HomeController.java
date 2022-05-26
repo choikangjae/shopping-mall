@@ -31,14 +31,4 @@ public class HomeController {
 
         return "home";
     }
-    @GetMapping(
-            value = "/index/{id}"
-//            produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
-    )
-    public String asdasdasda(@PathVariable(name = "id",required = false) Long id, Model model) {
-        ItemDetailResponse response = itemService.itemDetail(id);
-        model.addAttribute("response", response);
-
-        return "item/detail";
-    }
 }

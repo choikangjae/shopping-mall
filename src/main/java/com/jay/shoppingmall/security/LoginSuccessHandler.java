@@ -45,7 +45,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         String requestUsername = request.getParameter(username);
         clearAuthenticationExceptions(request);
         resultRedirectStrategy(request, response, authentication);
-//        response.sendRedirect(request.getHeader("referer"));
     }
 
 
@@ -59,6 +58,11 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         SavedRequest savedRequest = (SavedRequest) request.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
             redirectStrategy.sendRedirect(request, response, "/admin");
+        } else if (request.getSession().getAttribute("requestURI") != null) {
+            String requestURI = (String) request.getSession().getAttribute("requestURI");
+            System.out.println("requestURI: " + requestURI);
+            redirectStrategy.sendRedirect(request, response, (String) request.getSession().getAttribute("requestURI"));
+            request.getSession().removeAttribute("requestURI");
         }
         else if (savedRequest != null) {
             String targetUrl = savedRequest.getRedirectUrl();

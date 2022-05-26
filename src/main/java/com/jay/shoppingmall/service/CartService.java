@@ -55,18 +55,14 @@ public class CartService {
     public Integer addItemToCart(Long itemId, Integer quantity, User user) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
-        Image image = imageRepository.findByItemId(itemId);
         Cart cart = cartRepository.findByUserAndItem(user, item);
-//                .orElseThrow(()-> new ItemNotFoundException("Cart Not Found"));
 
         Integer addedQuantity = quantity;
-        //이미 장바구니에 상품이 존재하면
         if (cart != null) {
             throw new AlreadyExistsException("이미 상품이 장바구니에 존재합니다");
 //            addedQuantity = quantity + cart.getQuantity();
 //            cart.manipulateQuantity(addedQuantity);
 //            cartRepository.save(cart);
-        //상품이 장바구니에 존재하지 않으면
         } else {
             Cart newCart = Cart.builder()
                     .user(user)

@@ -32,11 +32,6 @@ public class CartApiController {
     }
     @PostMapping("/add")
     public ResponseEntity<?> addToCart(@Valid @RequestBody CartRequest request, @CurrentUser User user) {
-        System.out.println(user.getEmail());
-        if (user == null) {
-//            throw new UserNotFoundException("로그인이 필요한 서비스입니다");
-            return ResponseEntity.badRequest().body(null);
-        }
 
         cartService.addItemToCart(request.getId(), request.getQuantity(), user);
 
