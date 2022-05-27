@@ -21,4 +21,6 @@ public class ItemDetailResponse {
     private Integer stock;
 
     private Integer zzim;
+
+    private Boolean isZzimed;
 }

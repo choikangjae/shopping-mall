@@ -21,4 +21,6 @@ public class ItemResponse {
     private Integer salePrice;
 
     private Integer cartQuantity;
+
+    private Boolean isZzimed;
 }

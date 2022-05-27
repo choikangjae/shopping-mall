@@ -28,8 +28,8 @@ public class HomeController {
             value = "/",
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
     )
-    public String write(Model model, @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        List<ItemResponse> responses = itemService.itemAll(pageable);
+    public String write(Model model, @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @CurrentUser User user) {
+        List<ItemResponse> responses = itemService.itemAll(user, pageable);
         model.addAttribute("items", responses);
 
         return "home";

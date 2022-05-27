@@ -12,9 +12,14 @@ function addToWishList(itemId) {
 
                     const onSuccess = res => {
                         res.json()
-                        .then((data) =>
-                            document.getElementById('zzim' + itemId).textContent = data
-                            );
+                        .then((data) => {
+                            document.getElementById('zzim' + itemId).textContent = data.zzimPerItem
+                            if (data.isZzimed) {
+                                document.getElementById('heart' + itemId).classList.add('text-danger')
+                            } else {
+                                document.getElementById('heart' + itemId).classList.remove('text-danger');
+                            }
+                        });
                     }
                     const onFailure = res => {
                         if (confirm("로그인이 필요합니다")) {

@@ -3,6 +3,7 @@ package com.jay.shoppingmall.controller.api;
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.ItemZzimRequest;
+import com.jay.shoppingmall.dto.response.ZzimResponse;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class ItemApiController {
             throw new UserNotFoundException("로그인이 필요한 서비스입니다");
         }
 
-        Integer zzimedPerItem = itemService.itemZzim(request, user);
-        return ResponseEntity.ok(zzimedPerItem);
+        ZzimResponse zzimResponse = itemService.itemZzim(request, user);
+        return ResponseEntity.ok(zzimResponse);
     }
 }

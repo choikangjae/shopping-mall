@@ -60,9 +60,9 @@ public class QnaService {
 
     public QnaResponseWithPagination getQnaListByPaging(Long id, User user, Pageable pageable) {
         Page<Qna> qnas = qnaRepository.findAllByItemId(id, pageable);
-        if (qnas.isEmpty()) {
+//        if (qnas.isEmpty()) {
 //            throw new ItemNotFoundException("해당 상품이 존재하지 않습니다");
-        }
+//        }
         List<QnaResponse> qnaResponses = new ArrayList<>();
         for (Qna qna : qnas) {
             Boolean isQnaOwner = false;

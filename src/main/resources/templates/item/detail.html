@@ -38,7 +38,7 @@
                     <div class="col-6" sec:authorize="isAuthenticated()">
                         <button th:onclick="|addToWishList('${response.id}');|"
                                 class="btn btn-lg btn-outline-secondary">
-                            <i class="fas fa-heart"></i>
+                            <i th:classappend="${response.getIsZzimed == true ? 'text-danger':''}" th:id="'heart' + ${response.id}" class="fas fa-heart text-danger"></i>
                             <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${response.id}"
                                                                               th:text="${#objects.nullSafe(response.zzim,'0')}"></span></span>
                         </button>
@@ -510,7 +510,6 @@
             function pageRequest(requestPage) {
                 // addEventListener('click', (e) => {
                     // e.preventDefault();
-
                     let perPage = 5;
                     let itemId = '[[${response.id}]]';
 

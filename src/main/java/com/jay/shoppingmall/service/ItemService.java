@@ -10,6 +10,7 @@ import com.jay.shoppingmall.domain.zzim.ZzimRepository;
 import com.jay.shoppingmall.dto.request.ItemZzimRequest;
 import com.jay.shoppingmall.dto.response.ItemResponse;
 import com.jay.shoppingmall.dto.response.ItemDetailResponse;
+import com.jay.shoppingmall.dto.response.ZzimResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.RequiredArgsConstructor;
 
@@ -31,10 +32,9 @@ public class ItemService {
     private final FileHandler fileHandler;
     private final ZzimRepository zzimRepository;
 
-    public List<ItemResponse> itemAll(Pageable pageable) {
+    public List<ItemResponse> itemAll(User user, Pageable pageable) {
         List<ItemResponse> responses = new ArrayList<>();
 
-//        List<Item> items = itemRepository.findAll();
         Slice<Item> items = itemRepository.findAll(pageable);
         for (Item item : items) {
             Image image = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
@@ -52,6 +52,7 @@ public class ItemService {
 //                    .salePrice(item.getSalePrice())
                     .zzim(item.getZzim())
                     .image(stringImage)
+                    .isZzimed(isZzimed(user, item))
                     .build();
             responses.add(itemResponse);
         }
@@ -59,10 +60,11 @@ public class ItemService {
     }
 
 
-    public ItemDetailResponse itemDetail(Long id) {
+    public ItemDetailResponse itemDetail(User user, Long id) {
         Item item = itemRepository.findById(id).orElseThrow(
                 () -> new ItemNotFoundException("No Items Found"));
         Image image = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
+        boolean isZzimed = isZzimed(user, item);
 
         String stringImage = fileHandler.getStringImage(image);
 
@@ -74,7 +76,17 @@ public class ItemService {
                 .stock(item.getStock())
                 .image(stringImage)
                 .zzim(item.getZzim())
+                .isZzimed(isZzimed)
                 .build();
+    }
+
+    private boolean isZzimed(final User user, final Item item) {
+        Zzim zzim = zzimRepository.findByUserAndItem(user, item);
+        boolean isZzimed = false;
+        if (zzim != null) {
+            isZzimed = zzim.getIsZzimed();
+        }
+        return isZzimed;
     }
 
     public List<ItemResponse> searchItemsByKeyword(String keyword) {
@@ -97,7 +109,7 @@ public class ItemService {
 
     //아이템은 단 하나의 찜값만 가지고 그걸 더하고 빼고 할 것.
     //아이템은 찜값이 하나고 유저가 여러명.
-    public Integer itemZzim(final ItemZzimRequest request, final User user) {
+    public ZzimResponse itemZzim(final ItemZzimRequest request, final User user) {
         Item item = itemRepository.findById(request.getItemId()).orElseThrow(() -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
         Zzim zzim;
         if (zzimRepository.findByUserAndItem(user, item) == null) {
@@ -123,6 +135,9 @@ public class ItemService {
             }
         }
 
-        return item.getZzim();
+        return ZzimResponse.builder()
+                .zzimPerItem(item.getZzim())
+                .isZzimed(zzim.getIsZzimed())
+                .build();
     }
 }

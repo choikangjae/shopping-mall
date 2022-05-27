@@ -61,7 +61,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
                                         <button th:onclick="|addToWishList('${item.id}');|" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-heart"></i>
+                                            <i th:classappend="${item.getIsZzimed == true ? 'text-danger':''}" th:id="'heart' + ${item.id}" class="fas fa-heart"></i>
                                             <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${item.id}" th:text="${#objects.nullSafe(item.zzim,'0')}"></span></span>
                                         </button>
                                         <a href="/order/now" class="btn btn-sm btn-outline-secondary">

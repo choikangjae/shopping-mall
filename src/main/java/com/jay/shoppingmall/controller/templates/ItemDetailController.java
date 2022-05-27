@@ -35,7 +35,7 @@ public class ItemDetailController {
                                      @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
                                      Model model, @CurrentUser User user) {
 
-        ItemDetailResponse response = itemService.itemDetail(id);
+        ItemDetailResponse response = itemService.itemDetail(user, id);
         QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(id, user, pageable);
 
         model.addAttribute("response", response);
