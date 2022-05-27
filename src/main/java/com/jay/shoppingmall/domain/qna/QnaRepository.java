@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface QnaRepository extends JpaRepository<Qna, Long> {
 
-//    Page<Qna> findAllOrderByIdDesc(Pageable pageable);
+//    List<Qna> findAllOrderByIdDesc(Pageable pageable);
+    List<Qna> findAllByItemId(Long id);
+    Page<Qna> findAllByItemId(Long id, Pageable pageable);
 }

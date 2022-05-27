@@ -18,5 +18,4 @@ public class PasswordInterceptorRegister implements WebMvcConfigurer {
                 .addPathPatterns("/me/update")
         ;
     }
-
 }

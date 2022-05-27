@@ -16,7 +16,7 @@
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0" role="tablist">
                     <div sec:authorize="!isAuthenticated()">
-                        <li class="nav-item" data-toggle="tab" role="tab">
+                        <li class="nav-item" data-bs-toggle="tab" role="tab">
                             <a class="nav-link" th:href="@{/auth/login}" href="#">로그인</a>
                         </li>
                     </div>
@@ -24,21 +24,21 @@
                         <li class="nav-item"><a class="nav-link" th:href="@{/logout}" href="#">로그아웃</a></li>
                     </div>
                     <div sec:authorize="!isAuthenticated()">
-                        <li class="nav-item" data-toggle="tab" role="tab">
+                        <li class="nav-item" data-bs-toggle="tab" role="tab">
                             <a class="nav-link" th:href="@{/auth/signup}" href="#">회원가입</a>
                         </li>
                     </div>
-                    <li class="nav-item" data-toggle="tab" role="tab">
-                        <a id="my-page" class="nav-link" th:href="@{/me}" href="#">마이페이지</a>
+                    <li class="nav-item" data-bs-toggle="tab" role="tab">
+                        <a th:classappend="${#request.requestURI.startsWith('/me') ? 'active':''}" id="my-page" class="nav-link" th:href="@{/me}" href="#">마이페이지</a>
                     </li>
-                    <li class="nav-item" data-toggle="tab" role="tab">
-                        <a class="nav-link" th:href="@{/cart}" href="#">장바구니
+                    <li class="nav-item" data-bs-toggle="tab" role="tab">
+                        <a th:classappend="${#request.requestURI.startsWith('/cart') ? 'active':''}" class="nav-link" th:href="@{/cart}" href="#">장바구니
                             <span class="badge bg-primary rounded-pill"><span sec:authorize="isAuthenticated()" id="cartAmount">0</span></span>
                         </a>
                     </li>
                     <div sec:authorize="hasRole('SELLER')">
                         <li class="nav-item">
-                            <a class="nav-link" th:href="@{/seller}" href="#">판매자</a>
+                            <a th:classappend="${#request.requestURI.startsWith('/seller') ? 'active':''}" class="nav-link" th:href="@{/seller}" href="#">판매자</a>
                         </li>
                     </div>
                     <div sec:authorize="hasAnyRole('USER', 'SELLER')">
@@ -51,7 +51,7 @@
                     </div>
                     <div sec:authorize="hasRole('ADMIN')">
                         <li class="nav-item">
-                            <a class="nav-link" th:href="@{/admin}" href="#">어드민</a>
+                            <a th:classappend="${#request.requestURI.startsWith('/admin') ? 'active':''}" class="nav-link" th:href="@{/admin}" href="#">어드민</a>
                         </li>
                     </div>
                     <div sec:authorize="isAuthenticated()">

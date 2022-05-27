@@ -5,6 +5,8 @@ import com.jay.shoppingmall.domain.qna.QnaCategory;
 import com.jay.shoppingmall.domain.user.User;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -13,7 +15,7 @@ public class QnaResponse {
 
     private Long qnaId;
 
-    private QnaCategory qnaCategory;
+    private String qnaCategory;
 
     private Boolean isSecret;
 
@@ -21,11 +23,18 @@ public class QnaResponse {
 
     private Boolean isEmailNotification;
 
+    @Setter
     private String question;
 
+    @Setter
     private String answer;
 
     private String username;
 
     private Long itemId;
+
+    private LocalDateTime createdDate;
+
+    @Setter
+    private Boolean isQnaOwner;
 }
