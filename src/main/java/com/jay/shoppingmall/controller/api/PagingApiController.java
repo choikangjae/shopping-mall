@@ -28,7 +28,7 @@ public class PagingApiController {
     @PostMapping
     public ResponseEntity<?> pageApi(@Valid @RequestBody QnaPageRequest qnaPageRequest, @CurrentUser User user) {
 
-        Pageable pageable = PageRequest.of(qnaPageRequest.getRequestPage() - 1, qnaPageRequest.getPerPage(),Sort.by(Sort.Direction.DESC, "id"));
+        Pageable pageable = PageRequest.of(qnaPageRequest.getRequestPage() == 0 ? 0 : qnaPageRequest.getRequestPage() - 1, qnaPageRequest.getPerPage(),Sort.by(Sort.Direction.DESC, "id"));
 
         QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(qnaPageRequest.getItemId(), user, pageable);
 

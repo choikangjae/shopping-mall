@@ -8,10 +8,7 @@ import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.QnaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -31,5 +28,23 @@ public class QnaApiController {
         QnaResponse qnaResponse = qnaService.qnaWrite(qnaWriteRequest, user);
 
         return ResponseEntity.ok().body(qnaResponse);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> qnaDataForUpdate(@PathVariable Long id, @CurrentUser User user) {
+        if (user == null) {
+            throw new UserNotFoundException("잘못된 요청입니다");
+        }
+        QnaResponse qnaResponse = qnaService.qnaFindById(id);
+
+        return ResponseEntity.ok().body(qnaResponse);
+    }
+    @PostMapping("/delete/{id}")
+    public ResponseEntity<?> qnaDelete(@PathVariable Long id, @CurrentUser User user) {
+        if (user == null) {
+            throw new UserNotFoundException("잘못된 요청입니다");
+        }
+        qnaService.qnaDelete(id, user);
+
+        return ResponseEntity.ok().body(null);
     }
 }

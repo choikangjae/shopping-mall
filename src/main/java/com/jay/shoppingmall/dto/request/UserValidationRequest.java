@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import javax.persistence.Column;
-import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -15,7 +13,7 @@ import javax.validation.constraints.Pattern;
 @Getter
 @AllArgsConstructor
 @Builder
-public class SignupRequest {
+public class UserValidationRequest {
 
     @Email
     @NotBlank

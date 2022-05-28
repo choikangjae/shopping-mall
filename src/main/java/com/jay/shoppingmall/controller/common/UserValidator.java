@@ -1,7 +1,7 @@
 package com.jay.shoppingmall.controller.common;
 
 import com.jay.shoppingmall.domain.user.UserRepository;
-import com.jay.shoppingmall.dto.request.SignupRequest;
+import com.jay.shoppingmall.dto.request.UserValidationRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -16,18 +16,18 @@ public class UserValidator implements Validator {
 
     @Override
     public boolean supports(final Class<?> clazz) {
-        return SignupRequest.class.isAssignableFrom(clazz);
+        return UserValidationRequest.class.isAssignableFrom(clazz);
     }
 
     @Override
     public void validate(final Object target, final Errors errors) {
-        SignupRequest signupRequest = (SignupRequest) target;
+        UserValidationRequest userValidationRequest = (UserValidationRequest) target;
 
-        if (!ObjectUtils.isEmpty(signupRequest.getEmail()) && userRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
+        if (!ObjectUtils.isEmpty(userValidationRequest.getEmail()) && userRepository.findByEmail(userValidationRequest.getEmail()).isPresent()) {
             errors.rejectValue("email", "DuplicatedEmail", "이미 해당 이메일로 가입이 되어있습니다.");
         }
 
-        if (!signupRequest.getPassword().equals(signupRequest.getRepeatPassword())) {
+        if (!userValidationRequest.getPassword().equals(userValidationRequest.getRepeatPassword())) {
             errors.rejectValue("password", "PasswordNotMatch", "비밀번호가 같지 않습니다.");
             errors.rejectValue("repeatPassword", "PasswordNotMatch", "비밀번호가 같지 않습니다.");
         }

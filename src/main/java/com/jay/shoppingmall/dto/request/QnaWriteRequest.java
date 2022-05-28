@@ -19,6 +19,8 @@ public class QnaWriteRequest {
     @NotNull
     private Long itemId;
 
+    private Long qnaId;
+
     @NotNull
     private QnaCategory qnaCategory;
 

@@ -59,7 +59,7 @@ public class MeService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("잘못된 요청입니다"));
 
-        if (user.getAgree().getIsMandatoryAgree()) {
+        if (user.getAgree() != null && user.getAgree().getIsMandatoryAgree()) {
             throw new AgreeException("잘못된 요청입니다");
         }
         if (!agreeRequest.getIsMandatoryAgree()) {
@@ -150,6 +150,7 @@ public class MeService {
                     .image(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
                     .price(item.getPrice())
                     .salePrice(item.getSalePrice())
+                            .isZzimed(zzim.getIsZzimed())
                     .build());
         }
         return itemResponses;

@@ -45,4 +45,10 @@ public class Qna extends BaseTimeEntity {
     @JoinColumn(name = "item_id")
     private Item item;
 
+    public void QnaDirtyChecker(final QnaCategory qnaCategory, final Boolean isSecret, final Boolean isEmailNotification, final String question) {
+        this.qnaCategory = qnaCategory;
+        this.isSecret = isSecret;
+        this.isEmailNotification = isEmailNotification;
+        this.question = question;
+    }
 }

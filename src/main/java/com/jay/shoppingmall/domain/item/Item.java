@@ -40,6 +40,7 @@ public class Item extends BaseTimeEntity {
     @Setter
     private Integer zzim;
 
+    @Setter
     private Integer viewCount;
 
     //삭제.

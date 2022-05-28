@@ -1,10 +1,7 @@
 package com.jay.shoppingmall.domain.user;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
-import com.jay.shoppingmall.domain.user.model.Address;
-import com.jay.shoppingmall.domain.user.model.Agree;
-import com.jay.shoppingmall.domain.user.model.Name;
-import com.jay.shoppingmall.domain.user.model.PhoneNumber;
+import com.jay.shoppingmall.domain.user.model.*;
 import lombok.*;
 
 import javax.persistence.*;
@@ -43,6 +40,10 @@ public class User extends BaseTimeEntity {
 
     @Embedded
     private PhoneNumber phoneNumber;
+
+    public void updatePassword(final String password) {
+        this.password = password;
+    }
 
     @Builder
     public User(String email, String password, Agree agree, Role role) {

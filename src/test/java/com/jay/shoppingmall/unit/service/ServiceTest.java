@@ -2,11 +2,9 @@ package com.jay.shoppingmall.unit.service;
 
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
-import com.jay.shoppingmall.dto.request.SignupRequest;
+import com.jay.shoppingmall.dto.request.UserValidationRequest;
 import com.jay.shoppingmall.exception.exceptions.UserDuplicatedException;
-import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.AuthService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.BDDMockito.*;
@@ -16,14 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class ServiceTest {
@@ -36,7 +28,7 @@ class ServiceTest {
     @Spy
     PasswordEncoder passwordEncoder;
 
-    SignupRequest signupRequest;
+    UserValidationRequest userValidationRequest;
 
     //    @BeforeEach
 //    void setUp() throws Exception {
@@ -46,7 +38,7 @@ class ServiceTest {
     @Test
     void 회원가입_실패_이메일_형식미달() throws UserDuplicatedException{
         //mocking
-        signupRequest = SignupRequest.builder()
+        userValidationRequest = UserValidationRequest.builder()
                 .email("qwe")
                 .password("qwe213123123")
                 .build();
@@ -55,9 +47,9 @@ class ServiceTest {
                 UserDuplicatedException.class
         );
         //when
-        authService.signup(signupRequest);
+        authService.userRegistration(userValidationRequest);
         //then
-        assertThrows(UserDuplicatedException.class, () -> {authService.signup(signupRequest);
+        assertThrows(UserDuplicatedException.class, () -> {authService.userRegistration(userValidationRequest);
         });
     }
 
@@ -68,11 +60,11 @@ class ServiceTest {
         //mocking
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        SignupRequest signupRequest = SignupRequest.builder()
+        UserValidationRequest userValidationRequest = UserValidationRequest.builder()
                 .email("qwe@qwe")
                 .password("qwe213123123")
                 .build();
-        String encryptedPw = passwordEncoder.encode(signupRequest.getPassword());
+        String encryptedPw = passwordEncoder.encode(userValidationRequest.getPassword());
 
         given(userRepository.save(any(User.class))).willReturn(User.builder()
                 .email("qwe@qwe")
@@ -80,10 +72,10 @@ class ServiceTest {
                 .build());
 
         //when
-        User signupUser = authService.signup(signupRequest);
+        User signupUser = authService.userRegistration(userValidationRequest);
         //then
         assertThat(signupUser).isNotNull();
-        assertThat(signupUser.getEmail()).isEqualTo(signupRequest.getEmail());
-        assertThat(passwordEncoder.matches(signupRequest.getPassword(), signupUser.getPassword())).isTrue();
+        assertThat(signupUser.getEmail()).isEqualTo(userValidationRequest.getEmail());
+        assertThat(passwordEncoder.matches(userValidationRequest.getPassword(), signupUser.getPassword())).isTrue();
     }
 }

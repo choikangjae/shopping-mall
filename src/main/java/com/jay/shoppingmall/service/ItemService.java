@@ -62,7 +62,9 @@ public class ItemService {
 
     public ItemDetailResponse itemDetail(User user, Long id) {
         Item item = itemRepository.findById(id).orElseThrow(
-                () -> new ItemNotFoundException("No Items Found"));
+                () -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
+        item.setViewCount(item.getViewCount()+1);
+
         Image image = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
         boolean isZzimed = isZzimed(user, item);
 
@@ -107,8 +109,6 @@ public class ItemService {
         return itemResponses;
     }
 
-    //아이템은 단 하나의 찜값만 가지고 그걸 더하고 빼고 할 것.
-    //아이템은 찜값이 하나고 유저가 여러명.
     public ZzimResponse itemZzim(final ItemZzimRequest request, final User user) {
         Item item = itemRepository.findById(request.getItemId()).orElseThrow(() -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
         Zzim zzim;

@@ -10,6 +10,8 @@ import com.jay.shoppingmall.dto.request.QnaWriteRequest;
 import com.jay.shoppingmall.dto.response.QnaResponse;
 import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.QnaException;
+import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.lang.Boolean.valueOf;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -29,19 +33,50 @@ public class QnaService {
     private final QnaRepository qnaRepository;
     private final ItemRepository itemRepository;
 
+    public QnaResponse qnaFindById(final Long id) {
+        Qna qna = qnaRepository.findById(id)
+                .orElseThrow(() -> new QnaException("잘못된 요청입니다"));
+
+        if (qna.getIsAnswered() != null && qna.getIsAnswered()) {
+            throw new QnaException("답변된 질문은 수정하실 수 없습니다");
+        }
+
+        QnaResponse qnaResponse = QnaResponse.builder()
+                .email(qna.getUser().getEmail())
+                .answer(qna.getAnswer())
+                .isAnswered(qna.getIsAnswered())
+                .isSecret(qna.getIsSecret())
+                .itemId(qna.getItem().getId())
+                .qnaCategory(qna.getQnaCategory().value())
+                .qnaId(qna.getId())
+                .question(qna.getQuestion())
+                .isEmailNotification(qna.getIsEmailNotification())
+                .build();
+
+        return qnaResponse;
+    }
+
     public QnaResponse qnaWrite(final QnaWriteRequest qnaWriteRequest, User user) {
         Item item = itemRepository.findById(qnaWriteRequest.getItemId())
-                .orElseThrow(()-> new ItemNotFoundException("상품이 존재하지 않습니다"));
+                .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
 
-        Qna qna = Qna.builder()
-                .question(qnaWriteRequest.getQuestion())
-                .qnaCategory(qnaWriteRequest.getQnaCategory())
-                .isSecret(qnaWriteRequest.getIsSecret())
-                .isEmailNotification(qnaWriteRequest.getIsEmailNotification())
-                .user(user)
-                .item(item)
-                .build();
-        qnaRepository.save(qna);
+        Qna qna;
+
+        if (qnaWriteRequest.getQnaId() != null) {
+            qna = qnaRepository.findById(qnaWriteRequest.getQnaId())
+                    .orElseThrow(() -> new QnaException("QnA가 존재하지 않습니다"));
+            qna.QnaDirtyChecker(qnaWriteRequest.getQnaCategory(), qnaWriteRequest.getIsSecret(), qnaWriteRequest.getIsEmailNotification(), qnaWriteRequest.getQuestion());
+        } else {
+            qna = Qna.builder()
+                    .question(qnaWriteRequest.getQuestion())
+                    .qnaCategory(qnaWriteRequest.getQnaCategory())
+                    .isSecret(qnaWriteRequest.getIsSecret())
+                    .isEmailNotification(qnaWriteRequest.getIsEmailNotification())
+                    .user(user)
+                    .item(item)
+                    .build();
+            qnaRepository.save(qna);
+        }
 
         QnaResponse qnaResponse = QnaResponse.builder()
                 .username(qna.getUser().getUsername())
@@ -99,10 +134,20 @@ public class QnaService {
 
         QnaResponseWithPagination qnaResponseWithPagination = QnaResponseWithPagination.builder()
                 .totalElements(qnas.getTotalElements())
-                .totalPages(qnas.getTotalPages())
+                .totalPages(qnas.getTotalPages() == 0 ? 1 : qnas.getTotalPages())
                 .qnaResponses(qnaResponses)
                 .build();
 
         return qnaResponseWithPagination;
+    }
+
+    public void qnaDelete(final Long id, final User user) {
+
+        Qna qna = qnaRepository.findById(id)
+                .orElseThrow(() -> new QnaException("해당 QnA가 존재하지 않습니다"));
+        if (!Objects.equals(qna.getUser().getId(), user.getId())) {
+            throw new UserNotFoundException("유효하지 않은 접근입니다");
+        }
+        qnaRepository.delete(qna);
     }
 }

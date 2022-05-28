@@ -31,6 +31,8 @@ public class QnaResponse {
 
     private String username;
 
+    private String email;
+
     private Long itemId;
 
     private LocalDateTime createdDate;
