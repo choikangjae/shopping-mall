@@ -1,6 +1,8 @@
-package com.jay.shoppingmall.dto.response;
+package com.jay.shoppingmall.dto.response.item;
 
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Builder
@@ -10,7 +12,7 @@ public class ItemResponse {
 
     private Long id;
 
-    private String image;
+    private String mainImage;
 
     private String name;
 

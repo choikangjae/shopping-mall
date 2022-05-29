@@ -17,14 +17,15 @@ import java.util.List;
 @Builder
 @Table(name = "orders")
 public class Order extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-//    @OneToMany(mappedBy = "order")
-//    private List<Item> itemList = new ArrayList<>();
+    @OneToMany(mappedBy = "order")
+    private List<Item> itemList = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", referencedColumnName = "id", nullable = false)
     private Payment payment;
 

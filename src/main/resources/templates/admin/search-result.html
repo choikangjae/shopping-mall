@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>어드민</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+
+        <h1>회원 검색 결과</h1>
+
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">이메일</th>
+                <th scope="col">최근 주문 기록</th>
+                <th scope="col">구매 기록</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <th scope="row">1</th>
+                <td th:text="${user.email}">이메일</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

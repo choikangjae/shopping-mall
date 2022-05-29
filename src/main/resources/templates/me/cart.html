@@ -131,8 +131,6 @@
 <!--                                </div>-->
 <!--                            </div>-->
 <!--                        </div>-->
-                        <!--                    th:with="item = ${cart.item}"-->
-                        <!--                    th:each="cart : ${cartList}"-->
                         <div class="card mb-4">
                             <div class="card-body p-4 d-flex flex-row">
                                 <div class="col-1">
@@ -165,13 +163,6 @@
 
                                         </span> 원</h4>
                                 </div>
-
-
-                                <!--                            <div class="form-outline flex-fill">-->
-                                <!--                                <input type="text" id="form1" class="form-control form-control-lg" />-->
-                                <!--                                <label class="form-label" for="form1">Discound code</label>-->
-                                <!--                            </div>-->
-                                <!--                            <button type="button" class="btn btn-outline-warning btn-lg ms-3">Apply</button>-->
                             </div>
                         </div>
 
@@ -187,7 +178,6 @@
             </div>
         </section>
         <script>
-
             function deleteItem(id) {
 
                 const quantity = document.getElementById('quantity' + id).value;
@@ -215,7 +205,7 @@
                             document.getElementById('totalQuantity').textContent = data.totalQuantity.toLocaleString();
                             document.getElementById('cartAmount').textContent = data.totalQuantity.toLocaleString();
                             document.getElementById(id).remove();
-                            alert('선택 상품이 삭제되었습니다');
+                            alert('상품이 삭제되었습니다');
                         });
                 }
                 const onFailure = res => {

@@ -1,9 +1,10 @@
 package com.jay.shoppingmall.dto.response;
 
 import com.jay.shoppingmall.domain.payment.PaymentType;
+import com.jay.shoppingmall.dto.response.cart.CartOrderResponse;
+import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import lombok.*;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Getter

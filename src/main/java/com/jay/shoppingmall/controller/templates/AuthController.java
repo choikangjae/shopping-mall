@@ -62,6 +62,21 @@ public class AuthController {
         return "auth/signup";
     }
 
+    @PostMapping("/signup")
+    public String signupAction(@Valid UserValidationRequest userValidationRequest, BindingResult result) {
+        userValidator.validate(userValidationRequest, result);
+
+        if (result.hasErrors()) {
+            return "auth/signup";
+        }
+
+        authService.userRegistration(userValidationRequest);
+
+        sessionUpdateToken(userValidationRequest);
+
+        return "redirect:/";
+    }
+
     @GetMapping("/forgot-password")
     public String forgotPassword(PasswordResetRequest passwordResetRequest, @CurrentUser User user) {
         if (user != null) {
@@ -92,21 +107,6 @@ public class AuthController {
 
         authService.passwordUpdate(userValidationRequest);
         sessionUpdateToken(userValidationRequest);
-        return "redirect:/";
-    }
-
-    @PostMapping("/signup")
-    public String signupAction(@Valid UserValidationRequest userValidationRequest, BindingResult result) {
-        userValidator.validate(userValidationRequest, result);
-
-        if (result.hasErrors()) {
-            return "auth/signup";
-        }
-
-        authService.userRegistration(userValidationRequest);
-
-//        sessionUpdateToken(userValidationRequest);
-
         return "redirect:/";
     }
 

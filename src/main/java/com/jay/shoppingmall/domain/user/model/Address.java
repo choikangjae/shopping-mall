@@ -31,7 +31,7 @@ public class Address {
     }
 
     public String getFullAddress() {
-        if (extraAddress.isEmpty()) {
+        if (extraAddress == null) {
             return String.format("%s %s", this.address, this.detailAddress);
         }
         return String.format("%s %s %s", this.address, this.detailAddress, extraAddress);

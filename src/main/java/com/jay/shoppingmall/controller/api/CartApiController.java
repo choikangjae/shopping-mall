@@ -3,14 +3,12 @@ package com.jay.shoppingmall.controller.api;
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.CartRequest;
-import com.jay.shoppingmall.dto.response.CartResponse;
-import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
+import com.jay.shoppingmall.dto.response.cart.CartResponse;
 import com.jay.shoppingmall.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RequiredArgsConstructor

@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.domain.seller;
 
+import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import lombok.*;
 
 import javax.persistence.Entity;
@@ -17,6 +18,14 @@ public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    private Long userId;
+
+    private Boolean isSellerAgree;
+
+    private Boolean isLawAgree;
+
+    private Boolean isActivated;
 
     private Integer shippingFeePolicy;
 }

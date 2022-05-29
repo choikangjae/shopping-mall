@@ -1,6 +1,6 @@
-package com.jay.shoppingmall.dto.response;
+package com.jay.shoppingmall.dto.response.cart;
 
-import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import lombok.*;
 
 import java.util.List;

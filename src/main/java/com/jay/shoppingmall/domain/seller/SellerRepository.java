@@ -6,5 +6,6 @@ import java.util.Optional;
 
 public interface SellerRepository extends JpaRepository<Seller, Long> {
 
+    Optional<Seller> findByUserIdAndIsActivatedTrue(Long id);
 //    Optional<Seller> findByItemId(Long itemId);
 }

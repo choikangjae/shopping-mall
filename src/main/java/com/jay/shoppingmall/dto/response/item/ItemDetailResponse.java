@@ -1,6 +1,8 @@
-package com.jay.shoppingmall.dto.response;
+package com.jay.shoppingmall.dto.response.item;
 
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -14,7 +16,9 @@ public class ItemDetailResponse {
 
     private String description;
 
-    private String image;
+    private String mainImage;
+
+    private List<String> descriptionImages;
 
     private Integer price;
 

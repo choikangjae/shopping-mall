@@ -28,7 +28,7 @@ public class Item extends BaseTimeEntity {
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
             orphanRemoval = true
     )
-    private List<Image> imageList = new ArrayList<>();
+    private final List<Image> imageList = new ArrayList<>();
 
     private Integer price;
 
@@ -40,7 +40,6 @@ public class Item extends BaseTimeEntity {
     @Setter
     private Integer zzim;
 
-    @Setter
     private Integer viewCount;
 
     //삭제.
@@ -49,25 +48,35 @@ public class Item extends BaseTimeEntity {
     //임시저장.
     private boolean isTemporary;
 
+    //OneToMany를 위한 참조
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+//    @ManyToOne
+//    @JoinColumn(name = "user_id")
+//    private User user;
+
+    public void viewCountUp() {
+        if (this.getViewCount() == null) {
+            this.viewCount = 1;
+        } else {
+            this.viewCount += 1;
+        }
+    }
 
     @Builder
-    public Item(String name, String description, Integer price, Integer salePrice, Integer stock) {
+    public Item(String name, String description, Integer price, Integer salePrice, Integer stock, Seller seller) {
         this.name = name;
         this.description = description;
         this.price = price;
         this.salePrice = salePrice;
         this.stock = stock;
+        this.seller = seller;
     }
 
     //Image 테이블에 item_id 필드값 할당.

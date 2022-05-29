@@ -46,16 +46,15 @@
                     <div class="col" th:each="item : ${items}">
                         <div class="card shadow-sm">
                             <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none">
-                                <img class="bd-placeholder-img card-img-top" width="100%" height="225" th:src="'data:image/jpeg;base64,'+${item.image}"
+                                <img class="bd-placeholder-img card-img-top" width="100%" height="225" th:src="'data:image/jpeg;base64,'+${item.mainImage}"
                                       alt="..."/>
                             </a>
 <!--                            <input type="hidden" id = "itemId" th:value="${item.id}">-->
 
                             <div class="card-body">
                                 <p class="card-text">
-                                    <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none">
+                                    <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none"></a>
                                         <h5 class="fw-bolder" th:text="${item.name}">상품 이름</h5>
-                                    </a>
                                 </p>
                                 <h5 class="fw-bolder" th:text="${#numbers.formatDecimal(item.price, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">상품 가격</h5>
                                 <div class="d-flex justify-content-between align-items-center">

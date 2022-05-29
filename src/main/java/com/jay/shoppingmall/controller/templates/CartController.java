@@ -1,26 +1,16 @@
 package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
-import com.jay.shoppingmall.domain.cart.Cart;
-import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.CartRequest;
-import com.jay.shoppingmall.dto.response.ItemAndQuantityResponse;
+import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
 import com.jay.shoppingmall.service.CartService;
 import com.jay.shoppingmall.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Controller

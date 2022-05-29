@@ -36,24 +36,6 @@
                 전자금융거래 이용약관 <strong>(필수)</strong>
             </label>
         </div>
-
-        <div th:if="${!user.getAgree().getIsMandatoryAgree()}">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="isMandatoryCheck" required>
-                <label class="form-check-label" for="isMandatoryCheck">
-                    개인정보 수집 및 이용 동의 <strong>(필수)</strong>
-                </label>
-            </div>
-        </div>
-
-        <div th:if="${!user.getAgree().getIsMarketingAgree()}">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="isMarketingCheck">
-                <label class="form-check-label" for="isMarketingCheck">
-                    광고 및 이벤트 목적의 개인정보 수집 및 이용 동의 (선택)
-                </label>
-            </div>
-        </div>
         <br>
         <button id="agree-button" class="btn btn-primary">약관 동의하고 가입하기</button>
     </div>
@@ -66,16 +48,13 @@
 
                     let isSellerAgree = document.getElementById('isSellerCheck').checked;
                     let isLawAgree = document.getElementById('isLawCheck').checked;
-                    let isMandatoryAgree = document.getElementById('isMandatoryCheck').checked;
-                    let isMarketingAgree = document.getElementById('isMarketingCheck').checked;
 
                     let agreeData = {
                         method: 'POST',
                         body: JSON.stringify({
                             isSellerAgree,
                             isLawAgree,
-                            isMandatoryAgree,
-                            isMarketingAgree
+
                         }),
                         headers: {
                             'Content-Type': 'application/json'
@@ -83,13 +62,14 @@
                     };
 
                     const onSuccess = res => {
-                        window.location.replace('http://localhost:8080/seller')
+                        alert('판매자 전환이 완료되었습니다. 다시 로그인해주세요')
+                        window.location.replace('http://localhost:8080/')
                     }
                     const onFailure = res => {
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/privacy/agree`, agreeData)
+                    fetch(`/api/v1/seller/agree`, agreeData)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

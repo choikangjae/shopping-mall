@@ -5,7 +5,8 @@ import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.request.PasswordCheckRequest;
-import com.jay.shoppingmall.dto.response.ItemResponse;
+import com.jay.shoppingmall.dto.request.PasswordRequest;
+import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.MeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -37,9 +38,9 @@ public class MeController {
         if (user == null) {
             return "redirect:/";
         }
-        if (user.getAddress() != null || user.getName() != null || user.getPhoneNumber() != null) {
-            return "redirect:/";
-        }
+//        if (user.getAddress() != null || user.getName() != null || user.getPhoneNumber() != null) {
+//            return "redirect:/";
+//        }
         model.addAttribute("user", user);
         return "me/agreement";
     }
@@ -51,25 +52,24 @@ public class MeController {
     }
 
     @GetMapping("/reconfirm")
-    public String reConfirm(PasswordCheckRequest passwordCheckRequest, @CurrentUser User user, Model model) {
+    public String reConfirm(PasswordRequest passwordRequest, @CurrentUser User user, Model model) {
         model.addAttribute("user", user);
         return "me/reconfirm";
     }
 
     @PostMapping("/reconfirm")
-    public String reConfirmAction(@Valid PasswordCheckRequest passwordCheckRequest, BindingResult result, @CurrentUser User user, HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
-
-        if (passwordCheckRequest.getPassword().isEmpty()) {
+    public String reConfirmAction(@Valid PasswordRequest passwordRequest, BindingResult result, @CurrentUser User user, HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
+        if (passwordRequest.getPassword() == null) {
             result.rejectValue("password", "NO_PASSWORD_FOUND", "비밀번호를 입력해주세요.");
         }
-        if (!meService.passwordCheck(passwordCheckRequest.getPassword(), user)) {
+        if (!meService.passwordCheck(passwordRequest.getPassword(), user)) {
             result.rejectValue("password", "PASSWORD_MISMATCH", "비밀번호가 일치하지 않습니다.");
         }
         if (result.hasErrors()) {
             model.addAttribute("user", user);
             return "me/reconfirm";
         }
-        request.getSession().setAttribute("password", passwordCheckRequest.getPassword());
+        request.getSession().setAttribute("password", passwordRequest.getPassword());
         return "redirect:/me/update";
     }
     @GetMapping("/zzim")

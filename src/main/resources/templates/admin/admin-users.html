@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>어드민</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+
+        <h1>회원관리</h1>
+
+        <form th:action="@{/admin/search}" class="d-flex" role="search" method="get">
+            <input name="q" th:value="${result}" id="keywordQuery" class="form-control me-2" type="search"
+                   placeholder="회원 검색" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit"><i
+                    class="fas fa-search"></i></button>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">이메일</th>
+                    <th scope="col">권한</th>
+                    <th scope="col">주소</th>
+                    <th scope="col">이름</th>
+                    <th scope="col">전화번호</th>
+                    <th scope="col">필수 동의</th>
+                    <th scope="col">마케팅 동의</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <th scope="row">1</th>
+                    <td th:text="${user.email}">이메일</td>
+                    <td th:text="${user.role}">권한</td>
+                    <td th:text="${user.fullAddress}">이메일</td>
+                    <td th:text="${user.fullName}">이름</td>
+                    <td th:text="${user.fullPhoneNumber}">전화번호</td>
+                    <td th:text="${user.isMandatoryAgree}">필수 동의</td>
+                    <td th:text="${user.isMarketingAgree}">마케팅 동의</td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

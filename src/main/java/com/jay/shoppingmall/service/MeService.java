@@ -13,7 +13,7 @@ import com.jay.shoppingmall.domain.zzim.Zzim;
 import com.jay.shoppingmall.domain.zzim.ZzimRepository;
 import com.jay.shoppingmall.dto.request.AgreeRequest;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
-import com.jay.shoppingmall.dto.response.ItemResponse;
+import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.MeDetailResponse;
 import com.jay.shoppingmall.dto.request.UserUpdateRequest;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
@@ -41,7 +41,7 @@ public class MeService {
     private final FileHandler fileHandler;
     private final ImageRepository imageRepository;
 
-    public boolean passwordCheck(String password, User user) {
+    public Boolean passwordCheck(String password, User user) {
 
         return passwordEncoder.matches(password, user.getPassword());
     }
@@ -55,13 +55,13 @@ public class MeService {
                 .build();
     }
 
-    public boolean agreeCheck(final AgreeRequest agreeRequest, final Long id) {
+    public Boolean agreeCheck(final AgreeRequest agreeRequest, final Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("잘못된 요청입니다"));
 
-        if (user.getAgree() != null && user.getAgree().getIsMandatoryAgree()) {
-            throw new AgreeException("잘못된 요청입니다");
-        }
+//        if (user.getAgree() != null && user.getAgree().getIsMandatoryAgree()) {
+//            throw new AgreeException("잘못된 요청입니다");
+//        }
         if (!agreeRequest.getIsMandatoryAgree()) {
             throw new AgreeException("필수 항목을 반드시 동의하셔야 합니다");
         }
@@ -147,7 +147,7 @@ public class MeService {
                     .id(item.getId())
                     .name(item.getName())
                     .zzim(item.getZzim())
-                    .image(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
                     .price(item.getPrice())
                     .salePrice(item.getSalePrice())
                             .isZzimed(zzim.getIsZzimed())

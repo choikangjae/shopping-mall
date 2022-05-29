@@ -13,9 +13,7 @@
         </div>
         <!--본문 들어갈 곳-->
         <div class="container position-relative">
-            <!--            <form class="user" method="post" th:action="@{/auth/signup}" th:object="${signupRequest}">-->
-
-            <form method="post" th:action="@{/me/reconfirm}" th:object="${passwordCheckRequest}">
+            <form method="post" th:action="@{/me/reconfirm}" th:object="${passwordRequest}">
                 <div class="col-6">
                     <label for="email" class="form-label">이메일</label>
                     <input type="email" class="form-control" id="email" th:value="${user?.getEmail()}" disabled>

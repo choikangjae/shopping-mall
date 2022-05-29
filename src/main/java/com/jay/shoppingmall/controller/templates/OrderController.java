@@ -3,10 +3,9 @@ package com.jay.shoppingmall.controller.templates;
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
-import com.jay.shoppingmall.dto.response.CartOrderResponse;
+import com.jay.shoppingmall.dto.response.cart.CartOrderResponse;
 import com.jay.shoppingmall.dto.response.OrderResultResponse;
 import com.jay.shoppingmall.service.OrderService;
-import com.jay.shoppingmall.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/order")
@@ -31,6 +29,11 @@ public class OrderController {
         if (user == null) {
             return "redirect:/auth/login";
         }
+        CartOrderResponse cartOrderResponse = orderService.orderProcess(user);
+
+        model.addAttribute("user", user);
+        model.addAttribute("order", cartOrderResponse);
+
         return "/order/now";
     }
     @GetMapping("/process")

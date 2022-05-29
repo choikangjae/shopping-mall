@@ -5,11 +5,12 @@ import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.zzim.Zzim;
 import com.jay.shoppingmall.domain.zzim.ZzimRepository;
 import com.jay.shoppingmall.dto.request.ItemZzimRequest;
-import com.jay.shoppingmall.dto.response.ItemResponse;
-import com.jay.shoppingmall.dto.response.ItemDetailResponse;
+import com.jay.shoppingmall.dto.response.item.ItemResponse;
+import com.jay.shoppingmall.dto.response.item.ItemDetailResponse;
 import com.jay.shoppingmall.dto.response.ZzimResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,19 +32,15 @@ public class ItemService {
     private final ImageRepository imageRepository;
     private final FileHandler fileHandler;
     private final ZzimRepository zzimRepository;
+    private final ZzimService zzimService;
 
     public List<ItemResponse> itemAll(User user, Pageable pageable) {
         List<ItemResponse> responses = new ArrayList<>();
-
         Slice<Item> items = itemRepository.findAll(pageable);
+
         for (Item item : items) {
-            Image image = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
-
-            if (image == null) {
-                continue;
-            }
-
-            String stringImage = fileHandler.getStringImage(image);
+            Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
+            String stringMainImage = fileHandler.getStringImage(mainImage);
 
             ItemResponse itemResponse = ItemResponse.builder()
                     .id(item.getId())
@@ -51,8 +48,8 @@ public class ItemService {
                     .price(item.getPrice())
 //                    .salePrice(item.getSalePrice())
                     .zzim(item.getZzim())
-                    .image(stringImage)
-                    .isZzimed(isZzimed(user, item))
+                    .mainImage(stringMainImage)
+                    .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
                     .build();
             responses.add(itemResponse);
         }
@@ -63,12 +60,16 @@ public class ItemService {
     public ItemDetailResponse itemDetail(User user, Long id) {
         Item item = itemRepository.findById(id).orElseThrow(
                 () -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
-        item.setViewCount(item.getViewCount()+1);
 
-        Image image = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
-        boolean isZzimed = isZzimed(user, item);
+        List<String> stringDescriptionImages = new ArrayList<>();
+        List<Image> descriptionImages = imageRepository.findAllByItemId(item.getId());
+        for (Image image : descriptionImages) {
+            stringDescriptionImages.add(fileHandler.getStringImage(image));
+        }
 
-        String stringImage = fileHandler.getStringImage(image);
+        item.viewCountUp();
+        Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
+        String stringMainImage = fileHandler.getStringImage(mainImage);
 
         return ItemDetailResponse.builder()
                 .id(item.getId())
@@ -76,19 +77,11 @@ public class ItemService {
                 .description(item.getDescription())
                 .price(item.getPrice())
                 .stock(item.getStock())
-                .image(stringImage)
+                .mainImage(stringMainImage)
+                .descriptionImages(stringDescriptionImages)
                 .zzim(item.getZzim())
-                .isZzimed(isZzimed)
+                .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
                 .build();
-    }
-
-    private boolean isZzimed(final User user, final Item item) {
-        Zzim zzim = zzimRepository.findByUserAndItem(user, item);
-        boolean isZzimed = false;
-        if (zzim != null) {
-            isZzimed = zzim.getIsZzimed();
-        }
-        return isZzimed;
     }
 
     public List<ItemResponse> searchItemsByKeyword(String keyword) {
@@ -101,7 +94,7 @@ public class ItemService {
                     .id(item.getId())
                     .name(item.getName())
                     .zzim(item.getZzim())
-                    .image(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
                     .price(item.getPrice())
                     .salePrice(item.getSalePrice())
                     .build());
@@ -112,7 +105,7 @@ public class ItemService {
     public ZzimResponse itemZzim(final ItemZzimRequest request, final User user) {
         Item item = itemRepository.findById(request.getItemId()).orElseThrow(() -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
         Zzim zzim;
-        if (zzimRepository.findByUserAndItem(user, item) == null) {
+        if (zzimRepository.findByUserIdAndItemId(user.getId(), item.getId()) == null) {
             zzim = Zzim.builder()
                     .user(user)
                     .item(item)
@@ -120,7 +113,7 @@ public class ItemService {
                     .build();
             zzimRepository.saveAndFlush(zzim);
         } else {
-            zzim = zzimRepository.findByUserAndItem(user, item);
+            zzim = zzimRepository.findByUserIdAndItemId(user.getId(), item.getId());
         }
 
         if (!zzim.getIsZzimed() || zzim.getIsZzimed() == null) {

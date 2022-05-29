@@ -20,7 +20,7 @@ public class PasswordInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {
 
-        System.out.println("pre handle" + request.getSession().getAttribute("password"));
+//        System.out.println("pre handle" + request.getSession().getAttribute("password"));
         if (request.getSession().getAttribute("password") == null) {
             response.sendRedirect("/me/reconfirm");
         }
@@ -30,6 +30,6 @@ public class PasswordInterceptor implements HandlerInterceptor {
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
                                 @Nullable Exception ex) throws Exception {
         request.getSession().removeAttribute("password");
-        System.out.println("after completion" + request.getSession().getAttribute("password"));
+//        System.out.println("after completion" + request.getSession().getAttribute("password"));
     }
 }

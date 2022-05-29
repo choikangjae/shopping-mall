@@ -3,10 +3,7 @@ package com.jay.shoppingmall.domain.image;
 
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.review.Review;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -28,15 +25,16 @@ public class Image {
 
     private Long fileSize;
 
+    @Setter
     private Boolean isMainImage;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
 
-    @ManyToOne
-    @JoinColumn(name = "review_id")
-    private Review review;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "review_id")
+//    private Review review;
 
     @Builder
     public Image(String originalFileName, String filePath, Long fileSize, boolean isMainImage) {

@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
@@ -21,9 +22,16 @@ public class WriteItemRequest {
     @NotBlank
     private String description;
 
+//    private Map<String, List<String>> options;
+
+    private String option1;
+
+    private String option2;
+
     private List<MultipartFile> image;
 
-    private Image mainImage;
+    @NotNull
+    private MultipartFile mainImage;
 
     @NotNull
     private Integer price;
@@ -32,14 +40,4 @@ public class WriteItemRequest {
 
     @NotNull
     private Integer stock;
-
-    public Item toEntity() {
-        return Item.builder()
-                .name(name)
-                .description(description)
-                .price(price)
-                .salePrice(salePrice)
-                .stock(stock)
-                .build();
-    }
 }

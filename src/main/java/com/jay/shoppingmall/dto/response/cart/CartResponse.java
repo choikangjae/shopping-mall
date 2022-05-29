@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.dto.response;
+package com.jay.shoppingmall.dto.response.cart;
 
 import com.jay.shoppingmall.domain.item.Item;
 import lombok.*;

@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface ZzimRepository extends JpaRepository<Zzim, Long> {
     Optional<List<Zzim>> findByUser(User user);
 
-    Zzim findByUserAndItem(User user, Item item);
+    Zzim findByUserIdAndItemId(Long userId, Long itemId);
 
     void deleteByItemId(Long id);
 }

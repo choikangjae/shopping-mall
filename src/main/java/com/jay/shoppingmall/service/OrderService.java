@@ -13,13 +13,11 @@ import com.jay.shoppingmall.domain.payment.PaymentRepository;
 import com.jay.shoppingmall.domain.payment.PaymentType;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
-import com.jay.shoppingmall.dto.response.CartOrderResponse;
-import com.jay.shoppingmall.dto.response.CartResponse;
-import com.jay.shoppingmall.dto.response.ItemResponse;
+import com.jay.shoppingmall.dto.response.cart.CartOrderResponse;
+import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.OrderResultResponse;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
-import com.jay.shoppingmall.exception.exceptions.PaymentFailedException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,7 +59,7 @@ public class OrderService {
                     .name(item.getName())
                     .zzim(item.getZzim())
                     .cartQuantity(cart.getQuantity())
-                    .image(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
                     .price(item.getPrice())
                     .salePrice(item.getSalePrice())
                     .build());

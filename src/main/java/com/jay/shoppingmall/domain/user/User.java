@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -52,6 +53,10 @@ public class User extends BaseTimeEntity {
         this.role = role;
     }
 
+    public void updateUserRole(final Role role) {
+        this.role = role;
+    }
+
     public void userUpdate(final Address address, final Name name, final Agree agree, final PhoneNumber phoneNumber) {
         this.address = address;
         this.name = name;
@@ -63,4 +68,21 @@ public class User extends BaseTimeEntity {
         int indexOfAt = email.indexOf("@");
         return email.substring(0, indexOfAt);
     }
+
+    //모든 필드값이 null일때 Embeddable 객체도 null이 되는 것을 막기 위함.
+//    public Agree getAgree() {
+//        return this.agree == null ? Agree.builder().build() : this.agree;
+//    }
+//
+//    public Address getAddress() {
+//        return this.address == null ? Address.builder().build() : this.address;
+//    }
+//
+//    public Name getName() {
+//        return this.name == null ? Name.builder().build() : this.name;
+//    }
+//
+//    public PhoneNumber getPhoneNumber() {
+//        return this.phoneNumber == null ? PhoneNumber.builder().build() : this.phoneNumber;
+//    }
 }

@@ -41,7 +41,7 @@
                             <a th:classappend="${#request.requestURI.startsWith('/seller') ? 'active':''}" class="nav-link" th:href="@{/seller}" href="#">판매자</a>
                         </li>
                     </div>
-                    <div sec:authorize="hasAnyRole('USER', 'SELLER')">
+                    <div sec:authorize="hasRole('USER')">
                         <li class="nav-item">
                             <a class="nav-link" th:href="@{/seller/start}" href="#">판매자 가입</a>
                         </li>
