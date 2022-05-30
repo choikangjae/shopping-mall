@@ -34,26 +34,35 @@ public class ItemService {
     private final ZzimRepository zzimRepository;
     private final ZzimService zzimService;
 
-    public List<ItemResponse> itemAll(User user, Pageable pageable) {
-        List<ItemResponse> responses = new ArrayList<>();
-        Slice<Item> items = itemRepository.findAll(pageable);
-
-        for (Item item : items) {
-            Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
-            String stringMainImage = fileHandler.getStringImage(mainImage);
-
-            ItemResponse itemResponse = ItemResponse.builder()
-                    .id(item.getId())
-                    .name(item.getName())
-                    .price(item.getPrice())
-//                    .salePrice(item.getSalePrice())
-                    .zzim(item.getZzim())
-                    .mainImage(stringMainImage)
-                    .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
-                    .build();
-            responses.add(itemResponse);
-        }
+    public Slice<ItemResponse> itemAll(User user, Pageable pageable) {
+//        List<ItemResponse> responses = new ArrayList<>();
+        Slice<ItemResponse> responses = itemRepository.findAll(pageable)
+                .map(item -> ItemResponse.builder()
+                        .id(item.getId())
+                        .name(item.getName())
+                        .price(item.getPrice())
+//                          .salePrice(item.getSalePrice())
+                        .zzim(item.getZzim())
+                        .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+                        .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
+                        .build());
         return responses;
+//        for (Item item : items) {
+//            Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
+//            String stringMainImage = fileHandler.getStringImage(mainImage);
+//
+//            ItemResponse itemResponse = ItemResponse.builder()
+//                    .id(item.getId())
+//                    .name(item.getName())
+//                    .price(item.getPrice())
+////                    .salePrice(item.getSalePrice())
+//                    .zzim(item.getZzim())
+//                    .mainImage(stringMainImage)
+//                    .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
+//                    .build();
+//            responses.add(itemResponse);
+//        }
+//        return responses;
     }
 
 

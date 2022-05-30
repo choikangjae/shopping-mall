@@ -19,12 +19,9 @@ import java.util.List;
 public class CartController {
 
     private final CartService cartService;
-    private final UserService userService;
 
     @GetMapping
-    public String showCart(Model model,
-                           @CurrentUser User user) {
-
+    public String showCart(Model model, @CurrentUser User user) {
         if (user == null) {
             return "/auth/login";
         }

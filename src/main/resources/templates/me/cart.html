@@ -169,7 +169,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <a type="button" th:href="@{/order/process}"
-                                    class="btn btn-warning btn-block btn-lg">주문하기</a>
+                                    class="btn btn-warning btn-block btn-lg" id="order">주문하기</a>
                             </div>
                         </div>
 
@@ -178,6 +178,12 @@
             </div>
         </section>
         <script>
+            document.getElementById('order').addEventListener('click', (e) => {
+                if (document.getElementById('totalQuantity').textContent == 0) {
+                    alert('장바구니가 비어있습니다')
+                    e.preventDefault();
+                }
+            })
             function deleteItem(id) {
 
                 const quantity = document.getElementById('quantity' + id).value;

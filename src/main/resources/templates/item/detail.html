@@ -266,7 +266,7 @@
             </div>
 
             <div class="card" style="width: 30rem;" th:each="qna : ${qnaResponseWithPagination.qnaResponses}">
-                <div class="card-body">
+                <div class="card-body" th:id="'qnaCardBody' + ${qna.qnaId}">
                     <div class="row" data-bs-toggle="collapse" role="button"
                         th:data-bs-target="'#answer' + ${qna.qnaId}" aria-expanded="false"
                         th:aria-controls="'answer' + ${qna.qnaId}">
@@ -646,7 +646,7 @@
                         res.text()
                             .then((json) => {
                                 alert('삭제되었습니다');
-                                //엘레멘트 삭제
+                                document.getElementById('qnaCardBody' + qnaId).remove();
                             })
                     }
                     const onFailure = res => {

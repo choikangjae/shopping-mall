@@ -38,7 +38,13 @@ public class OrderController {
     }
     @GetMapping("/process")
     public String orderProcess(@CurrentUser User user, Model model) {
-        CartOrderResponse cartOrderResponse = orderService.orderProcess(user);
+        CartOrderResponse cartOrderResponse = null;
+        try {
+            cartOrderResponse = orderService.orderProcess(user);
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/cart";
+        }
 
         model.addAttribute("user", user);
         model.addAttribute("order", cartOrderResponse);
