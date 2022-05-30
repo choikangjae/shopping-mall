@@ -12,6 +12,7 @@ import com.jay.shoppingmall.dto.response.cart.CartResponse;
 import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
 import com.jay.shoppingmall.exception.exceptions.AlreadyExistsException;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
+import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

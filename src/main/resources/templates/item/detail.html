@@ -133,7 +133,7 @@
 
             <div class="col-md-8" th:each="descriptionImage : ${response.descriptionImages}">
                 <img class="bd-placeholder-img card-img-top" width="100%" height="500"
-                     th:src="'data:image/jpeg;base64,'+${descriptionImage}" alt="..." />
+                    th:src="'data:image/jpeg;base64,'+${descriptionImage}" alt="..." />
             </div>
 
             <hr>
@@ -286,12 +286,12 @@
                             th:text="${#temporals.format(qna.createdDate, 'yyyy-MM-dd HH:mm')}" id="date">작성일
                         </h6>
                         <span class="col-3" th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
-                            <div onclick="event.stopPropagation();">
+<!--                            <div onclick="event.stopPropagation();">-->
                                 <a th:onclick="|qnaUpdate('${qna.qnaId}');|" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#qnaWriteFormToggle" aria-expanded="false"
                                     aria-controls="qnaWriteFormToggle">수정</a>
                                 <a th:onclick="|qnaDelete('${qna.qnaId}');|" type="button">삭제</a>
-                            </div>
+<!--                            </div>-->
                         </span>
                     </div>
 
@@ -608,7 +608,7 @@
                             document.getElementById('isEmailNotification').checked = json.isEmailNotification
                             document.getElementById('qnaWrite').innerText = '수정'
                             document.getElementById('qnaId').value = qnaId;
-                            data-bs-toggle
+                            data - bs - toggle
                         })
                 }
                 const onFailure = res => {
@@ -630,53 +630,50 @@
                         console.log(err.message);
                     });
             }
-            
+
             function qnaDelete(qnaId) {
                 if (confirm('정말 삭제하시겠습니까?')) {
 
-                let data = {
-                    method: 'POST'
-                };
-                const onSuccess = res => {
-                    res.json()
-                        .then((json) => {
-                            alert('삭제되었습니다');
-                        })
-                }
-                const onFailure = res => {
-                    return res.json()
-                        .then(json => {
-                            alert(json.errors);
-                        })
-                }
+                    let data = {
+                        method: 'POST'
+                    };
+                    const onSuccess = res => {
+                        res.json()
+                            .then((json) => {
+                                alert('삭제되었습니다');
+                            })
+                    }
+                    const onFailure = res => {
+                        return res.json()
+                            .then(json => {
+                                alert(json.errors);
+                            })
+                    }
 
-                fetch(`/api/v1/qna/delete/` + qnaId, data)
-                    .then(res => {
-                        if (!res.ok) {
-                            throw res;
-                        }
-                        return res
-                    })
-                    .then(onSuccess, onFailure)
-                    .catch(err => {
-                        console.log(err.message);
-                    });
+                    fetch(`/api/v1/qna/delete/` + qnaId, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            console.log(err.message);
+                        });
                 }
             }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+            function connect(userId) {
+                let socket = new WebSocket('/ws-connection');
+                stompClient = Stomp.over(socket);
+                stompClient.connect({}, function () {
+                    setConnected(true);
+                    stompClient.subscribe('/subscribe/' + userId, function (greeting) {
+                        console.log(greeting.body);
+                    })
+                })
+            }
 
 
         </script>

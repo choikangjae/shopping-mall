@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.service;
+package com.jay.shoppingmall.service.handler;
 
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;

@@ -1,10 +1,8 @@
 package com.jay.shoppingmall.controller.common;
 
-import com.jay.shoppingmall.service.FileHandler;
+import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 @RequiredArgsConstructor

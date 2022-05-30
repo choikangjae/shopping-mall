@@ -61,15 +61,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .and()
                 .authorizeRequests()
 
-                .antMatchers("/api/v1/pagination", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
+//                .antMatchers("/webjars/**", "script.js").permitAll()
+
+                .antMatchers("/index", "/api/v1/pagination", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
                 .antMatchers("/auth/new-password", "/auth/reset**", "/auth/login**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/auth/forgot-password").permitAll()
                 .antMatchers("/item/details/null", "/seller/null", "/admin/null", "/auth/null", "/null").permitAll()
                 .antMatchers("/swagger-ui.html#", "/search**",  "/", "/item/**","/item/details/**").permitAll()
 
                 .antMatchers("/me/**", "/seller/start", "/seller/agree").hasRole("USER")
                 .antMatchers("/seller/**").hasRole("SELLER")
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
+                .antMatchers( "/admin/**").hasRole("ADMIN")
+//                .anyRequest().authenticated()
+                .anyRequest().permitAll()
                 .expressionHandler(expressionHandler())
                 .and()
                 .formLogin()
