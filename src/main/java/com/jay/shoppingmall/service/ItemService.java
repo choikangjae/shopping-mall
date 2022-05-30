@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -94,21 +95,41 @@ public class ItemService {
     }
 
     public List<ItemResponse> searchItemsByKeyword(String keyword) {
-        List<Item> items = itemRepository.findByNameContaining(keyword)
+
+        return itemRepository.findByNameContaining(keyword)
+                .map(items -> items.stream().map(item -> ItemResponse.builder()
+                        .id(item.getId())
+                        .name(item.getName())
+                        .zzim(item.getZzim())
+                        .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+                        .price(item.getPrice())
+                        .salePrice(item.getSalePrice())
+                        .build()).collect(Collectors.toList()))
                 .orElseThrow(() -> new ItemNotFoundException("해당 키워드에 맞는 상품이 없습니다"));
 
-        List<ItemResponse> itemResponses = new ArrayList<>();
-        for (Item item : items) {
-            itemResponses.add(ItemResponse.builder()
-                    .id(item.getId())
-                    .name(item.getName())
-                    .zzim(item.getZzim())
-                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
-                    .price(item.getPrice())
-                    .salePrice(item.getSalePrice())
-                    .build());
-        }
-        return itemResponses;
+//        List<ItemResponse> itemResponses = new ArrayList<>();
+
+//        return items.stream().map(item -> ItemResponse.builder()
+//                .id(item.getId())
+//                .name(item.getName())
+//                .zzim(item.getZzim())
+//                .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+//                .price(item.getPrice())
+//                .salePrice(item.getSalePrice())
+//                .build())
+//                .collect(Collectors.toList());
+
+//        for (Item item : items) {
+//            itemResponses.add(ItemResponse.builder()
+//                    .id(item.getId())
+//                    .name(item.getName())
+//                    .zzim(item.getZzim())
+//                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+//                    .price(item.getPrice())
+//                    .salePrice(item.getSalePrice())
+//                    .build());
+//        }
+//        return itemResponses;
     }
 
     public ZzimResponse itemZzim(final ItemZzimRequest request, final User user) {
