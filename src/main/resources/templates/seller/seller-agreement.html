@@ -63,7 +63,7 @@
 
                     const onSuccess = res => {
                         alert('판매자 전환이 완료되었습니다. 다시 로그인해주세요')
-                        window.location.replace('http://localhost:8080/')
+                        window.location.replace('http://localhost:8080/auth/login')
                     }
                     const onFailure = res => {
                         return res.json().then(json => alert(json.message));

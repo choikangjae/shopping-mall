@@ -29,16 +29,20 @@
                         </li>
                     </div>
                     <li class="nav-item" data-bs-toggle="tab" role="tab">
-                        <a th:classappend="${#request.requestURI.startsWith('/me') ? 'active':''}" id="my-page" class="nav-link" th:href="@{/me}" href="#">마이페이지</a>
+                        <a th:classappend="${#request.requestURI.startsWith('/me') ? 'active':''}" id="my-page"
+                            class="nav-link" th:href="@{/me}" href="#">마이페이지</a>
                     </li>
                     <li class="nav-item" data-bs-toggle="tab" role="tab">
-                        <a th:classappend="${#request.requestURI.startsWith('/cart') ? 'active':''}" class="nav-link" th:href="@{/cart}" href="#">장바구니
-                            <span class="badge bg-primary rounded-pill"><span sec:authorize="isAuthenticated()" id="cartAmount">0</span></span>
+                        <a th:classappend="${#request.requestURI.startsWith('/cart') ? 'active':''}" class="nav-link"
+                            th:href="@{/cart}" href="#">장바구니
+                            <span class="badge bg-primary rounded-pill"><span sec:authorize="isAuthenticated()"
+                                    id="cartAmount">0</span></span>
                         </a>
                     </li>
                     <div sec:authorize="hasRole('SELLER')">
                         <li class="nav-item">
-                            <a th:classappend="${#request.requestURI.startsWith('/seller') ? 'active':''}" class="nav-link" th:href="@{/seller}" href="#">판매자</a>
+                            <a th:classappend="${#request.requestURI.startsWith('/seller') ? 'active':''}"
+                                class="nav-link" th:href="@{/seller}" href="#">판매자</a>
                         </li>
                     </div>
                     <div sec:authorize="hasRole('USER')">
@@ -51,7 +55,8 @@
                     </div>
                     <div sec:authorize="hasRole('ADMIN')">
                         <li class="nav-item">
-                            <a th:classappend="${#request.requestURI.startsWith('/admin') ? 'active':''}" class="nav-link" th:href="@{/admin}" href="#">어드민</a>
+                            <a th:classappend="${#request.requestURI.startsWith('/admin') ? 'active':''}"
+                                class="nav-link" th:href="@{/admin}" href="#">어드민</a>
                         </li>
                     </div>
                     <li class="nav-item">
@@ -66,11 +71,23 @@
                         </li>
                     </div>
                 </ul>
-                <i class="fas fa-bell"></i>
+                <div class="dropdown">
+                    <a class="btn" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge bg-primary rounded-pill">0</span>
+                    </a>
+                  
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                      <li><a class="dropdown-item" href="#">Action</a></li>
+                      <li><a class="dropdown-item" href="#">Another action</a></li>
+                      <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                </div>
+ 
                 <form th:action="@{/search}" class="d-flex" role="search" method="get">
-                    <input name="q" th:value="${result}" id="keywordQuery" class="form-control me-2" type="search" placeholder="상품 검색" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit"><i
-                            class="fas fa-search"></i></button>
+                    <input name="q" th:value="${result}" id="keywordQuery" class="form-control me-2" type="search"
+                        placeholder="상품 검색" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i></button>
                 </form>
             </div>
         </div>

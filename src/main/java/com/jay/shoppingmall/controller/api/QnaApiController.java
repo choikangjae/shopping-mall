@@ -47,4 +47,13 @@ public class QnaApiController {
 
         return ResponseEntity.ok().body(null);
     }
+    @PostMapping("/answer/{id}")
+    public ResponseEntity<?> qnaAnswer(@PathVariable Long id, @CurrentUser User user) {
+        if (user == null) {
+            throw new UserNotFoundException("잘못된 요청입니다");
+        }
+        qnaService.qnaDelete(id, user);
+
+        return ResponseEntity.ok().body(null);
+    }
 }

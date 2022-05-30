@@ -56,22 +56,24 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                                           final Authentication authentication) throws IOException, ServletException {
 
         SavedRequest savedRequest = (SavedRequest) request.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-
-        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-            redirectStrategy.sendRedirect(request, response, "/admin");
-        } else if (request.getSession().getAttribute("requestURI") != null) {
-            String requestURI = (String) request.getSession().getAttribute("requestURI");
-//            System.out.println("requestURI: " + requestURI);
-            redirectStrategy.sendRedirect(request, response, requestURI);
-            request.getSession().removeAttribute("requestURI");
-        }
-        else if (savedRequest != null) {
-            String targetUrl = savedRequest.getRedirectUrl();
-//            System.out.println("targetUrl: " + targetUrl);
-            redirectStrategy.sendRedirect(request, response, targetUrl);
-        } else {
-//            System.out.println("defaultUrl: " + defaultUrl);
+        if (savedRequest != null && savedRequest.toString().contains("api")) {
             redirectStrategy.sendRedirect(request, response, defaultUrl);
+        } else {
+            if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+                redirectStrategy.sendRedirect(request, response, "/admin");
+            } else if (request.getSession().getAttribute("requestURI") != null) {
+                String requestURI = (String) request.getSession().getAttribute("requestURI");
+//            System.out.println("requestURI: " + requestURI);
+                redirectStrategy.sendRedirect(request, response, requestURI);
+                request.getSession().removeAttribute("requestURI");
+            } else if (savedRequest != null) {
+                String targetUrl = savedRequest.getRedirectUrl();
+//            System.out.println("targetUrl: " + targetUrl);
+                redirectStrategy.sendRedirect(request, response, targetUrl);
+            } else {
+//            System.out.println("defaultUrl: " + defaultUrl);
+                redirectStrategy.sendRedirect(request, response, defaultUrl);
+            }
         }
     }
 

@@ -5,12 +5,16 @@ import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
+import com.jay.shoppingmall.domain.seller.Seller;
+import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.dto.request.QnaWriteRequest;
 import com.jay.shoppingmall.dto.response.QnaResponse;
 import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.QnaException;
+import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.Boolean.valueOf;
 
@@ -32,6 +37,8 @@ public class QnaService {
 
     private final QnaRepository qnaRepository;
     private final ItemRepository itemRepository;
+    private final SellerRepository sellerRepository;
+    private final UserRepository userRepository;
 
     public QnaResponse qnaFindById(final Long id) {
         Qna qna = qnaRepository.findById(id)
@@ -149,5 +156,34 @@ public class QnaService {
             throw new UserNotFoundException("유효하지 않은 접근입니다");
         }
         qnaRepository.delete(qna);
+    }
+
+    //유저가 있으면 셀러에서 유저id로 찾아보고 유저가 없으면 false.
+    //유저id로 찾아본 셀러와 아이템으로 찾아본 셀러의 id가 같으면 true.
+    public Boolean sellerCheck(final Long itemId, final User user) {
+        if (user == null) {
+            return false;
+        }
+        Long sellerId = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .map(Seller::getId)
+                .orElse(-1L);
+
+//        Optional<Seller> seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId());
+//        Long sellerId = 0L;
+//        if (seller.isPresent()) {
+//            sellerId = seller.get().getId();
+//        }
+
+        Long sellerId2 = itemRepository.findById(itemId)
+                .map(Item::getSeller)
+                .map(Seller::getId)
+                .orElse(-2L);
+
+//        if (itemRepository.findById(itemId).isEmpty()) {
+//            return false;
+//        }
+//        Long sellerId2 = itemRepository.getById(itemId).getSeller().getId();
+        System.out.println(sellerId + " " + sellerId2);
+        return Objects.equals(sellerId, sellerId2);
     }
 }

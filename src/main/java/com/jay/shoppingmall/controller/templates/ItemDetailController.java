@@ -27,13 +27,15 @@ public class ItemDetailController {
             value = "/item/details/{id}",
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
     )
-    public String itemDetailByItemId(@PathVariable(name = "id",required = false) Long id,
+    public String itemDetailByItemId(@PathVariable(name = "id",required = false) Long itemId,
                                      @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
                                      Model model, @CurrentUser User user) {
 
-        ItemDetailResponse response = itemService.itemDetail(user, id);
-        QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(id, user, pageable);
+        ItemDetailResponse response = itemService.itemDetail(user, itemId);
+        QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(itemId, user, pageable);
+        Boolean isSellerItem = qnaService.sellerCheck(itemId, user);
 
+        model.addAttribute("isSellerItem", isSellerItem);
         model.addAttribute("response", response);
         model.addAttribute("qnaResponseWithPagination", qnaResponseWithPagination);
         model.addAttribute("user", user);
