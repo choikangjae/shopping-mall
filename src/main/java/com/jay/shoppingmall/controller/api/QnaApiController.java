@@ -2,10 +2,13 @@ package com.jay.shoppingmall.controller.api;
 
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.request.IdRequest;
+import com.jay.shoppingmall.dto.request.QnaAnswerRequest;
 import com.jay.shoppingmall.dto.request.QnaWriteRequest;
 import com.jay.shoppingmall.dto.response.QnaResponse;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.QnaService;
+import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +21,7 @@ import javax.validation.Valid;
 public class QnaApiController {
 
     private final QnaService qnaService;
+    private final SellerService sellerService;
 
     @PostMapping("/write")
     public ResponseEntity<?> qnaWrite(@Valid @RequestBody QnaWriteRequest qnaWriteRequest, @CurrentUser User user) {
@@ -30,29 +34,30 @@ public class QnaApiController {
         return ResponseEntity.ok().body(qnaResponse);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<?> qnaDataForUpdate(@PathVariable Long id, @CurrentUser User user) {
+    public ResponseEntity<?> qnaDataForUpdate(@PathVariable Long qnaId, @CurrentUser User user) {
         if (user == null) {
             throw new UserNotFoundException("잘못된 요청입니다");
         }
-        QnaResponse qnaResponse = qnaService.qnaFindById(id);
+        QnaResponse qnaResponse = qnaService.qnaFindById(qnaId);
 
         return ResponseEntity.ok().body(qnaResponse);
     }
-    @PostMapping("/delete/{id}")
-    public ResponseEntity<?> qnaDelete(@PathVariable Long id, @CurrentUser User user) {
+    @PostMapping("/delete")
+    public ResponseEntity<?> qnaDelete(@RequestBody IdRequest idRequest, @CurrentUser User user) {
         if (user == null) {
             throw new UserNotFoundException("잘못된 요청입니다");
         }
-        qnaService.qnaDelete(id, user);
+        qnaService.qnaDelete(idRequest.getId(), user);
 
         return ResponseEntity.ok().body(null);
     }
-    @PostMapping("/answer/{id}")
-    public ResponseEntity<?> qnaAnswer(@PathVariable Long id, @CurrentUser User user) {
+    @PostMapping("/answer")
+    public ResponseEntity<?> qnaAnswer(@Valid @RequestBody QnaAnswerRequest qnaAnswerRequest, @CurrentUser User user) {
         if (user == null) {
             throw new UserNotFoundException("잘못된 요청입니다");
         }
-        qnaService.qnaDelete(id, user);
+
+        sellerService.qnaAnswer(qnaAnswerRequest, user);
 
         return ResponseEntity.ok().body(null);
     }

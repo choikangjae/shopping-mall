@@ -17,6 +17,7 @@ public class QnaResponse {
 
     private String qnaCategory;
 
+    @Setter
     private Boolean isSecret;
 
     private Boolean isAnswered;

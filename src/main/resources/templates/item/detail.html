@@ -272,30 +272,28 @@
                         th:aria-controls="'answer' + ${qna.qnaId}">
                         <h6 class="card-title col-5" th:text="'[' + ${qna.qnaCategory} + ']'">카테고리</h6>
                         <span class="card-title col-5" th:text="${qna.username}"></span>
+
                         <div class="card-title col-2" th:unless="${#bools.isTrue(qna.getIsAnswered())}">
                             <h5 class="card-text text-danger"><i class="fas fa-pause"></i></h5>
                         </div>
-                        <div class="card-title col-3" th:if="${#bools.isTrue(qna.getIsAnswered())}">
+                        <div class="card-title col-2" th:if="${#bools.isTrue(qna.getIsAnswered())}">
                             <h5 class="card-text text-success"><i class="fas fa-check"></i></h5>
                         </div>
                     </div>
 
 
                     <div class="row">
-                        <h6 class="card-subtitle mb-2 text-muted col-9"
+                        <h6 class="card-subtitle mb-2 text-muted col-6"
                             th:text="${#temporals.format(qna.createdDate, 'yyyy-MM-dd HH:mm')}" id="date">작성일
                         </h6>
-                        <span class="col-3" th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
-                            <!--                            <div onclick="event.stopPropagation();">-->
-                            <div th:if="${isSellerItem} == true">
-                                <a th:onclick="|qnaAnswer('${qna.qnaId}');|" type="button">답변</a>
-                            </div>
+                        <div class="card-subtitle col-3" th:if="${qnaResponseWithPagination.getIsSellerItem()} == true">
+                            <a th:onclick="|createAnswerForm('${qna.qnaId}');|" type="button">답변</a>
+                        </div>
+                        <span class="card-subtitle col-3" th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
                             <a th:onclick="|qnaUpdate('${qna.qnaId}');|" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#qnaWriteFormToggle" aria-expanded="false"
                                 aria-controls="qnaWriteFormToggle">수정</a>
                             <a th:onclick="|qnaDelete('${qna.qnaId}');|" type="button">삭제</a>
-
-                            <!--                            </div>-->
                         </span>
                     </div>
 
@@ -339,6 +337,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div th:id="'answerForm' + ${qna.qnaId}">
+
                 </div>
 
             </div>
@@ -519,7 +520,6 @@
                 let perPage = 5;
                 let itemId = '[[${response.id}]]';
 
-                console.log(requestPage, perPage, itemId);
                 let data = {
                     method: 'POST',
                     body: JSON.stringify({
@@ -561,13 +561,8 @@
             }
             function qnaUpdate(qnaId) {
 
-                console.log(qnaId);
                 let data = {
                     method: 'GET',
-
-                    headers: {
-
-                    }
                 };
                 const onSuccess = res => {
                     res.json()
@@ -637,24 +632,31 @@
 
             function qnaDelete(qnaId) {
                 if (confirm('정말 삭제하시겠습니까?')) {
-
+                    let id = qnaId;
                     let data = {
-                        method: 'POST'
+                        method: 'POST',
+                        body: JSON.stringify({
+                            id
+                        }),
+                        headers: {
+                        'Content-Type': 'application/json',
+                        }
                     };
                     const onSuccess = res => {
-                        res.json()
+                        res.text()
                             .then((json) => {
                                 alert('삭제되었습니다');
+                                //엘레멘트 삭제
                             })
                     }
                     const onFailure = res => {
                         return res.json()
                             .then(json => {
-                                alert(json.errors);
+                                alert(json.message);
                             })
                     }
 
-                    fetch(`/api/v1/qna/delete/` + qnaId, data)
+                    fetch(`/api/v1/qna/delete`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;
@@ -667,24 +669,53 @@
                         });
                 }
             }
-            function qnaAnswer(qnaId) {
+            let value;
+            function createAnswerForm(id) {
+                let qnaId = id;
+                let input = document.createElement("input");
+                // input.type = "text";
+                input.className = "form-control";
+                input.id = "answerInput" + qnaId;
+
+                
+                input.addEventListener('input', () => {
+                    value = input.value;
+                });
+
+                let button = document.createElement("button");
+                button.type = "button";
+                button.className = "btn btn-primary";
+                button.id = "answerButton" + qnaId;
+                button.textContent = "답변 등록하기";
+                button.onclick = function qnaAnswerRequest() {
+                    // let answer = document.getElementById('answerInput' + qnaId).value;
+                    let answer = value;
+
                     let data = {
-                        method: 'POST'
+                        method: 'POST',
+                        body: JSON.stringify({
+                            answer,
+                            qnaId
+                        }),
+                        headers: {
+                        'Content-Type': 'application/json',
+                        }
                     };
                     const onSuccess = res => {
                         res.json()
                             .then((json) => {
-                                alert('삭제되었습니다');
+                                alert('답변이 등록되었습니다');
+                                //input 삭제하고 답변으로 밀어넣기
                             })
                     }
                     const onFailure = res => {
                         return res.json()
                             .then(json => {
-                                alert(json.errors);
+                                alert(json.message);
                             })
                     }
 
-                    fetch(`/api/v1/qna/answer/` + qnaId, data)
+                    fetch(`/api/v1/qna/answer/`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;
@@ -695,6 +726,11 @@
                         .catch(err => {
                             console.log(err.message);
                         });
+                }
+
+                const currentDiv = document.getElementById("answerForm" + qnaId);
+                currentDiv.appendChild(input);
+                currentDiv.appendChild(button);
             }
 
 

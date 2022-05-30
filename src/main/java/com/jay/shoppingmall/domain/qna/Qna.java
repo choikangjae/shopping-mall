@@ -6,7 +6,6 @@ import com.jay.shoppingmall.domain.user.User;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -50,5 +49,10 @@ public class Qna extends BaseTimeEntity {
         this.isSecret = isSecret;
         this.isEmailNotification = isEmailNotification;
         this.question = question;
+    }
+
+    public void answerUpdate(final String answer) {
+        this.answer = answer;
+        this.isAnswered = true;
     }
 }

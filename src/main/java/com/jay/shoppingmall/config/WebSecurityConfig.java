@@ -61,7 +61,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .and()
                 .authorizeRequests()
 
-//                .antMatchers("/webjars/**", "script.js").permitAll()
 
                 .antMatchers("/index", "/api/v1/pagination", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
                 .antMatchers("/auth/new-password", "/auth/reset**", "/auth/login**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/auth/forgot-password").permitAll()
@@ -71,8 +70,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/me/**", "/seller/start", "/seller/agree").hasRole("USER")
                 .antMatchers("/seller/**").hasRole("SELLER")
                 .antMatchers( "/admin/**").hasRole("ADMIN")
-//                .anyRequest().authenticated()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
                 .expressionHandler(expressionHandler())
                 .and()
                 .formLogin()

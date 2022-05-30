@@ -35,7 +35,7 @@ public class ItemDetailController {
         QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(itemId, user, pageable);
         Boolean isSellerItem = qnaService.sellerCheck(itemId, user);
 
-        model.addAttribute("isSellerItem", isSellerItem);
+//        model.addAttribute("isSellerItem", isSellerItem);
         model.addAttribute("response", response);
         model.addAttribute("qnaResponseWithPagination", qnaResponseWithPagination);
         model.addAttribute("user", user);

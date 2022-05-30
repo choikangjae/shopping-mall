@@ -26,12 +26,4 @@ public class UserValidationRequest {
     @NotBlank
     @Pattern(regexp = "^[A-Za-z[0-9]]{10,20}$", message = "비밀번호는 영문과 숫자를 포함하며 10자 이상이어야 합니다")
     private String repeatPassword;
-
-    public User toEntity(String password) {
-        return User.builder()
-                .email(email)
-                .password(password)
-                .role(Role.ROLE_USER)
-                .build();
-    }
 }

@@ -14,5 +14,7 @@ public class QnaResponseWithPagination {
 
     private long totalElements;
 
+    private Boolean isSellerItem;
+
     private List<QnaResponse> qnaResponses;
 }

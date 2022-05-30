@@ -100,11 +100,9 @@ public class QnaService {
         return qnaResponse;
     }
 
-    public QnaResponseWithPagination getQnaListByPaging(Long id, User user, Pageable pageable) {
-        Page<Qna> qnas = qnaRepository.findAllByItemId(id, pageable);
-//        if (qnas.isEmpty()) {
-//            throw new ItemNotFoundException("해당 상품이 존재하지 않습니다");
-//        }
+    public QnaResponseWithPagination getQnaListByPaging(Long itemId, User user, Pageable pageable) {
+        Page<Qna> qnas = qnaRepository.findAllByItemId(itemId, pageable);
+        Boolean isSellerItem = sellerCheck(itemId, user);
         List<QnaResponse> qnaResponses = new ArrayList<>();
         for (Qna qna : qnas) {
             Boolean isQnaOwner = false;
@@ -136,10 +134,16 @@ public class QnaService {
                 qnaResponse.setAnswer(qna.getAnswer());
                 qnaResponse.setIsQnaOwner(isQnaOwner);
             }
+            if (isSellerItem){
+                qnaResponse.setIsSecret(false);
+                qnaResponse.setQuestion(qna.getQuestion());
+                qnaResponse.setAnswer(qna.getAnswer());
+            }
             qnaResponses.add(qnaResponse);
         }
 
         QnaResponseWithPagination qnaResponseWithPagination = QnaResponseWithPagination.builder()
+                .isSellerItem(isSellerItem)
                 .totalElements(qnas.getTotalElements())
                 .totalPages(qnas.getTotalPages() == 0 ? 1 : qnas.getTotalPages())
                 .qnaResponses(qnaResponses)
@@ -168,21 +172,10 @@ public class QnaService {
                 .map(Seller::getId)
                 .orElse(-1L);
 
-//        Optional<Seller> seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId());
-//        Long sellerId = 0L;
-//        if (seller.isPresent()) {
-//            sellerId = seller.get().getId();
-//        }
-
         Long sellerId2 = itemRepository.findById(itemId)
                 .map(Item::getSeller)
                 .map(Seller::getId)
                 .orElse(-2L);
-
-//        if (itemRepository.findById(itemId).isEmpty()) {
-//            return false;
-//        }
-//        Long sellerId2 = itemRepository.getById(itemId).getSeller().getId();
         System.out.println(sellerId + " " + sellerId2);
         return Objects.equals(sellerId, sellerId2);
     }

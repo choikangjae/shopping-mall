@@ -4,17 +4,18 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.qna.Qna;
+import com.jay.shoppingmall.domain.qna.QnaRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
+import com.jay.shoppingmall.dto.request.QnaAnswerRequest;
 import com.jay.shoppingmall.dto.request.SellerAgreeRequest;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
-import com.jay.shoppingmall.exception.exceptions.AlreadyExistsException;
-import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
-import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,9 @@ public class SellerService {
     private final ImageRepository imageRepository;
     private final ItemRepository itemRepository;
     private final ZzimService zzimService;
+    private final QnaRepository qnaRepository;
+
+    private final QnaService qnaService;
 
     public List<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -113,5 +117,26 @@ public class SellerService {
 
         sellerRepository.save(seller);
         return true;
+    }
+
+    public void qnaAnswer(final QnaAnswerRequest qnaAnswerRequest, final User user) {
+        Long qnaId = qnaAnswerRequest.getQnaId();
+        Boolean isAnswered = qnaRepository.findById(qnaId)
+                .map(Qna::getIsAnswered)
+                .orElse(false);
+        if (isAnswered) {
+            throw new AlreadyExistsException("답변이 이미 존재합니다");
+        }
+        Long itemId = qnaRepository.findById(qnaId)
+                .map(Qna::getItem)
+                .map(Item::getId)
+                .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지 않습니다"));
+
+        if (qnaService.sellerCheck(itemId, user)) {
+            Qna qna = qnaRepository.findById(qnaId)
+                    .orElseThrow(() -> new QnaException("QnA가 존재하지 않습니다"));
+            qna.answerUpdate(qnaAnswerRequest.getAnswer());
+        }
+
     }
 }
