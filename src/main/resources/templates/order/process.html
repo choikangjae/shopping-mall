@@ -14,8 +14,7 @@
         <main>
             <div class="py-5 text-center">
                 <h1 class="text-danger">어떠한 개인 정보도 입력하지 마십시오 본 사이트는 데모용입니다</h1>
-                <h1 class="text-danger">DO NOT ENTER ANY OF YOUR PERSONAL INFORMATION.
-                    THIS IS A DEMO SITE.</h1>
+
                 <img class="d-block mx-auto mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72"
                      height="57">
                 <h2><strong class="text-primary">주문 진행</strong> <i class="fas fa-arrow-right"></i>
@@ -28,7 +27,8 @@
                 <div class="col-md-5 col-lg-4 order-md-last">
                     <h4 class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-primary">장바구니</span>
-                        <span class="badge bg-primary rounded-pill"><span th:text="${order.orderTotalCount}"></span></span>
+                        <span class="badge bg-primary rounded-pill"><span
+                                th:text="${order.orderTotalCount}"></span></span>
                     </h4>
 
                     <ul class="list-group mb-3">
@@ -37,8 +37,9 @@
                             <div>
                                 <div>
                                     <h6 th:text="${item.getName()}" class="my-0"></h6>
-                                    <small th:text="${#numbers.formatDecimal(item.cartQuantity, 0, 'DEFAULT', 0, 'DEFAULT')}"
-                                           class="text-muted">개수</small><small>
+                                    <small
+                                            th:text="${#numbers.formatDecimal(item.cartQuantity, 0, 'DEFAULT', 0, 'DEFAULT')}"
+                                            class="text-muted">개수</small><small>
                                     개</small>
                                 </div>
                                 <span class="text-success"
@@ -65,82 +66,222 @@
                         </li>
                     </ul>
 
-                    <a class="w-100 btn btn-primary btn-lg" th:href="@{/order/payment}" type="button">결제하러 가기</a>
+                    <button class="w-100 btn btn-primary btn-lg" form="receiverForm"
+                            type="submit">결제하러 가기
+                    </button>
                 </div>
 
 
                 <div class="col-md-7 col-lg-8">
 
-                    <form class="needs-validation" novalidate>
-                        <h4 class="mb-3">구매자 정보</h4>
-                        <div class="row g-3">
+                    <!-- <form class="needs-validation" novalidate> -->
+                    <h4 class="mb-3">구매자 정보</h4>
+                    <div class="row g-3">
 
-                            <div class="col-sm-6">
-                                <label for="buyerFullName" class="form-label">이름</label>
-                                <input th:value="${user.getName().getFullName()}" type="text" class="form-control"
-                                       id="buyerFullName" placeholder="" value="" required disabled>
+                        <div class="col-sm-6">
+                            <label for="buyerFullName" class="form-label">이름</label>
+                            <input th:value="${user.getName().getFullName()}" type="text" class="form-control"
+                                   id="buyerFullName" placeholder="" value="" required disabled>
+                        </div>
+                        <div class="col-12">
+                            <label for="buyerAddress" class="form-label">주소</label>
+                            <input th:value="${user.getAddress().getFullAddress()}" type="text"
+                                   class="form-control" id="buyerAddress" placeholder="1234 Main St" required
+                                   readonly>
+                            <div class="invalid-feedback">
+                                주소를 입력해주세요
                             </div>
-                            <div class="col-12">
-                                <label for="buyerAddress" class="form-label">주소</label>
-                                <input th:value="${user.getAddress().getFullAddress()}" type="text" class="form-control"
-                                       id="buyerAddress" placeholder="1234 Main St" required readonly>
-                                <div class="invalid-feedback">
-                                    주소를 입력해주세요
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <label for="buyerPhoneNumber" class="form-label">휴대폰 번호</label>
-                                <input th:value="${user.getPhoneNumber().getFullNumber()}" type="text"
-                                       class="form-control"
-                                       id="buyerPhoneNumber" placeholder="" value="" required disabled>
-                            </div>
-                            <div class="col-12">
-                                <label for="buyerEmail" class="form-label">이메일</label>
-                                <input th:value="${user.getEmail()}" type="text" class="form-control"
-                                       id="buyerEmail" placeholder="" value="" required disabled>
-                            </div>
-
+                        </div>
+                        <div class="col-12">
+                            <label for="buyerPhoneNumber" class="form-label">휴대폰 번호</label>
+                            <input th:value="${user.getPhoneNumber().getFullNumber()}" type="text"
+                                   class="form-control" id="buyerPhoneNumber" placeholder="" value="" required
+                                   disabled>
+                        </div>
+                        <div class="col-12">
+                            <label for="buyerEmail" class="form-label">이메일</label>
+                            <input th:value="${user.getEmail()}" type="text" class="form-control"
+                                   id="buyerEmail" placeholder="" value="" required disabled>
                         </div>
 
-                        <hr class="my-4">
+                    </div>
 
+                    <hr class="my-4">
+                    <div>
                         <h4 class="mb-3">받는 사람 정보</h4>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="receiverFormReset">
+                            <label class="form-check-label" for="receiverFormReset">
+                                받는 사람 정보 새로 적기
+                            </label>
+                        </div>
+                    </div>
+
+                    <form id="receiverForm" method="post" th:action="@{/order/process}"
+                          th:object="${receiverInfoTemporarySave}">
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label for="receiverFullName" class="form-label">이름</label>
                                 <input th:value="${user.getName().getFullName()}" type="text" class="form-control"
-                                       id="receiverFullName" placeholder="" value="" required readonly>
+                                       name="receiverFullName" id="receiverFullName" placeholder="" value="" required>
+                            </div>
+
+                            <hr>
+
+                            <div class="col-md-7">
+                                <label for="zipcode" class="form-label">우편번호</label>
+                                <input type="text" class="form-control" name="zipcode" id="zipcode" placeholder="우편번호" readonly
+                                       th:value="${user.getAddress()?.getZipcode()}" required>
+                                <div class="invalid-feedback">
+                                    우편번호를 입력해주세요
+                                </div>
+                            </div>
+                            <div class="col-4 position-relative">
+                                <a class="btn btn-primary" onclick="getAddressApi()" type="button">주소 검색</a>
                             </div>
 
                             <div class="col-12">
-                                <label for="receiverAddress" class="form-label">주소</label>
-                                <input th:value="${user.getAddress().getFullAddress()}" type="text" class="form-control"
-                                       id="receiverAddress" placeholder="1234 Main St" required readonly>
+                                <label for="address" class="form-label">주소</label>
+                                <input type="text" class="form-control" name="address" id="address" placeholder="도로명 주소"
+                                       th:value="${user.getAddress()?.getAddress()}" readonly required>
                                 <div class="invalid-feedback">
-                                    주소를 입력해주세요
+                                    도로명 주소를 입력해주세요
                                 </div>
                             </div>
+
+                            <div class="col-6">
+                                <label for="detailAddress" class="form-label">상세 주소</label>
+                                <input type="text" class="form-control" name="detailAddress" id="detailAddress" placeholder="상세 주소"
+                                       th:value="${user.getAddress()?.getDetailAddress()}" required>
+                                <div class="invalid-feedback">
+                                    상세 주소를 입력해주세요
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label for="extraAddress" class="form-label">참고항목</label>
+                                <input type="text" class="form-control" id="extraAddress" name="extraAddress"
+                                       th:value="${#objects.nullSafe(user.getAddress()?.getExtraAddress(),'')}"
+                                       readonly>
+                            </div>
+
+
+                            <!-- <div class="col-12">
+                            <label for="receiverAddress" class="form-label">주소</label>
+                            <input th:value="${user.getAddress().getFullAddress()}" type="text" class="form-control"
+                                   id="receiverAddress" required>
+                            <div class="invalid-feedback">
+                                주소를 입력해주세요
+                            </div>
+                            </div> -->
+                            <hr>
 
                             <div class="col-12">
                                 <label for="receiverPhoneNumber" class="form-label">휴대폰 번호</label>
                                 <input th:value="${user.getPhoneNumber().getFullNumber()}" type="text"
-                                       class="form-control"
-                                       id="receiverPhoneNumber" placeholder="" value="" required readonly>
+                                       name="receiverPhoneNumber" class="form-control" id="receiverPhoneNumber" placeholder="" value="" required>
                             </div>
                             <div class="col-12">
                                 <label for="receiverEmail" class="form-label">이메일</label>
                                 <input th:value="${user.getEmail()}" type="text" class="form-control"
-                                       id="receiverEmail" placeholder="" value="" required readonly>
+                                       name="receiverEmail" id="receiverEmail" placeholder="" value="" required>
                             </div>
-
-                            <hr class="my-4">
-                        </div>
                     </form>
+                    <hr class="my-4">
                 </div>
+                <!-- </form> -->
             </div>
-        </main>
-        <script src="../js/form-validation.js"></script>
-    </div>
+        </div>
+    </main>
+    <script>
+
+
+                let checkbox = document.getElementById('receiverFormReset');
+
+                let receiverFullName = document.getElementById('receiverFullName').value;
+                let zipcode = document.getElementById('zipcode').value;
+                let address = document.getElementById('address').value;
+                let detailAddress = document.getElementById('detailAddress').value;
+                let extraAddress = document.getElementById('extraAddress').value;
+                let receiverPhoneNumber = document.getElementById('receiverPhoneNumber').value;
+                let receiverEmail = document.getElementById('receiverEmail').value;
+
+                checkbox.addEventListener('change', () => {
+
+                    if (checkbox.checked) {
+                        document.getElementById('receiverFullName').value = '';
+                        document.getElementById('zipcode').value = '';
+                        document.getElementById('address').value = '';
+                        document.getElementById('detailAddress').value = '';
+                        document.getElementById('extraAddress').value = '';
+                        document.getElementById('receiverPhoneNumber').value = '';
+                        document.getElementById('receiverEmail').value = '';
+                    } else {
+                        document.getElementById('receiverFullName').value = receiverFullName;
+                        document.getElementById('zipcode').value = zipcode;
+                        document.getElementById('address').value = address;
+                        document.getElementById('detailAddress').value = detailAddress;
+                        document.getElementById('extraAddress').value = extraAddress;
+                        document.getElementById('receiverPhoneNumber').value = receiverPhoneNumber;
+                        document.getElementById('receiverEmail').value = receiverEmail;
+                    }
+                })
+
+                document.getElementById('goToPayment').addEventListener('click', (e) => {
+                    
+
+                    receiverFullName = document.getElementById('receiverFullName').value;
+                    zipcode = document.getElementById('zipcode').value;
+                    address = document.getElementById('address').value;
+                    detailAddress = document.getElementById('detailAddress').value;
+                    extraAddress = document.getElementById('extraAddress').value;
+                    receiverPhoneNumber = document.getElementById('receiverPhoneNumber').value;
+                    receiverEmail = document.getElementById('receiverEmail').value;
+
+                    let data = {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            receiverFullName,
+                            zipcode,
+                            address,
+                            detailAddress,
+                            extraAddress,
+                            receiverPhoneNumber,
+                            receiverEmail,
+                        }),
+
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+
+                    }
+
+                    const onSuccess = res => {
+                        res.text()
+                            .then(() =>
+                                console.log('변경되었습니다'));
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
+                    fetch(`/api/v1/order/receiver-info`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            alert(err.message);
+                        });
+                        return false;
+                })
+    </script>
+    <script th:src="@{/js/get_address_api.js}"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script src="../js/form-validation.js"></script>
+</div>
 </div>
 </body>
 

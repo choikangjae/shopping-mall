@@ -13,20 +13,17 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ErrorDetails {
     private HttpStatus status;
-//    private String message;
-    private List<String> errors;
+    private List<String> message;
 
-    public ErrorDetails(HttpStatus status, String message, List<String> errors) {
+    public ErrorDetails(HttpStatus status, List<String> errors) {
         super();
         this.status = status;
-//        this.message = message;
-        this.errors = errors;
+        this.message = errors;
     }
 
-    public ErrorDetails(HttpStatus status, String message, String error) {
+    public ErrorDetails(HttpStatus status, String error) {
         super();
         this.status = status;
-//        this.message = message;
-        errors = Arrays.asList(error);
+        message = Arrays.asList(error);
     }
 }

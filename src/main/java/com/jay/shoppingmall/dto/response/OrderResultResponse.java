@@ -1,6 +1,6 @@
 package com.jay.shoppingmall.dto.response;
 
-import com.jay.shoppingmall.domain.payment.PaymentType;
+import com.jay.shoppingmall.domain.payment.Pg;
 import com.jay.shoppingmall.dto.response.cart.CartOrderResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import lombok.*;
@@ -15,10 +15,11 @@ public class OrderResultResponse {
 
     private List<ItemResponse> itemResponseList;
 
-    private Integer totalPrice;
+    private Long amount;
+
     private CartOrderResponse cartOrderResponse;
 
-    private PaymentType paymentType;
+    private Pg pg;
 
     private Boolean isShippingFeeFree;
 }

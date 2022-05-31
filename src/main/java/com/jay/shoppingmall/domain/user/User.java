@@ -3,6 +3,7 @@ package com.jay.shoppingmall.domain.user;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.user.model.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -13,6 +14,7 @@ import java.util.Optional;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Where(clause = "is_deleted = 0")
 public class User extends BaseTimeEntity {
 
     @Id
@@ -42,6 +44,13 @@ public class User extends BaseTimeEntity {
     @Embedded
     private PhoneNumber phoneNumber;
 
+    @Column(columnDefinition = "boolean default 0")
+    private Boolean isDeleted = false;
+
+    public User(final Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
     public void updatePassword(final String password) {
         this.password = password;
     }
@@ -69,20 +78,4 @@ public class User extends BaseTimeEntity {
         return email.substring(0, indexOfAt);
     }
 
-    //모든 필드값이 null일때 Embeddable 객체도 null이 되는 것을 막기 위함.
-//    public Agree getAgree() {
-//        return this.agree == null ? Agree.builder().build() : this.agree;
-//    }
-//
-//    public Address getAddress() {
-//        return this.address == null ? Address.builder().build() : this.address;
-//    }
-//
-//    public Name getName() {
-//        return this.name == null ? Name.builder().build() : this.name;
-//    }
-//
-//    public PhoneNumber getPhoneNumber() {
-//        return this.phoneNumber == null ? PhoneNumber.builder().build() : this.phoneNumber;
-//    }
 }

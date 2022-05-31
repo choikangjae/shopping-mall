@@ -287,7 +287,8 @@
                             th:text="${#temporals.format(qna.createdDate, 'yyyy-MM-dd HH:mm')}" id="date">작성일
                         </h6>
                         <div class="card-subtitle col-3" th:if="${qnaResponseWithPagination.getIsSellerItem()} == true">
-                            <a th:onclick="|createAnswerForm('${qna.qnaId}');|" type="button">답변</a>
+                            <!-- <a th:onclick="|createAnswerForm('${qna.qnaId}');|" type="button">답변</a> -->
+                            <a th:onclick="|displayAnswerForm('${qna.qnaId}');|" type="button">답변</a>
                         </div>
                         <span class="card-subtitle col-3" th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
                             <a th:onclick="|qnaUpdate('${qna.qnaId}');|" type="button" data-bs-toggle="collapse"
@@ -338,10 +339,11 @@
                         </div>
                     </div>
                 </div>
-                <div th:id="'answerForm' + ${qna.qnaId}">
-
+                <div th:id="'answerForm' + ${qna.qnaId}" class="d-none">
+                    <textarea class="form-control" th:id="'answerInput' + ${qna.qnaId}" style="height: 1500px"></textarea>
+                    <button type="button" th:onclick="|qnaAnswerRequest('${qna.qnaId}');|" class="btn btn-primary" th:id="'answerButton' + ${qna.qnaId}">답변 등록하기
+                    </button>
                 </div>
-
             </div>
 
             <nav aria-label="Page navigation example">
@@ -559,7 +561,8 @@
                         console.log(err.message);
                     });
             }
-            function qnaUpdate(qnaId) {
+            function qnaUpdate(id) {
+                let qnaId = id;
 
                 let data = {
                     method: 'GET',
@@ -578,7 +581,7 @@
                 const onFailure = res => {
                     return res.json()
                         .then(json => {
-                            alert(json.errors);
+                            alert(json.message);
                         })
                 }
 
@@ -613,7 +616,7 @@
                 const onFailure = res => {
                     return res.json()
                         .then(json => {
-                            alert(json.errors);
+                            alert(json.message);
                         })
                 }
 
@@ -631,6 +634,7 @@
             }
 
             function qnaDelete(qnaId) {
+
                 if (confirm('정말 삭제하시겠습니까?')) {
                     let id = qnaId;
                     let data = {
@@ -639,7 +643,7 @@
                             id
                         }),
                         headers: {
-                        'Content-Type': 'application/json',
+                            'Content-Type': 'application/json',
                         }
                     };
                     const onSuccess = res => {
@@ -669,27 +673,13 @@
                         });
                 }
             }
-            let value;
-            function createAnswerForm(id) {
-                let qnaId = id;
-                let input = document.createElement("input");
-                // input.type = "text";
-                input.className = "form-control";
-                input.id = "answerInput" + qnaId;
 
-                
-                input.addEventListener('input', () => {
-                    value = input.value;
-                });
+            function displayAnswerForm(qnaId) {
+                document.getElementById("answerForm" + qnaId).classList.toggle("d-none");
+            }
 
-                let button = document.createElement("button");
-                button.type = "button";
-                button.className = "btn btn-primary";
-                button.id = "answerButton" + qnaId;
-                button.textContent = "답변 등록하기";
-                button.onclick = function qnaAnswerRequest() {
-                    // let answer = document.getElementById('answerInput' + qnaId).value;
-                    let answer = value;
+            function qnaAnswerRequest(qnaId) {
+                    let answer = document.getElementById("answerInput" + qnaId).value;
 
                     let data = {
                         method: 'POST',
@@ -698,7 +688,7 @@
                             qnaId
                         }),
                         headers: {
-                        'Content-Type': 'application/json',
+                            'Content-Type': 'application/json',
                         }
                     };
                     const onSuccess = res => {
@@ -726,12 +716,7 @@
                         .catch(err => {
                             console.log(err.message);
                         });
-                }
-
-                const currentDiv = document.getElementById("answerForm" + qnaId);
-                currentDiv.appendChild(input);
-                currentDiv.appendChild(button);
-            }
+                };
 
 
         </script>

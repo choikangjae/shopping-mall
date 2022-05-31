@@ -33,7 +33,20 @@
                                         <input id="password" th:value="${#session.getAttribute('password')}" type="hidden">
                                 </div>
                                 <div class="col-4 position-relative fixed-bottom">
-                                    <a class="btn btn-primary" type="button">비밀번호 변경하기</a>
+                                    <a class="btn btn-primary" id="passwordChangeButton"type="button">비밀번호 변경하기</a>
+                                </div>
+                                <div class="card d-none" id="passwordChangeForm">
+                                    <div class="card-body">
+                                        <form>
+                                        </br>
+                                            <input id="passwordNow" type="password" class="form-control"  placeholder="현재 비밀번호">
+                                            <hr>
+                                            <input id="passwordAfter" type="password" class="form-control"  placeholder="바꿀 비밀번호">
+                                            <input id="repeatPasswordAfter" type="password" class="form-control"  placeholder="비밀번호 확인">
+                                            <hr>
+                                            <a class="btn btn-primary" id="passwordChangeAction" type="button">비밀번호 변경 완료</a>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -117,6 +130,24 @@
 
                     <hr class="my-4">
 
+                    <div class="row g-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked disabled>
+                            <label class="form-check-label" for="flexCheckDefault">
+                                개인정보 제공 동의 완료 <strong>(필수)</strong>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input th:if="${#session.getAttribute('isMarketingAgree')} != null" class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${#session.getAttribute('isMarketingAgree')}">
+                            <input th:if="${user.getAgree()?.getIsMarketingAgree()} != null" class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${user.getAgree().getIsMarketingAgree()}">
+                            <label class="form-check-label">
+                                광고성 개인 정보 수집 동의 여부 (선택)
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
                     <button id="validationCheck" class="w-100 btn btn-primary btn-lg" type="submit">개인정보 입력 완료</button>
                 </form>
 
@@ -141,6 +172,8 @@
                     let detailAddress = document.getElementById('detailAddress').value;
                     let extraAddress = document.getElementById('extraAddress').value;
                     let phoneNumber = document.getElementById('phoneNumber').value;
+                    let isMarketingAgree = document.getElementById('isMarketingAgree').checked;
+
 
                     let data = {
                         method: 'POST',
@@ -152,7 +185,8 @@
                             address,
                             detailAddress,
                             extraAddress,
-                            phoneNumber
+                            phoneNumber,
+                            isMarketingAgree
                         }),
                         headers: {
                             'Content-Type': 'application/json'
@@ -181,6 +215,55 @@
                             alert(err.message);
                         });
                 })
+            })
+            document.getElementById("passwordChangeAction").addEventListener('click', () => {
+                let passwordNow = document.getElementById('passwordNow').value;
+                let passwordAfter = document.getElementById('passwordAfter').value;
+                let repeatPasswordAfter = document.getElementById('repeatPasswordAfter').value;
+
+                let data = {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            passwordNow,
+                            passwordAfter,
+                            repeatPasswordAfter
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    };
+
+                    const onSuccess = res => {
+                        res.text()
+                            .then(() =>
+                                alert('비밀번호가 변경되었습니다'));
+                                togglePasswordChange();
+                                document.getElementById('passwordNow').value = '';
+                                document.getElementById('passwordAfter').value = '';
+                                document.getElementById('repeatPasswordAfter').value = '';
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
+                    fetch(`/api/v1/me/password-update`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            alert(err.message);
+                        });
+                
+            })
+            function togglePasswordChange() {
+                    document.getElementById("passwordChangeForm").classList.toggle("d-none");
+                }
+            document.getElementById("passwordChangeButton").addEventListener('click', () => {
+                togglePasswordChange();
             })
         </script>
 

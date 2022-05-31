@@ -5,6 +5,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,8 +31,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .distinct()
                 .collect(Collectors.toList());
-        ErrorDetails errorDetails = new ErrorDetails(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), errorList);
+        ErrorDetails errorDetails = new ErrorDetails(HttpStatus.BAD_REQUEST, errorList);
         return handleExceptionInternal(ex, errorDetails, headers, errorDetails.getStatus(), request);
     }
 
@@ -61,7 +63,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
     @ExceptionHandler(QuantityException.class)
-    public ResponseEntity<?> handleUserException(QuantityException e) {
+    public ResponseEntity<?> handleQuantityException(QuantityException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()
                 .code("STOCK_NOT_VALID")
                 .message(e.getMessage())
@@ -69,7 +71,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
     @ExceptionHandler(AlreadyExistsException.class)
-    public ResponseEntity<?> handleUserException(AlreadyExistsException e) {
+    public ResponseEntity<?> handleAlreadyExistsException(AlreadyExistsException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()
                 .code("ALREADY_EXISTS")
                 .message(e.getMessage())
@@ -77,9 +79,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
     @ExceptionHandler(ItemNotFoundException.class)
-    public ResponseEntity<?> handleUserException(ItemNotFoundException e) {
+    public ResponseEntity<?> handleItemNotFoundException(ItemNotFoundException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()
                 .code("ITEM_NOT_FOUND")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+    @ExceptionHandler(PasswordInvalidException.class)
+    public ResponseEntity<?> handlePasswordInvalidException(PasswordInvalidException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("PASSWORD_NOT_VALID")
                 .message(e.getMessage())
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);

@@ -1,10 +1,11 @@
 package com.jay.shoppingmall.dto.request;
 
-import com.jay.shoppingmall.domain.image.Image;
-import com.jay.shoppingmall.domain.payment.PaymentType;
+import com.jay.shoppingmall.domain.payment.PayMethod;
+import com.jay.shoppingmall.domain.payment.Pg;
 import lombok.*;
 
-import javax.validation.constraints.NotEmpty;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -13,15 +14,23 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PaymentRequest {
 
-    @NotNull
-    private Long itemId;
+    private Pg pg;
 
-    @NotNull
-    private Integer itemQuantity;
+    private PayMethod payMethod;
 
-    private Integer totalPrice;
+//    private String merchantUid;
 
-    private PaymentType paymentType;
+//    private String name;
 
-    private Boolean isShippingFeeFree;
+//    private Long amount;
+
+    private String buyerEmail;
+
+    private String buyerName;
+
+    private String buyerTel;
+
+    private String buyerAddr;
+
+    private String buyerPostcode;
 }

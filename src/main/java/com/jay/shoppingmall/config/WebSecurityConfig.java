@@ -62,7 +62,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
 
 
-                .antMatchers("/index", "/api/v1/pagination", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
+                .antMatchers("/random-user-generator", "/api/v1/pagination", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
                 .antMatchers("/auth/new-password", "/auth/reset**", "/auth/login**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/auth/forgot-password").permitAll()
                 .antMatchers("/item/details/null", "/seller/null", "/admin/null", "/auth/null", "/null").permitAll()
                 .antMatchers("/swagger-ui.html#", "/search**",  "/", "/item/**","/item/details/**").permitAll()

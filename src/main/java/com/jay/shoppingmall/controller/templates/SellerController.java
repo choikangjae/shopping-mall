@@ -7,6 +7,7 @@ import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -62,7 +63,7 @@ public class SellerController {
     }
     @GetMapping("/items")
     public String sellerItems(@CurrentUser User user, Model model, Pageable pageable) {
-        List<ItemResponse> itemResponses = sellerService.showItemsBySeller(user, pageable);
+        Page<ItemResponse> itemResponses = sellerService.showItemsBySeller(user, pageable);
 
         model.addAttribute("items", itemResponses);
 

@@ -3,7 +3,6 @@ package com.jay.shoppingmall.domain.order;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.payment.Payment;
-import com.jay.shoppingmall.domain.payment.PaymentType;
 import lombok.*;
 
 import javax.persistence.*;

@@ -77,7 +77,7 @@ public class MeService {
         return true;
     }
 
-    public User updateInfo(final UserUpdateRequest request, final Object isMarketingAgree, final Long id) {
+    public User updateInfo(final UserUpdateRequest request, final Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("잘못된 요청입니다"));
 
@@ -94,7 +94,8 @@ public class MeService {
 
         Agree agree = Agree.builder()
                 .isMandatoryAgree(true)
-                .isMarketingAgree(isMarketingAgree.equals("true") ? true : false)
+//                .isMarketingAgree(isMarketingAgree.equals("true") ? true : false)
+                .isMarketingAgree(request.getIsMarketingAgree())
                 .build();
 
         user.userUpdate(address, name, agree, splitPhoneNumber(request.getPhoneNumber()));

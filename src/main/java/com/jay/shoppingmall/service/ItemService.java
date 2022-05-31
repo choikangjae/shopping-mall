@@ -15,6 +15,8 @@ import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +40,7 @@ public class ItemService {
 
     public Slice<ItemResponse> itemAll(User user, Pageable pageable) {
 //        List<ItemResponse> responses = new ArrayList<>();
-        Slice<ItemResponse> responses = itemRepository.findAll(pageable)
+        return itemRepository.findAll(pageable)
                 .map(item -> ItemResponse.builder()
                         .id(item.getId())
                         .name(item.getName())
@@ -47,7 +50,6 @@ public class ItemService {
                         .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
                         .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
                         .build());
-        return responses;
 //        for (Item item : items) {
 //            Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
 //            String stringMainImage = fileHandler.getStringImage(mainImage);
@@ -94,18 +96,19 @@ public class ItemService {
                 .build();
     }
 
-    public List<ItemResponse> searchItemsByKeyword(String keyword) {
+    public Page<ItemResponse> searchItemsByKeyword(String keyword, Pageable pageable) {
 
-        return itemRepository.findByNameContaining(keyword)
-                .map(items -> items.stream().map(item -> ItemResponse.builder()
+        return itemRepository.findByNameContaining(keyword, pageable)
+                .map(items -> items.map(item -> ItemResponse.builder()
                         .id(item.getId())
                         .name(item.getName())
                         .zzim(item.getZzim())
                         .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
                         .price(item.getPrice())
                         .salePrice(item.getSalePrice())
-                        .build()).collect(Collectors.toList()))
+                        .build()))
                 .orElseThrow(() -> new ItemNotFoundException("해당 키워드에 맞는 상품이 없습니다"));
+
 
 //        List<ItemResponse> itemResponses = new ArrayList<>();
 

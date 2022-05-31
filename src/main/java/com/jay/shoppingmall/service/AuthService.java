@@ -5,8 +5,10 @@ import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.token.password.PasswordResetToken;
+import com.jay.shoppingmall.dto.request.PasswordChangeRequest;
 import com.jay.shoppingmall.dto.request.PasswordResetRequest;
 import com.jay.shoppingmall.dto.request.UserValidationRequest;
+import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
 import com.jay.shoppingmall.exception.exceptions.TokenExpiredException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -77,7 +78,7 @@ public class AuthService {
             throw new TokenExpiredException("주소가 만료되었습니다");
         }
     }
-    public void passwordUpdate(UserValidationRequest userValidationRequest) {
+    public void passwordUpdateAfterReset(UserValidationRequest userValidationRequest) {
         User user = userRepository.findByEmail(userValidationRequest.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("유효하지 않은 이메일입니다"));
         String encryptedPassword = passwordEncoder.encode(userValidationRequest.getPassword());
@@ -85,4 +86,16 @@ public class AuthService {
         user.updatePassword(encryptedPassword);
     }
 
+    public void passwordChange(final PasswordChangeRequest passwordChangeRequest, User user) {
+        User updatedUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new UserNotFoundException("유효하지 않은 접근입니다"));
+
+        if (!passwordEncoder.matches(passwordChangeRequest.getPasswordNow(), user.getPassword())) {
+            throw new PasswordInvalidException("현재 비밀번호가 일치하지 않습니다");
+        }
+        if (passwordEncoder.matches(passwordChangeRequest.getPasswordAfter(), user.getPassword())) {
+            throw new PasswordInvalidException("현재 비밀번호와 비꿀 비밀번호가 같습니다");
+        }
+        updatedUser.updatePassword(passwordEncoder.encode(passwordChangeRequest.getPasswordAfter()));
+    }
 }

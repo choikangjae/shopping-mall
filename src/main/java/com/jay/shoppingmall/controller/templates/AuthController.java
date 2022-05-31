@@ -4,16 +4,12 @@ import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.controller.common.SellerValidator;
 import com.jay.shoppingmall.controller.common.UserValidator;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.PasswordCheckRequest;
 import com.jay.shoppingmall.dto.request.PasswordResetRequest;
 import com.jay.shoppingmall.dto.request.UserValidationRequest;
 import com.jay.shoppingmall.service.AuthService;
 import com.jay.shoppingmall.service.MailService;
+import com.jay.shoppingmall.service.common.SessionUpdater;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -30,7 +26,7 @@ public class AuthController {
     private final AuthService authService;
     private final UserValidator userValidator;
     private final SellerValidator sellerValidator;
-    private final AuthenticationManager authenticationManager;
+    private final SessionUpdater sessionUpdater;
     private final MailService mailService;
 
     @GetMapping("/login")
@@ -72,7 +68,7 @@ public class AuthController {
 
         authService.userRegistration(userValidationRequest);
 
-        sessionUpdateToken(userValidationRequest);
+        sessionUpdater.sessionUpdateToken(userValidationRequest.getEmail(), userValidationRequest.getPassword());
 
         return "redirect:/";
     }
@@ -105,14 +101,9 @@ public class AuthController {
             return "auth/new-password";
         }
 
-        authService.passwordUpdate(userValidationRequest);
-        sessionUpdateToken(userValidationRequest);
+        authService.passwordUpdateAfterReset(userValidationRequest);
+        sessionUpdater.sessionUpdateToken(userValidationRequest.getEmail(), userValidationRequest.getPassword());
         return "redirect:/";
-    }
-
-    private void sessionUpdateToken(final UserValidationRequest userValidationRequest) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userValidationRequest.getEmail(), userValidationRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     @GetMapping("/seller-signup")

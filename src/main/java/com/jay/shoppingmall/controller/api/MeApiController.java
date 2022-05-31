@@ -3,13 +3,14 @@ package com.jay.shoppingmall.controller.api;
 import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.controller.common.UpdateValidator;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.AgreeRequest;
-import com.jay.shoppingmall.dto.request.PasswordCheckRequest;
-import com.jay.shoppingmall.dto.request.UserUpdateRequest;
+import com.jay.shoppingmall.dto.request.*;
 import com.jay.shoppingmall.exception.ErrorResponse;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
+import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
+import com.jay.shoppingmall.service.AuthService;
 import com.jay.shoppingmall.service.MeService;
+import com.jay.shoppingmall.service.common.SessionUpdater;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +20,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -33,6 +33,8 @@ public class MeApiController {
     private final MeService meService;
     private final AuthenticationManager authenticationManager;
     private final UpdateValidator updateValidator;
+    private final AuthService authService;
+    private final SessionUpdater sessionUpdater;
 
     @PostMapping("/privacy/agree")
     public ResponseEntity<?> agreeCheck(@Valid @RequestBody AgreeRequest agreeRequest, @CurrentUser User user, HttpServletRequest request) {
@@ -45,9 +47,25 @@ public class MeApiController {
             throw new AgreeException("잘못된 요청입니다");
         }
         if (agreeRequest.getIsMarketingAgree()) {
-            request.getSession().setAttribute("isMarketingAgree", "true");
+            request.getSession().setAttribute("isMarketingAgree", agreeRequest.getIsMarketingAgree());
+
         }
         return ResponseEntity.ok().body(true);
+    }
+
+    @PostMapping("/me/password-update")
+    public ResponseEntity<?> passwordUpdate(@Valid @RequestBody PasswordChangeRequest passwordChangeRequest, @CurrentUser User user) {
+        if (user == null) {
+            throw new UserNotFoundException("잘못된 요청입니다");
+        }
+        if (!passwordChangeRequest.getPasswordAfter().equals(passwordChangeRequest.getRepeatPasswordAfter())) {
+            throw new PasswordInvalidException("바꿀 비밀번호가 일치하지 않습니다");
+        }
+
+        authService.passwordChange(passwordChangeRequest, user);
+        sessionUpdater.sessionUpdateToken(user.getEmail(), passwordChangeRequest.getPasswordAfter());
+
+        return ResponseEntity.ok(null);
     }
 
 //    @PostMapping("/reconfirm")
@@ -84,8 +102,7 @@ public class MeApiController {
         }
 
         Long id = user.getId();
-        Object isMarketingAgree = servletRequest.getSession().getAttribute("isMarketingAgree") != null;
-        meService.updateInfo(request, isMarketingAgree, id);
+        meService.updateInfo(request, id);
         servletRequest.getSession().removeAttribute("isMarketingAgree");
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

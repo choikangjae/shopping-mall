@@ -32,7 +32,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final FileHandler fileHandler;
 
-    public List<ItemAndQuantityResponse> CartItemsList(User user) {
+    public List<ItemAndQuantityResponse> showCartItemsList(User user) {
         final List<Cart> carts = cartRepository.findByUser(user)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
         List<ItemAndQuantityResponse> itemAndQuantityResponses = new ArrayList<>();

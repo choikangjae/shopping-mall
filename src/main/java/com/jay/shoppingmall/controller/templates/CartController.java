@@ -25,7 +25,8 @@ public class CartController {
         if (user == null) {
             return "/auth/login";
         }
-        final List<ItemAndQuantityResponse> itemAndQuantityResponses = cartService.CartItemsList(user);
+
+        final List<ItemAndQuantityResponse> itemAndQuantityResponses = cartService.showCartItemsList(user);
         int totalPrice = 0;
         int totalQuantity = 0;
         for (ItemAndQuantityResponse response : itemAndQuantityResponses) {
@@ -40,7 +41,7 @@ public class CartController {
 
     @PostMapping("/add")
     public String addToCart(@RequestParam("id") Long itemId, @RequestParam("quantity") Integer quantity,
-                            @CurrentUser User user, Model model, RedirectAttributes redirectAttributes) {
+                            @CurrentUser User user, Model model) {
 
         if (user == null) {
             return "redirect:/auth/login";
@@ -49,11 +50,11 @@ public class CartController {
         try {
             cartService.addItemToCart(itemId, quantity, user);
         } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
+//            model.addAttribute("error", e.getMessage());
             return "redirect:/item/details/" + itemId;
         }
 
-        redirectAttributes.addFlashAttribute("message", "장바구니에 상품이 추가되었습니다");
+//        redirectAttributes.addFlashAttribute("message", "장바구니에 상품이 추가되었습니다");
 
         return "redirect:/cart";
     }

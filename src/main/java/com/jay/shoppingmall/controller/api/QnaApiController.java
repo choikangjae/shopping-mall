@@ -34,7 +34,7 @@ public class QnaApiController {
         return ResponseEntity.ok().body(qnaResponse);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<?> qnaDataForUpdate(@PathVariable Long qnaId, @CurrentUser User user) {
+    public ResponseEntity<?> qnaDataForUpdate(@PathVariable("id") Long qnaId, @CurrentUser User user) {
         if (user == null) {
             throw new UserNotFoundException("잘못된 요청입니다");
         }

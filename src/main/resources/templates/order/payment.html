@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layouts/layout.html}">
+    layout:decorate="~{layouts/layout.html}">
 
 <head>
     <title>주문 진행</title>
@@ -10,72 +10,87 @@
 </head>
 
 <body class="bg-light">
-<div layout:fragment="content">
-    <div class="container">
-        <main>
-            <div class="py-5 text-center">
-                <h1 class="text-danger">어떠한 개인 정보도 입력하지 마십시오 본 사이트는 데모용입니다</h1>
-                <h1 class="text-danger">DO NOT ENTER ANY OF YOUR PERSONAL INFORMATION.
-                    THIS IS A DEMO SITE.</h1>
-                <img class="d-block mx-auto mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72"
-                     height="57">
-                <h2>주문 진행 <i class="fas fa-arrow-right"></i>
-                    <strong class="text-primary">결제 진행</strong> <i class="fas fa-arrow-right"></i>
-                    결제 완료
-                </h2>
-            </div>
-
-            <div class="row g-5">
-                <div class="col-md-5 col-lg-4 order-md-last">
-                    <h4 class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-primary">장바구니</span>
-                        <span class="badge bg-primary rounded-pill"><span th:text="${order.orderTotalCount}"></span></span>
-                    </h4>
-
-                    <ul class="list-group mb-3">
-                        <li class="list-group-item d-flex justify-content-between lh-sm"
-                            th:each="item : ${order.itemResponses}">
-                        <div>
-                                <div>
-                                    <h6 th:text="${item.name}" class="my-0"></h6>
-                                    <small th:text="${#numbers.formatDecimal(item.cartQuantity, 0, 'DEFAULT', 0, 'DEFAULT')}"
-                                           class="text-muted">개수</small><small>
-                                    개</small>
-                                </div>
-                                <span class="text-success"
-                                      th:text="${#numbers.formatDecimal(item.price * item.cartQuantity, 0, 'DEFAULT', 0, 'DEFAULT')}">가격</span>
-                                <span> 원</span>
-                            </div>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <h4>
-                                <span>배송비</span>
-                                <strong></span>
-                                    원</strong>
-                            </h4>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <h4>
-                                <span>총합</span>
-                                <strong><span class="text-success"
-                                              th:text="${#numbers.formatDecimal(order.orderTotalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
-                                    원</strong>
-                            </h4>
-                        </li>
-                    </ul>
-
-                    <button class="w-100 btn btn-warning btn-lg" th:href="@{/order/payment}" type="submit">결제 완료</button>
+    <div layout:fragment="content">
+        <div class="container">
+            <main>
+                <div class="py-5 text-center">
+                    <h1 class="text-danger">어떠한 개인 정보도 입력하지 마십시오 본 사이트는 데모용입니다</h1>
+                    <h1 class="text-danger">DO NOT ENTER ANY OF YOUR PERSONAL INFORMATION.
+                        THIS IS A DEMO SITE.</h1>
+                    <img class="d-block mx-auto mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72"
+                        height="57">
+                    <h2>주문 진행 <i class="fas fa-arrow-right"></i>
+                        <strong class="text-primary">결제 진행</strong> <i class="fas fa-arrow-right"></i>
+                        결제 완료
+                    </h2>
                 </div>
 
+                <div class="row g-5">
+                    <div class="col-md-5 col-lg-4 order-md-last">
+                        <h4 class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-primary">장바구니</span>
+                            <span class="badge bg-primary rounded-pill"><span
+                                    th:text="${order.orderTotalCount}"></span></span>
+                        </h4>
 
-                <div class="col-md-7 col-lg-8">
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item d-flex justify-content-between lh-sm"
+                                th:each="item : ${order.itemResponses}">
+                                <div>
+                                    <div>
+                                        <h6 th:text="${item.name}" id="name" class="my-0"></h6>
+                                        <small
+                                            th:text="${#numbers.formatDecimal(item.cartQuantity, 0, 'DEFAULT', 0, 'DEFAULT')}"
+                                            class="text-muted">개수</small><small>
+                                            개</small>
+                                    </div>
+                                    <span class="text-success"
+                                        th:text="${#numbers.formatDecimal(item.price * item.cartQuantity, 0, 'DEFAULT', 0, 'DEFAULT')}">가격</span>
+                                    <span> 원</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <h4>
+                                    <span>배송비</span>
+                                    <strong></span>
+                                        원</strong>
+                                </h4>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <h4>
+                                    <span>총합</span>
+                                    <strong><span class="text-success"
+                                            th:text="${#numbers.formatDecimal(order.orderTotalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
+                                        원</strong>
+                                </h4>
+                            </li>
+                        </ul>
+                        <!-- th:href="@{/order/payment}" -->
+                        <button onmousedown="paymentRecord();" onclick="requestPay();" class="w-100 btn btn-warning btn-lg"
+                             type="submit">결제하기</button>
+                    </div>
 
-                    <form class="needs-validation" novalidate>
-                        <h4 class="mb-3">구매자 정보</h4>
+
+                    <div class="col-md-7 col-lg-8">
+
+                        <form class="needs-validation" novalidate>
+                            <h4 class="mb-3">결제 방법</h4>
                             <div class="row g-3">
                                 <div>
 
-                                    <div class="accordion" id="accordionExample">
+                                    <select id="pg" class="form-select" aria-label="Default select example">
+                                        <option selected>결제 방법 선택</option>
+                                        <option value="html5_inicis">이니시스 웹표준</option>
+                                        <option value="tosspay">토스 간편결제</option>
+                                        <option value="kakaopay">카카오페이 간편결제</option>
+                                    </select>
+                                    <select id="payMethod" class="form-select" aria-label="Default select example">
+                                        <option selected>결제 수단 선택</option>
+                                        <option value="card">신용카드</option>
+                                        <option value="trans">실시간계좌이체</option>
+                                        <option value="phone">휴대폰소액결제</option>
+                                    </select>
+                                    <!-- <div class="accordion" id="accordionExample">
                                         <div class="card">
                                             <div class="card-header p-0">
                                                 <h2 class="mb-0">
@@ -125,51 +140,182 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
 
-
-                        <hr class="my-4">
-
-                        <h4 class="mb-3">받는 사람 정보</h4>
-                        <div class="row g-3">
-                            <div class="col-sm-6">
-                                <label for="receiverFullName" class="form-label">이름</label>
-                                <input th:value="${user.getName().getFullName()}" type="text" class="form-control"
-                                       id="receiverFullName" placeholder="" value="" required readonly>
-                            </div>
-
-                            <div class="col-12">
-                                <label for="receiverAddress" class="form-label">주소</label>
-                                <input th:value="${user.getAddress().getFullAddress()}" type="text" class="form-control"
-                                       id="receiverAddress" placeholder="1234 Main St" required readonly>
-                                <div class="invalid-feedback">
-                                    주소를 입력해주세요
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <label for="receiverPhoneNumber" class="form-label">휴대폰 번호</label>
-                                <input th:value="${user.getPhoneNumber().getFullNumber()}" type="text"
-                                       class="form-control"
-                                       id="receiverPhoneNumber" placeholder="" value="" required readonly>
-                            </div>
-                            <div class="col-12">
-                                <label for="receiverEmail" class="form-label">이메일</label>
-                                <input th:value="${user.getEmail()}" type="text" class="form-control"
-                                       id="receiverEmail" placeholder="" value="" required readonly>
-                            </div>
 
                             <hr class="my-4">
-                        </div>
-                    </form>
+
+                            <h4 class="mb-3">받는 사람 정보</h4>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="buyerName" class="form-label">이름</label>
+                                    <input
+                                        th:value="${info == null ? user.getName().getFullName() : info.receiverFullName}"
+                                        type="text" class="form-control" id="buyerName" placeholder="" value="" required
+                                        readonly>
+                                </div>
+
+                                <div class="col-3">
+                                    <label for="buyerPostcode" class="form-label">우편번호</label>
+                                    <input th:value="${info == null ? user.getAddress().getZipcode() : info.zipcode}"
+                                        type="text" class="form-control" id="buyerPostcode" required readonly>
+                                    <div class="invalid-feedback">
+                                        우편번호를 입력해주세요
+                                    </div>
+                                </div>
+                                <div class="col-9">
+                                    <label for="buyerAddr" class="form-label">주소</label>
+                                    <input th:value="${info == null ? user.getAddress().getFullAddress() : fullAddress}"
+                                        type="text" class="form-control" id="buyerAddr" required readonly>
+                                    <div class="invalid-feedback">
+                                        주소를 입력해주세요
+                                    </div>
+                                </div>
+
+
+                                <div class="col-12">
+                                    <label for="buyerTel" class="form-label">휴대폰 번호</label>
+                                    <input
+                                        th:value="${info == null ? user.getPhoneNumber().getFullNumber() : info.receiverPhoneNumber}"
+                                        type="text" class="form-control" id="buyerTel" placeholder="" value="" required
+                                        readonly>
+                                </div>
+                                <div class="col-12">
+                                    <label for="buyerEmail" class="form-label">이메일</label>
+                                    <input th:value="${info == null ? user.getEmail() : info.receiverEmail}" type="text"
+                                        class="form-control" id="buyerEmail" placeholder="" value="" required readonly>
+                                </div>
+
+                                <hr class="my-4">
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        </main>
-        <script src="../js/form-validation.js"></script>
+            </main>
+            <script>
+                var IMP = window.IMP;
+
+                let pg;
+                let payMethod;
+                let buyerEmail;
+                let buyerName;
+                let buyerTel;
+                let buyerAddr;
+                let buyerPostcode;
+                let amount;
+                let merchantUid;
+                let name = document.getElementById('name').textContent;
+                function paymentRecord() {
+                    pg = document.getElementById('pg')[document.getElementById('pg')
+                        .selectedIndex].value.toUpperCase();
+                    if (pg == '결제 방법 선택') {
+                        alert('결제 방법을 선택해주세요');
+                        preventDefault();
+                    }
+                    payMethod = document.getElementById('payMethod')[document.getElementById('payMethod')
+                        .selectedIndex].value.toUpperCase();
+                    if (payMethod == '결제 수단 선택') {
+                        alert('결제 수단을 선택해주세요');
+                        preventDefault();
+                    }
+                    buyerEmail = document.getElementById('buyerEmail').value;
+                    buyerName = document.getElementById('buyerName').value;
+                    buyerTel = document.getElementById('buyerTel').value;
+                    buyerAddr = document.getElementById('buyerAddr').value;
+                    buyerPostcode = document.getElementById('buyerPostcode').value;
+
+                    let data = {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            pg,
+                            payMethod,
+                            buyerEmail,
+                            buyerName,
+                            buyerTel,
+                            buyerAddr,
+                            buyerPostcode
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    };
+                    const onSuccess = res => {
+                        res.json()
+                            .then((json) => {
+                                amount = json.amount;
+                                merchantUid = json.merchantUid;
+                            })
+                    }
+                    const onFailure = res => {
+                        return res.json()
+                            .then(json => {
+                                alert(json.message);
+                                preventDefault();
+                            })
+                    }
+
+                    fetch(`/api/v1/payment/record`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            console.log(err.message);
+                        });
+                };
+
+
+                function requestPay() {
+                    
+                    IMP.init("imp67766521");
+                    // IMP.request_pay(param, callback) 결제창 호출
+
+                    IMP.request_pay({ // param
+                        pg: pg,
+                        pay_method: payMethod,
+                        merchant_uid: merchantUid,
+                        amount: amount,
+                        name: name,
+                        buyer_email: buyerEmail,
+                        buyer_name: buyerName,
+                        buyer_tel: buyerTel,
+                        buyer_addr: buyerAddr,
+                        buyer_postcode: buyerPostcode
+
+                    }, function (rsp) { // callback
+                        if (rsp.success) {
+                            var msg = '결제가 완료되었습니다.';
+        msg += '고유ID : ' + rsp.imp_uid;
+        msg += '상점 거래ID : ' + rsp.merchant_uid;
+        msg += '결제 금액 : ' + rsp.paid_amount;
+        msg += '카드 승인번호 : ' + rsp.apply_num;
+                            // jQuery.ajax({
+                            //     url: "", // 예: https://www.myservice.com/payments/complete
+                            //     method: "POST",
+                            //     headers: { "Content-Type": "application/json" },
+                            //     data: {
+                            //         imp_uid: rsp.imp_uid,
+                            //         merchant_uid: rsp.merchant_uid
+                            //     }
+                            // }).done(function (data) {
+                            //     // 가맹점 서버 결제 API 성공시 로직
+                            // })
+                        } else {
+                            alert("결제에 실패하였습니다. 에러 내용: " + rsp.error_msg);
+                        }
+                    });
+                }
+            </script>
+            <script src="../js/form-validation.js"></script>
+            <script src="/webjars/jquery/jquery.min.js"></script>
+            <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+        </div>
     </div>
-</div>
 </body>
 
 </html>

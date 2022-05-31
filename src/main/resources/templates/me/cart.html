@@ -28,6 +28,14 @@
                                         class="text-body">price <i class="fas fa-angle-down mt-1"></i></a></p>
                             </div>
                         </div>
+                        <div class="alert alert-danger" role="alert" th:if="${message}">
+                            <span th:text="${message}"></span>
+                            <form action="/me/privacy" method="post">
+                                </br>
+                                <button type="submit" class="btn btn-primary">개인정보 입력하러 가기</button>
+                            </form>
+                        </div>
+
                         <div class="container" th:if="${#lists.isEmpty(items)}">
                             <h3>장바구니가 비어있습니다</h3>
                             <a th:href="@{/}"><i class="fas fa-home fa-4x"></i></a>

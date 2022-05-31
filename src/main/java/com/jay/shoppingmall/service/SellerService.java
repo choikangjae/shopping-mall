@@ -18,7 +18,10 @@ import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.support.PagedListHolder;
+import org.springframework.beans.support.SortDefinition;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -42,29 +46,38 @@ public class SellerService {
 
     private final QnaService qnaService;
 
-    public List<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
+    public Page<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
-                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+                .orElseThrow(() -> new SellerNotFoundException("판매자 권한이 없습니다"));
 
-        Page<Item> items = itemRepository.findBySellerId(seller.getId(), pageable);
-
-        List<ItemResponse> itemResponses = new ArrayList<>();
-        for (Item item : items) {
-            Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
-            String stringMainImage = fileHandler.getStringImage(mainImage);
-
-            ItemResponse itemResponse = ItemResponse.builder()
-                    .id(item.getId())
-                    .name(item.getName())
-                    .price(item.getPrice())
+        return itemRepository.findBySellerId(seller.getId(), pageable)
+                .map(item -> ItemResponse.builder()
+                        .id(item.getId())
+                        .name(item.getName())
+                        .price(item.getPrice())
 //                    .salePrice(item.getSalePrice())
-                    .zzim(item.getZzim())
-                    .mainImage(stringMainImage)
-                    .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
-                    .build();
-            itemResponses.add(itemResponse);
-        }
-        return itemResponses;
+                        .zzim(item.getZzim())
+                        .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+                        .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
+                        .build());
+
+//        List<ItemResponse> itemResponses = new ArrayList<>();
+//        for (Item item : items) {
+////            Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
+////            String stringMainImage = fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId()));
+//
+//            ItemResponse itemResponse = ItemResponse.builder()
+//                    .id(item.getId())
+//                    .name(item.getName())
+//                    .price(item.getPrice())
+////                    .salePrice(item.getSalePrice())
+//                    .zzim(item.getZzim())
+//                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+//                    .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
+//                    .build();
+//            itemResponses.add(itemResponse);
+//        }
+//        return itemResponses;
     }
 
     public Long writeItem(WriteItemRequest writeItemRequest, final MultipartFile file, final List<MultipartFile> files, final User user) {
