@@ -20,16 +20,18 @@ public class Payment extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private Long userId;
+
     @Enumerated(EnumType.STRING)
     private Pg pg;
 
     @Enumerated(EnumType.STRING)
     private PayMethod payMethod;
 
-    //ORD + yyyy-MM-dd + - + 7자리 숫자
     private String merchantUid;
 
-//    private String name;
+    //이름 생성 전략 생각할 것
+    private String name;
 
     private Long amount;
 
@@ -43,24 +45,15 @@ public class Payment extends BaseTimeEntity {
 
     private String buyerPostcode;
 
-    private static class MerchantUidGenerator {
-        private static int i;
-        private static LocalDate localDate = LocalDate.now();
+    private Boolean isValidated;
 
-        public String generateMerchantUid() {
-            if (!localDate.isEqual(ChronoLocalDate.from(LocalDateTime.now()))) {
-                i = 0;
-                localDate = LocalDate.now();
-            }
-            return "ORD" +
-                    LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) +
-                    "-" +
-                    String.format("%07d", ++i);
-        }
+    private Boolean isAmountManipulated;
 
-        public MerchantUidGenerator() {
-        }
+    public void isValidatedTrue() {
+        this.isValidated = true;
     }
 
-
+    public void isAmountFakeTrue() {
+        this.isAmountManipulated = true;
+    }
 }

@@ -79,7 +79,12 @@ public class OrderController {
 
     @GetMapping("/payment")
     public String orderPayment(@CurrentUser User user, Model model) {
-        CartOrderResponse cartOrderResponse = orderService.orderProcess(user);
+        CartOrderResponse cartOrderResponse = null;
+        try {
+            cartOrderResponse = orderService.orderProcess(user);
+        } catch (Exception e) {
+            return "redirect:/cart";
+        }
 
         model.addAttribute("user", user);
         model.addAttribute("order", cartOrderResponse);
@@ -100,8 +105,6 @@ public class OrderController {
     @GetMapping("/payment-result")
     public String paymentResult(@ModelAttribute OrderResultResponse response, Model model) {
         model.addAttribute("response", response);
-        //TODO 결제 진행창과 결제 완료창 템플릿 만들기.
-        //TODO payment.html과 payment-result.html. Seller 만들고 나서.
 
         return "/order/payment-result";
     }

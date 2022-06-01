@@ -138,9 +138,10 @@
                             </label>
                         </div>
                         <div class="form-check">
-                            <input th:if="${#session.getAttribute('isMarketingAgree')} != null" class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${#session.getAttribute('isMarketingAgree')}">
-                            <input th:if="${user.getAgree()?.getIsMarketingAgree()} != null" class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${user.getAgree().getIsMarketingAgree()}">
-                            <label class="form-check-label">
+<!--                            <input th:if="${#session.getAttribute('isMarketingAgree')} != null" class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${#session.getAttribute('isMarketingAgree')}">-->
+<!--                            <input th:if="${user.getAgree()?.getIsMarketingAgree()} != null" class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${user.getAgree().getIsMarketingAgree()}">-->
+                            <input class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${#session.getAttribute('isMarketingAgree') == null ? user.getAgree().getIsMarketingAgree() : #session.getAttribute('isMarketingAgree')}">
+                            <label class="form-check-label" for="isMarketingAgree">
                                 광고성 개인 정보 수집 동의 여부 (선택)
                             </label>
                         </div>

@@ -1,23 +1,36 @@
 package com.jay.shoppingmall.service;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
+import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.payment.MerchantUidGenerator;
 import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.payment.PaymentRepository;
-import com.jay.shoppingmall.domain.payment.Pg;
 import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
 import com.jay.shoppingmall.dto.response.PaymentResponse;
+import com.jay.shoppingmall.dto.response.PaymentResultResponse;
+import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
 import com.jay.shoppingmall.exception.exceptions.PaymentFailedException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
+import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,31 +43,55 @@ public class PaymentService {
     private final CartRepository cartRepository;
     private final MerchantUidGenerator merchantUidGenerator;
 
-    public Payment doPayment(final Long itemId, final Pg pg, final Long amount) {
-        //외부 API 결제 로직 진행
-        doSomethingWithApi();
+    public PaymentResultResponse paymentTotal(String imp_uid, final String merchant_uid, User user) throws IOException {
+        String accessToken = getAccessToken();
 
-//        Seller seller = sellerRepository.findByItemId(itemId).orElseThrow(()-> new SellerNotFoundException("해당 판매자를 찾을 수 없습니다"));
-        //상품 id로 seller찾기. 다른 seller마다 다른 배송비 정책.
-//        List<Item> itemList = itemRepository.findAllById(Collections.singleton(itemId));
-//        List<Seller> sellerList = new ArrayList<>();
-//        for (Item item : itemList) {
-//            sellerRepository.findAllById(Collections.singleton(item.getSeller().getId()));
-//        }
+        System.out.println("token : " + accessToken);
+        //PG사에 의해 실제로 결제된 금액
+        Long amountByPg = getPaymentInfoByToken(imp_uid, accessToken);
 
-        Payment payment = Payment.builder()
-                .pg(pg)
-                .amount(amount)
-//                .isShippingFeeFree(totalPrice > seller.getShippingFeePolicy())
-                .build();
+        //결제 금액과 레코드 검증.
+        Payment paymentRecord = paymentRepository.findByMerchantUid(merchant_uid)
+                .orElseThrow(() -> new PaymentFailedException("결제 정보가 없습니다"));
 
-        return payment;
-    }
-
-    private void doSomethingWithApi() {
-        if (false) {
-            throw new PaymentFailedException("결제에 실패하였습니다");
+        if (!amountByPg.equals(paymentRecord.getAmount())) {
+            paymentRecord.isAmountFakeTrue();
+            throw new PaymentFailedException("결제 정보가 올바르지 않습니다.");
         }
+
+        paymentRecord.isValidatedTrue();
+
+        //장바구니 비우기 (선택 상품만 제거하는 기능 추가 예정)
+        final List<Cart> carts = cartRepository.findByUser(user)
+                .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
+
+        carts.forEach(Cart::isDeletedTrue);
+
+        //재고 관리하기
+        for (Cart cart : carts) {
+            cart.getItem().stockMinusQuantity(cart.getQuantity());
+
+            if (cart.getItem().getStock() == 0) {
+                //품절일때 로직 작성
+                //seller에게 메시지 보내기
+
+                //UI적 처리
+            }
+        }
+
+        //model로 paymentRecord 돌려주기.
+        PaymentResultResponse paymentResultResponse = PaymentResultResponse.builder()
+                .pg(paymentRecord.getPg())
+                .payMethod(paymentRecord.getPayMethod())
+                .amount(paymentRecord.getAmount())
+                .buyerAddr(paymentRecord.getBuyerAddr())
+                .buyerEmail(paymentRecord.getBuyerEmail())
+                .buyerName(paymentRecord.getBuyerName())
+                .buyerPostcode(paymentRecord.getBuyerPostcode())
+                .buyerTel(paymentRecord.getBuyerTel())
+                .merchantUid(paymentRecord.getMerchantUid())
+                .build();
+        return paymentResultResponse;
     }
 
     public PaymentResponse paymentRecordGenerateBeforePg(final PaymentRequest paymentRequest, final User user) {
@@ -69,6 +106,7 @@ public class PaymentService {
         //유효성 검사 로직 더 작성할 것.
 
         Payment payment = Payment.builder()
+                .userId(user.getId())
                 .amount(amount)
                 .merchantUid(merchantUid)
                 .payMethod(paymentRequest.getPayMethod())
@@ -87,4 +125,88 @@ public class PaymentService {
                 .merchantUid(merchantUid)
                 .build();
     }
+
+    @Value("${imp_key}")
+    private String imp_key;
+
+    @Value("${imp_secret}")
+    private String imp_secret;
+
+    /**
+     *
+     * @return access_token
+     * @throws IOException
+     */
+    private String getAccessToken() throws IOException {
+
+        HttpsURLConnection conn = null;
+        URL url = new URL("https://api.iamport.kr/users/getToken");
+        conn = (HttpsURLConnection) url.openConnection();
+
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-type", "application/json");
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setDoOutput(true);
+        JsonObject json = new JsonObject();
+
+        json.addProperty("imp_key", imp_key);
+        json.addProperty("imp_secret", imp_secret);
+
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+
+        bw.write(json.toString());
+        bw.flush();
+        bw.close();
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+
+        Gson gson = new Gson();
+        String response = gson.fromJson(br.readLine(), Map.class).get("response").toString();
+        System.out.println("response : " + response);
+        String token = gson.fromJson(response, Map.class).get("access_token").toString();
+
+        br.close();
+        conn.disconnect();
+
+        return token;
+    }
+
+    /**
+     *
+     * @param imp_uid
+     * @param access_token
+     * @return 총액
+     * @throws IOException
+     */
+    private Long getPaymentInfoByToken(String imp_uid, String access_token) throws IOException {
+        HttpsURLConnection connection = null;
+        URL url = new URL("https://api.iamport.kr/payments/" + imp_uid);
+        connection = (HttpsURLConnection) url.openConnection();
+
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Authorization", access_token);
+        connection.setDoOutput(true);
+
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"));
+
+        Gson gson = new Gson();
+        Response response = gson.fromJson(bufferedReader.readLine(), Response.class);
+
+        bufferedReader.close();
+        connection.disconnect();
+
+        return response.getResponse().getAmount();
+    }
+
+    @ToString
+    @Getter
+    private static class Response {
+        private PaymentInfo response;
+    }
+    @ToString
+    @Getter
+    private static class PaymentInfo {
+        private Long amount;
+    }
+
+
 }

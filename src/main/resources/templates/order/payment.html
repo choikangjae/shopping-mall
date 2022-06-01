@@ -15,8 +15,6 @@
             <main>
                 <div class="py-5 text-center">
                     <h1 class="text-danger">어떠한 개인 정보도 입력하지 마십시오 본 사이트는 데모용입니다</h1>
-                    <h1 class="text-danger">DO NOT ENTER ANY OF YOUR PERSONAL INFORMATION.
-                        THIS IS A DEMO SITE.</h1>
                     <img class="d-block mx-auto mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72"
                         height="57">
                     <h2>주문 진행 <i class="fas fa-arrow-right"></i>
@@ -66,8 +64,9 @@
                             </li>
                         </ul>
                         <!-- th:href="@{/order/payment}" -->
-                        <button onmousedown="paymentRecord();" onclick="requestPay();" class="w-100 btn btn-warning btn-lg"
+                        <button name="paymentButton" id="paymentButton" onmousedown="paymentRecord();" onclick="requestPay();" class="w-100 btn btn-warning btn-lg"
                              type="submit">결제하기</button>
+                             <label for="paymentButton">본 결제는 테스트용으로 실제로 결제가 진행되지 않습니다</label>
                     </div>
 
 
@@ -144,10 +143,26 @@
                                 </div>
                             </div>
 
+                            <hr>
+
+                            <h4 class="mb-3">구매자 정보</h4>
+
+                            <div class="col-12">
+                                <label for="buyerTel" class="form-label">휴대폰 번호</label>
+                                <input
+                                    th:value="${user.getPhoneNumber().getFullNumber()}"
+                                    type="text" class="form-control" id="buyerTel" placeholder="" value="" required
+                                    readonly>
+                            </div>
+                            <div class="col-12">
+                                <label for="buyerEmail" class="form-label">이메일</label>
+                                <input th:value="${user.getEmail()}" type="text"
+                                    class="form-control" id="buyerEmail" placeholder="" value="" required readonly>
+                            </div>
 
                             <hr class="my-4">
 
-                            <h4 class="mb-3">받는 사람 정보</h4>
+                            <h4 class="mb-3">받는 분 주소</h4>
                             <div class="row g-3">
                                 <div class="col-12">
                                     <label for="buyerName" class="form-label">이름</label>
@@ -172,20 +187,6 @@
                                     <div class="invalid-feedback">
                                         주소를 입력해주세요
                                     </div>
-                                </div>
-
-
-                                <div class="col-12">
-                                    <label for="buyerTel" class="form-label">휴대폰 번호</label>
-                                    <input
-                                        th:value="${info == null ? user.getPhoneNumber().getFullNumber() : info.receiverPhoneNumber}"
-                                        type="text" class="form-control" id="buyerTel" placeholder="" value="" required
-                                        readonly>
-                                </div>
-                                <div class="col-12">
-                                    <label for="buyerEmail" class="form-label">이메일</label>
-                                    <input th:value="${info == null ? user.getEmail() : info.receiverEmail}" type="text"
-                                        class="form-control" id="buyerEmail" placeholder="" value="" required readonly>
                                 </div>
 
                                 <hr class="my-4">
@@ -285,26 +286,23 @@
                         buyer_name: buyerName,
                         buyer_tel: buyerTel,
                         buyer_addr: buyerAddr,
-                        buyer_postcode: buyerPostcode
+                        buyer_postcode: buyerPostcode,
+                        m_redirect_url: "/order/payment-result"
 
                     }, function (rsp) { // callback
                         if (rsp.success) {
-                            var msg = '결제가 완료되었습니다.';
-        msg += '고유ID : ' + rsp.imp_uid;
-        msg += '상점 거래ID : ' + rsp.merchant_uid;
-        msg += '결제 금액 : ' + rsp.paid_amount;
-        msg += '카드 승인번호 : ' + rsp.apply_num;
-                            // jQuery.ajax({
-                            //     url: "", // 예: https://www.myservice.com/payments/complete
-                            //     method: "POST",
-                            //     headers: { "Content-Type": "application/json" },
-                            //     data: {
-                            //         imp_uid: rsp.imp_uid,
-                            //         merchant_uid: rsp.merchant_uid
-                            //     }
-                            // }).done(function (data) {
-                            //     // 가맹점 서버 결제 API 성공시 로직
-                            // })
+
+                            jQuery.ajax({
+                                url: "/api/v1/payment/complete", // 예: https://www.myservice.com/payments/complete
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                data: {
+                                    imp_uid: rsp.imp_uid,
+                                    merchant_uid: rsp.merchant_uid
+                                }
+                            }).done(function (data) {
+                                location.replace('/order/payment-result');
+                            })
                         } else {
                             alert("결제에 실패하였습니다. 에러 내용: " + rsp.error_msg);
                         }

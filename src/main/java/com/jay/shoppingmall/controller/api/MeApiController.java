@@ -86,28 +86,16 @@ public class MeApiController {
         updateValidator.validate(request, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            FieldError error = bindingResult.getFieldError();
-            String e = Objects.requireNonNull(error).getField();
-            if (e.equals("phoneNumber")) {
-                return ResponseEntity.badRequest().body(ErrorResponse.builder()
-                        .message("전화번호가 형식에 맞지않습니다")
-                        .code("INVALID_PHONE_NUMBER")
-                        .build());
-            } else {
-                return ResponseEntity.badRequest().body(ErrorResponse.builder()
-                        .message("비어있는 값이 있습니다")
-                        .code("NULL_NOT_ACCEPTED")
-                        .build());
-            }
+            return ResponseEntity.badRequest().body(ErrorResponse.builder()
+                    .message(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage())
+                    .build());
         }
 
         Long id = user.getId();
         meService.updateInfo(request, id);
         servletRequest.getSession().removeAttribute("isMarketingAgree");
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Authentication newAuthentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authentication.getPrincipal(), request.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+        sessionUpdater.sessionUpdateToken(user.getEmail(), request.getPassword());
 
         return ResponseEntity.ok().body(null);
     }

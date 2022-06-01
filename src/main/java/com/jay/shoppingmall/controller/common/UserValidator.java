@@ -24,12 +24,12 @@ public class UserValidator implements Validator {
         UserValidationRequest userValidationRequest = (UserValidationRequest) target;
 
         if (!ObjectUtils.isEmpty(userValidationRequest.getEmail()) && userRepository.findByEmail(userValidationRequest.getEmail()).isPresent()) {
-            errors.rejectValue("email", "DuplicatedEmail", "이미 해당 이메일로 가입이 되어있습니다.");
+            errors.rejectValue("email", "DUPLICATED_EMAIL", "이미 해당 이메일로 가입이 되어있습니다.");
         }
 
         if (!userValidationRequest.getPassword().equals(userValidationRequest.getRepeatPassword())) {
-            errors.rejectValue("password", "PasswordNotMatch", "비밀번호가 같지 않습니다.");
-            errors.rejectValue("repeatPassword", "PasswordNotMatch", "비밀번호가 같지 않습니다.");
+            errors.rejectValue("password", "PASSWORD_NOT_MATCH", "비밀번호가 같지 않습니다.");
+            errors.rejectValue("repeatPassword", "PASSWORD_NOT_MATCH", "비밀번호가 같지 않습니다.");
         }
     }
 }

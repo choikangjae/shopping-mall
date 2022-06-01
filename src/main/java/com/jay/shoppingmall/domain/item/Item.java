@@ -5,6 +5,7 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.*;
 
 import javax.persistence.*;
@@ -43,12 +44,18 @@ public class Item extends BaseTimeEntity {
     private Integer viewCount;
 
     //삭제.
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     //임시저장.
-    private boolean isTemporary;
+    private Boolean isTemporary;
 
-    //OneToMany를 위한 참조
+    public void stockMinusQuantity(Integer quantity) {
+        if (quantity > stock) {
+            throw new ItemNotFoundException("주문량이 재고보다 많습니다");
+        }
+        this.stock -= quantity;
+    }
+
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;

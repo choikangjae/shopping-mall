@@ -108,11 +108,11 @@
 
                     <hr class="my-4">
                     <div>
-                        <h4 class="mb-3">받는 사람 정보</h4>
+                        <h4 class="mb-3">받는 분 주소</h4>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="" id="receiverFormReset">
                             <label class="form-check-label" for="receiverFormReset">
-                                받는 사람 정보 새로 적기
+                                새로 적기
                             </label>
                         </div>
                     </div>
@@ -173,18 +173,18 @@
                                 주소를 입력해주세요
                             </div>
                             </div> -->
-                            <hr>
+                            <!-- <hr> -->
 
-                            <div class="col-12">
+                            <!-- <div class="col-12">
                                 <label for="receiverPhoneNumber" class="form-label">휴대폰 번호</label>
                                 <input th:value="${user.getPhoneNumber().getFullNumber()}" type="text"
-                                       name="receiverPhoneNumber" class="form-control" id="receiverPhoneNumber" placeholder="" value="" required>
+                                       name="receiverPhoneNumber" class="form-control" id="receiverPhoneNumber" placeholder="" value="" required readonly>
                             </div>
                             <div class="col-12">
                                 <label for="receiverEmail" class="form-label">이메일</label>
                                 <input th:value="${user.getEmail()}" type="text" class="form-control"
-                                       name="receiverEmail" id="receiverEmail" placeholder="" value="" required>
-                            </div>
+                                       name="receiverEmail" id="receiverEmail" placeholder="" value="" required readonly>
+                            </div> -->
                     </form>
                     <hr class="my-4">
                 </div>
@@ -202,8 +202,8 @@
                 let address = document.getElementById('address').value;
                 let detailAddress = document.getElementById('detailAddress').value;
                 let extraAddress = document.getElementById('extraAddress').value;
-                let receiverPhoneNumber = document.getElementById('receiverPhoneNumber').value;
-                let receiverEmail = document.getElementById('receiverEmail').value;
+                // let receiverPhoneNumber = document.getElementById('receiverPhoneNumber').value;
+                // let receiverEmail = document.getElementById('receiverEmail').value;
 
                 checkbox.addEventListener('change', () => {
 
@@ -213,16 +213,16 @@
                         document.getElementById('address').value = '';
                         document.getElementById('detailAddress').value = '';
                         document.getElementById('extraAddress').value = '';
-                        document.getElementById('receiverPhoneNumber').value = '';
-                        document.getElementById('receiverEmail').value = '';
+                        // document.getElementById('receiverPhoneNumber').value = '';
+                        // document.getElementById('receiverEmail').value = '';
                     } else {
                         document.getElementById('receiverFullName').value = receiverFullName;
                         document.getElementById('zipcode').value = zipcode;
                         document.getElementById('address').value = address;
                         document.getElementById('detailAddress').value = detailAddress;
                         document.getElementById('extraAddress').value = extraAddress;
-                        document.getElementById('receiverPhoneNumber').value = receiverPhoneNumber;
-                        document.getElementById('receiverEmail').value = receiverEmail;
+                        // document.getElementById('receiverPhoneNumber').value = receiverPhoneNumber;
+                        // document.getElementById('receiverEmail').value = receiverEmail;
                     }
                 })
 
@@ -234,8 +234,8 @@
                     address = document.getElementById('address').value;
                     detailAddress = document.getElementById('detailAddress').value;
                     extraAddress = document.getElementById('extraAddress').value;
-                    receiverPhoneNumber = document.getElementById('receiverPhoneNumber').value;
-                    receiverEmail = document.getElementById('receiverEmail').value;
+                    // receiverPhoneNumber = document.getElementById('receiverPhoneNumber').value;
+                    // receiverEmail = document.getElementById('receiverEmail').value;
 
                     let data = {
                         method: 'POST',
@@ -245,8 +245,8 @@
                             address,
                             detailAddress,
                             extraAddress,
-                            receiverPhoneNumber,
-                            receiverEmail,
+                            // receiverPhoneNumber,
+                            // receiverEmail,
                         }),
 
                         headers: {

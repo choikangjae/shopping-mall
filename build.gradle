@@ -35,6 +35,9 @@ dependencies {
 	implementation 'org.webjars:sockjs-client:1.0.2'
 	implementation 'org.webjars:stomp-websocket:2.3.3'
 
+	implementation 'org.json:json:20200518'
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.7'
+
 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
 //	I/O
