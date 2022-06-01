@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
-    xmlns:sec="http://www.w3.org/1999/xhtml" layout:decorate="~{layouts/layout.html}">
+      xmlns:sec="http://www.w3.org/1999/xhtml" layout:decorate="~{layouts/layout.html}">
 
 <head>
     <title>상품 상세</title>
@@ -8,71 +8,79 @@
 
 <body>
 
-    <div layout:fragment="content">
+<div layout:fragment="content">
 
-        <div class="container">
+    <div class="container">
 
-            <div class="row">
+        <div class="row">
 
-                <div class="col-md-8">
-                    <img class="bd-placeholder-img card-img-top" width="100%" height="500"
-                        th:src="'data:image/jpeg;base64,'+${response.mainImage}" alt="..." />
+            <div class="col-md-8">
+                <img class="bd-placeholder-img card-img-top" width="100%" height="500"
+                     th:src="'data:image/jpeg;base64,'+${response.mainImage}" alt="..."/>
+            </div>
+
+            <div class="col-md-4">
+                <h3 th:text="'이름: ' + ${response.name}" class="my-3">상품 이름
+                </h3>
+
+                <h4 th:text="'가격: ' + ${#numbers.formatDecimal(response.price, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                    가격</h4>
+                <h3 class="my-3">상세설명</h3>
+                <div class="row">
+                    <div class="col-6">
+
+                        <ul>
+                            <li th:text="'재고: ' + ${response.stock} + ' 개'">재고</li>
+                            <li th:text="'설명: ' + ${response.description}">설명</li>
+                        </ul>
+                    </div>
+                    <div class="col-6" sec:authorize="isAuthenticated()">
+                        <button th:onclick="|addToWishList('${response.id}');|"
+                                class="btn btn-lg btn-outline-secondary">
+                            <i th:classappend="${response.getIsZzimed == true ? 'text-danger':''}"
+                               th:id="'heart' + ${response.id}" class="fas fa-heart"></i>
+                            <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${response.id}"
+                                                                              th:text="${#objects.nullSafe(response.zzim,'0')}"></span></span>
+                        </button>
+                    </div>
+
+                    <div class="col-6" sec:authorize="!isAuthenticated()">
+                        <form method="get" th:action="@{/auth/login}">
+                            <input type="hidden" th:name="requestURI" th:value="${#httpServletRequest.requestURI}">
+                            <button class="btn btn-lg btn-outline-secondary">
+                                <i class="fas fa-heart"></i>
+                                <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${response.id}"
+                                                                                  th:text="${#objects.nullSafe(response.zzim,'0')}"></span></span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
-                <div class="col-md-4">
-                    <h3 th:text="'이름: ' + ${response.name}" class="my-3">상품 이름
-                    </h3>
+                <!--                <form th:action="@{/cart/add}" method="post">-->
+                <input type="hidden" th:name="id" id="id" th:value="${response.id}"/>
+                <div class="col-6 d-flex">
+                    <a class="btn btn-link px-2"
+                       onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                        <i class="fas fa-minus"></i>
+                    </a>
 
-                    <h4 th:text="'가격: ' + ${#numbers.formatDecimal(response.price, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
-                        가격</h4>
-                    <h3 class="my-3">상세설명</h3>
-                    <div class="row">
-                        <div class="col-6">
-
-                            <ul>
-                                <li th:text="'재고: ' + ${response.stock} + ' 개'">재고</li>
-                                <li th:text="'설명: ' + ${response.description}">설명</li>
-                            </ul>
-                        </div>
-                        <div class="col-6" sec:authorize="isAuthenticated()">
-                            <button th:onclick="|addToWishList('${response.id}');|"
-                                class="btn btn-lg btn-outline-secondary">
-                                <i th:classappend="${response.getIsZzimed == true ? 'text-danger':''}"
-                                    th:id="'heart' + ${response.id}" class="fas fa-heart"></i>
-                                <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${response.id}"
-                                        th:text="${#objects.nullSafe(response.zzim,'0')}"></span></span>
-                            </button>
-                        </div>
-
-                        <div class="col-6" sec:authorize="!isAuthenticated()">
-                            <form method="get" th:action="@{/auth/login}">
-                                <input type="hidden" th:name="requestURI" th:value="${#httpServletRequest.requestURI}">
-                                <button class="btn btn-lg btn-outline-secondary">
-                                    <i class="fas fa-heart"></i>
-                                    <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${response.id}"
-                                            th:text="${#objects.nullSafe(response.zzim,'0')}"></span></span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!--                <form th:action="@{/cart/add}" method="post">-->
-                    <input type="hidden" th:name="id" id="id" th:value="${response.id}" />
-                    <div class="col-6 d-flex">
-                        <a class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                            <i class="fas fa-minus"></i>
-                        </a>
-
-                        <input id="quantity" min="1" th:max="${response.stock}" th:name="quantity" value="1"
-                            type="number" class="form-control form-control-sm" />
-                        <a class="btn btn-link px-2"
-                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                    </div>
-                    <hr>
-                    <div sec:authorize="isAuthenticated()">
+                    <input id="quantity" min="1" th:max="${response.stock}" th:name="quantity" value="1"
+                           type="number" class="form-control form-control-sm"/>
+                    <a class="btn btn-link px-2"
+                       onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                </div>
+                <hr>
+                <div sec:authorize="isAuthenticated()">
+                    <th:block th:if="${response.stock} == 0">
+                        <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="죄송합니다 상품이 품절되었습니다." class="btn btn-outline-dark" disabled>
+                            <i class="fas fa-exclamation text-danger"></i>
+                            품절
+                        </button>
+                    </th:block>
+                    <th:block th:unless="${response.stock} == 0">
                         <button type="button" id="addToCart" class="btn btn-outline-dark">
                             <i class="fas fa-shopping-cart"></i>
                             장바구니
@@ -81,322 +89,342 @@
                             <i class="fas fa-cash-register"></i>
                             바로구매
                         </button>
+                    </th:block>
+                </div>
+                <form method="get" th:action="@{/auth/login}">
+                    <div sec:authorize="!isAuthenticated()">
+                        <input type="hidden" th:name="requestURI" th:value="${#httpServletRequest.requestURI}">
+                        <button class="btn btn-outline-dark">
+                            <i class="fas fa-shopping-cart"></i>
+                            장바구니
+                        </button>
+                        <button class="btn btn-outline-dark">
+                            <i class="fas fa-cash-register"></i>
+                            바로구매
+                        </button>
                     </div>
-                    <form method="get" th:action="@{/auth/login}">
-                        <div sec:authorize="!isAuthenticated()">
-                            <input type="hidden" th:name="requestURI" th:value="${#httpServletRequest.requestURI}">
-                            <button class="btn btn-outline-dark">
-                                <i class="fas fa-shopping-cart"></i>
-                                장바구니
-                            </button>
-                            <button class="btn btn-outline-dark">
-                                <i class="fas fa-cash-register"></i>
-                                바로구매
-                            </button>
-                        </div>
-                    </form>
-                    <!--                </form>-->
-                    <div th:error="${error}"></div>
+                </form>
+
+                <div th:if="${qnaResponseWithPagination.getIsSellerItem()} == true">
+                    <hr>
+                    <button type="button" id="itemUpdate" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i>
+                        수정
+                    </button>
+                    <button type="button" id="itemDelete" class="btn btn-outline-danger">
+                        <i class="fas fa-trash-alt"></i>
+                        삭제
+                    </button>
                 </div>
+                <!--                </form>-->
+                <div th:error="${error}"></div>
             </div>
+        </div>
 
-            <!-- /.row -->
+        <!-- /.row -->
 
-            <!-- Related Projects Row -->
-            <br>
-            <h2 class="my-4">관련 상품</h2>
-            <div class="row">
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <a href="#">
-                        <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
-                    </a>
-                </div>
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <a href="#">
-                        <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
-                    </a>
-                </div>
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <a href="#">
-                        <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
-                    </a>
-                </div>
-                <div class="col-md-3 col-sm-6 mb-4">
-                    <a href="#">
-                        <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
-                    </a>
-                </div>
+        <!-- Related Projects Row -->
+        <br>
+        <h2 class="my-4">관련 상품</h2>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 mb-4">
+                <a href="#">
+                    <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
+                </a>
             </div>
-
-            <hr>
-
-
-            <div class="col-md-8" th:each="descriptionImage : ${response.descriptionImages}">
-                <img class="bd-placeholder-img card-img-top" width="100%" height="500"
-                    th:src="'data:image/jpeg;base64,'+${descriptionImage}" alt="..." />
+            <div class="col-md-3 col-sm-6 mb-4">
+                <a href="#">
+                    <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
+                </a>
             </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <a href="#">
+                    <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <a href="#">
+                    <img class="img-fluid" src="https://via.placeholder.com/500x300" alt="">
+                </a>
+            </div>
+        </div>
 
-            <hr>
+        <hr>
 
-            <h2 class="my-4">리뷰
-                <span>(전체개수)
+
+        <div class="col-md-8" th:each="descriptionImage : ${response.descriptionImages}">
+            <img class="bd-placeholder-img card-img-top" width="100%" height="500"
+                 th:src="'data:image/jpeg;base64,'+${descriptionImage}" alt="..."/>
+        </div>
+
+        <hr>
+
+        <h2 class="my-4">리뷰
+            <span>(전체개수)
                 </span>
-                <span class="text-warning">
+            <span class="text-warning">
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star-half-alt"></i>
                 </span>
-            </h2>
+        </h2>
 
-            <div>
-                <hr>
-                <span>아이디(이메일에서 떼와서)뒷자리 3개가리기.</span>
-                <span>가장 오른쪽으로 이동시키기 -> 글쓴 시점.</span>
-            </div>
-            <div>
-                <div>
-                    <div><span>옵션이 들어간다. [COLOR]KHAKI BEIGE [SIZE] S 구매</span>
-                    </div>
-                    <p>
-                        리뷰자가 글쓴 내용이 들어간다.
-                        많이 오버핏이긴합니다.
-                        어깨가 제가좁아서
-                        어깨패드가 좀 내려가긴합니다....ㅠ
-                        디자인이나색감은 괜찮아서 입으려ㅁ고요..
-                        어깨만좀 넓엇더라면 더예뻣을걸</p>
-                </div>
-                <div>
-                    사진이 들어갈곳.
-                </div>
-            </div>
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">Next</a>
-                    </li>
-                </ul>
-            </nav>
-
+        <div>
             <hr>
-
-            <div class="row">
-                <div class="col-10">
-                    <h2 class="my-4">상품 Q&A (<span th:text="${qnaResponseWithPagination.getTotalElements()}"></span>)
-                    </h2>
+            <span>아이디(이메일에서 떼와서)뒷자리 3개가리기.</span>
+            <span>가장 오른쪽으로 이동시키기 -> 글쓴 시점.</span>
+        </div>
+        <div>
+            <div>
+                <div><span>옵션이 들어간다. [COLOR]KHAKI BEIGE [SIZE] S 구매</span>
                 </div>
+                <p>
+                    리뷰자가 글쓴 내용이 들어간다.
+                    많이 오버핏이긴합니다.
+                    어깨가 제가좁아서
+                    어깨패드가 좀 내려가긴합니다....ㅠ
+                    디자인이나색감은 괜찮아서 입으려ㅁ고요..
+                    어깨만좀 넓엇더라면 더예뻣을걸</p>
+            </div>
+            <div>
+                사진이 들어갈곳.
+            </div>
+        </div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                </li>
+            </ul>
+        </nav>
 
-                <div class="col-2" sec:authorize="isAuthenticated()">
-                    <input type="hidden" th:name="scrollY" id="scrollNow"
-                        th:value="${#session.getAttribute('scrollY')}">
+        <hr>
 
-                    <button class="btn btn-primary btn-lg" type="button" data-bs-toggle="collapse"
+        <div class="row">
+            <div class="col-10">
+                <h2 class="my-4">상품 Q&A (<span th:text="${qnaResponseWithPagination.getTotalElements()}"></span>)
+                </h2>
+            </div>
+
+            <div class="col-2" sec:authorize="isAuthenticated()">
+                <input type="hidden" th:name="scrollY" id="scrollNow"
+                       th:value="${#session.getAttribute('scrollY')}">
+
+                <button class="btn btn-primary btn-lg" type="button" data-bs-toggle="collapse"
                         data-bs-target="#qnaWriteFormToggle" aria-expanded="false" aria-controls="qnaWriteFormToggle">
-                        Q&A 작성
-                    </button>
-                </div>
+                    Q&A 작성
+                </button>
+            </div>
 
-                <div class="collapse col-10 container" id="qnaWriteFormToggle" sec:authorize="isAuthenticated()">
-                    <form method="post" th:action="@{api/v1/qna/write}">
-                        <div class="card card-body">
-                            <div class="input-group mb-3">
-                                <input type="hidden" id="qnaId">
-                                <span class="input-group-text" id="basic-addon1">이메일</span>
-                                <input th:value="${user.email}" type="text" class="form-control" placeholder="Email"
-                                    aria-label="Username" aria-describedby="basic-addon1" readonly>
-                            </div>
+            <div class="collapse col-10 container" id="qnaWriteFormToggle" sec:authorize="isAuthenticated()">
+                <form method="post" th:action="@{api/v1/qna/write}">
+                    <div class="card card-body">
+                        <div class="input-group mb-3">
+                            <input type="hidden" id="qnaId">
+                            <span class="input-group-text" id="basic-addon1">이메일</span>
+                            <input th:value="${user.email}" type="text" class="form-control" placeholder="Email"
+                                   aria-label="Username" aria-describedby="basic-addon1" readonly>
+                        </div>
 
-                            <select id="qnaCategory" class="form-select" aria-label="Default select example">
-                                <option value="ABOUT_ITEM" selected>상품문의</option>
-                                <option value="ABOUT_RESTOCK">재입고문의</option>
-                                <option value="ABOUT_SIZE">사이즈문의</option>
-                                <option value="ABOUT_DELIVERY">배송문의</option>
-                                <option value="ABOUT_OTHERS">기타</option>
-                            </select>
+                        <select id="qnaCategory" class="form-select" aria-label="Default select example">
+                            <option value="ABOUT_ITEM" selected>상품문의</option>
+                            <option value="ABOUT_RESTOCK">재입고문의</option>
+                            <option value="ABOUT_SIZE">사이즈문의</option>
+                            <option value="ABOUT_DELIVERY">배송문의</option>
+                            <option value="ABOUT_OTHERS">기타</option>
+                        </select>
 
-                            <br>
+                        <br>
 
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="isSecret" value="option1">
-                                <label class="form-check-label" for="isSecret">비밀글</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="isEmailNotification" value="option2"
-                                    checked>
-                                <label class="form-check-label" for="isEmailNotification">메일로 알림 받기</label>
-                            </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="isSecret" value="option1">
+                            <label class="form-check-label" for="isSecret">비밀글</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="isEmailNotification" value="option2"
+                                   checked>
+                            <label class="form-check-label" for="isEmailNotification">메일로 알림 받기</label>
+                        </div>
 
-                            <br>
+                        <br>
 
-                            <div class="input-group">
-                                <span class="input-group-text">문의 내용</span>
-                                <textarea id="question" class="form-control" aria-label="With textarea"
-                                    style="height: 200px"></textarea>
-                            </div>
+                        <div class="input-group">
+                            <span class="input-group-text">문의 내용</span>
+                            <textarea id="question" class="form-control" aria-label="With textarea"
+                                      style="height: 200px"></textarea>
+                        </div>
 
-                            <br>
+                        <br>
 
-                            <div class="position-relative">
-                                <button id="qnaWrite" class="btn btn-primary btn-lg" type="button">
-                                    등록
-                                </button>
-                                <button class="btn btn-secondary btn-lg" type="reset" data-bs-toggle="collapse"
+                        <div class="position-relative">
+                            <button id="qnaWrite" class="btn btn-primary btn-lg" type="button">
+                                등록
+                            </button>
+                            <button class="btn btn-secondary btn-lg" type="reset" data-bs-toggle="collapse"
                                     data-bs-target="#qnaWriteFormToggle" aria-expanded="false"
                                     aria-controls="qnaWriteFormToggle" onclick="confirm('정말로 취소하시겠어요?')">
-                                    취소
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-2" sec:authorize="!isAuthenticated()">
-                    <form method="get" th:action="@{/auth/login}">
-                        <input type="hidden" th:name="scrollY" id="scrollY">
-                        <input type="hidden" th:name="requestURI" th:value="${#httpServletRequest.requestURI}">
-                        <button class="btn btn-primary btn-lg" onclick="getScrollY()">Q&A 작성</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card" style="width: 30rem;" th:each="qna : ${qnaResponseWithPagination.qnaResponses}">
-                <div class="card-body" th:id="'qnaCardBody' + ${qna.qnaId}">
-                    <div class="row" data-bs-toggle="collapse" role="button"
-                        th:data-bs-target="'#answer' + ${qna.qnaId}" aria-expanded="false"
-                        th:aria-controls="'answer' + ${qna.qnaId}">
-                        <h6 class="card-title col-5" th:text="'[' + ${qna.qnaCategory} + ']'">카테고리</h6>
-                        <span class="card-title col-5" th:text="${qna.username}"></span>
-
-                        <div class="card-title col-2" th:unless="${#bools.isTrue(qna.getIsAnswered())}">
-                            <h5 class="card-text text-danger"><i class="fas fa-pause"></i></h5>
-                        </div>
-                        <div class="card-title col-2" th:if="${#bools.isTrue(qna.getIsAnswered())}">
-                            <h5 class="card-text text-success"><i class="fas fa-check"></i></h5>
+                                취소
+                            </button>
                         </div>
                     </div>
+                </form>
+            </div>
+            <div class="col-2" sec:authorize="!isAuthenticated()">
+                <form method="get" th:action="@{/auth/login}">
+                    <input type="hidden" th:name="scrollY" id="scrollY">
+                    <input type="hidden" th:name="requestURI" th:value="${#httpServletRequest.requestURI}">
+                    <button class="btn btn-primary btn-lg" onclick="getScrollY()">Q&A 작성</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card" style="width: 30rem;" th:each="qna : ${qnaResponseWithPagination.qnaResponses}">
+            <div class="card-body" th:id="'qnaCardBody' + ${qna.qnaId}">
+                <div class="row" data-bs-toggle="collapse" role="button"
+                     th:data-bs-target="'#answer' + ${qna.qnaId}" aria-expanded="false"
+                     th:aria-controls="'answer' + ${qna.qnaId}">
+                    <h6 class="card-title col-5" th:text="'[' + ${qna.qnaCategory} + ']'">카테고리</h6>
+                    <span class="card-title col-5" th:text="${qna.username}"></span>
+
+                    <div class="card-title col-2" th:unless="${#bools.isTrue(qna.getIsAnswered())}">
+                        <h5 class="card-text text-danger"><i class="fas fa-pause"></i></h5>
+                    </div>
+                    <div class="card-title col-2" th:if="${#bools.isTrue(qna.getIsAnswered())}">
+                        <h5 class="card-text text-success"><i class="fas fa-check"></i></h5>
+                    </div>
+                </div>
 
 
-                    <div class="row">
-                        <h6 class="card-subtitle mb-2 text-muted col-6"
-                            th:text="${#temporals.format(qna.createdDate, 'yyyy-MM-dd HH:mm')}" id="date">작성일
-                        </h6>
-                        <div class="card-subtitle col-3" th:if="${qnaResponseWithPagination.getIsSellerItem()} == true">
-                            <!-- <a th:onclick="|createAnswerForm('${qna.qnaId}');|" type="button">답변</a> -->
-                            <a th:onclick="|displayAnswerForm('${qna.qnaId}');|" type="button">답변</a>
-                        </div>
-                        <span class="card-subtitle col-3" th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
+                <div class="row">
+                    <h6 class="card-subtitle mb-2 text-muted col-6"
+                        th:text="${#temporals.format(qna.createdDate, 'yyyy-MM-dd HH:mm')}" id="date">작성일
+                    </h6>
+                    <div class="card-subtitle col-3" th:if="${qnaResponseWithPagination.getIsSellerItem()} == true">
+                        <!-- <a th:onclick="|createAnswerForm('${qna.qnaId}');|" type="button">답변</a> -->
+                        <a th:onclick="|displayAnswerForm('${qna.qnaId}');|" type="button">답변</a>
+                    </div>
+                    <span class="card-subtitle col-3" th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
                             <a th:onclick="|qnaUpdate('${qna.qnaId}');|" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#qnaWriteFormToggle" aria-expanded="false"
-                                aria-controls="qnaWriteFormToggle">수정</a>
+                               data-bs-target="#qnaWriteFormToggle" aria-expanded="false"
+                               aria-controls="qnaWriteFormToggle">수정</a>
                             <a th:onclick="|qnaDelete('${qna.qnaId}');|" type="button">삭제</a>
                         </span>
-                    </div>
+                </div>
 
-                    <div data-bs-toggle="collapse" role="button" th:data-bs-target="'#answer' + ${qna.qnaId}"
-                        aria-expanded="false" th:aria-controls="'answer' + ${qna.qnaId}">
-                        <!--주인이면 보여줌-->
-                        <div th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
+                <div data-bs-toggle="collapse" role="button" th:data-bs-target="'#answer' + ${qna.qnaId}"
+                     aria-expanded="false" th:aria-controls="'answer' + ${qna.qnaId}">
+                    <!--주인이면 보여줌-->
+                    <div th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
+                        <h5 class="card-text text-truncate" th:text="${qna.question}">질문 내용</h5>
+                    </div>
+                    <!--주인이 아니면 비밀글 여부 확인-->
+                    <div th:unless="${#bools.isTrue(qna.getIsQnaOwner())}">
+                        <!--비밀글일시 보여주지 않음-->
+                        <div th:if="${#bools.isTrue(qna.getIsSecret())}">
+                            <h5 class="card-text"><i class="fas fa-lock"></i> 비밀글입니다</h5>
+                        </div>
+                        <!--주인이 아니어도 비밀글이 아니면 보여줌-->
+                        <div th:unless="${#bools.isTrue(qna.getIsSecret())}">
                             <h5 class="card-text text-truncate" th:text="${qna.question}">질문 내용</h5>
                         </div>
-                        <!--주인이 아니면 비밀글 여부 확인-->
+                    </div>
+                    <div class="collapse" th:id="'answer' + ${qna.qnaId}">
+                        <hr>
+                        <!--주인이면 보여줌-->
+                        <div th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
+                            <h5 th:if="${#bools.isTrue(qna.getIsAnswered())}" th:text="${qna.answer}"></h5>
+                            <h5 th:unless="${#bools.isTrue(qna.getIsAnswered())}"><i
+                                    class="fas fa-comment-dots"></i> 답변이 아직 작성되지 않았어요</h5>
+                        </div>
+                        <!--주인이 아닐시 비밀글 여부 확인-->
                         <div th:unless="${#bools.isTrue(qna.getIsQnaOwner())}">
-                            <!--비밀글일시 보여주지 않음-->
+                            <!--비밀글이면 보여주지않음-->
                             <div th:if="${#bools.isTrue(qna.getIsSecret())}">
                                 <h5 class="card-text"><i class="fas fa-lock"></i> 비밀글입니다</h5>
                             </div>
-                            <!--주인이 아니어도 비밀글이 아니면 보여줌-->
+                            <!--주인이 아니어도 비밀글이 아니라면 보여줌-->
                             <div th:unless="${#bools.isTrue(qna.getIsSecret())}">
-                                <h5 class="card-text text-truncate" th:text="${qna.question}">질문 내용</h5>
-                            </div>
-                        </div>
-                        <div class="collapse" th:id="'answer' + ${qna.qnaId}">
-                            <hr>
-                            <!--주인이면 보여줌-->
-                            <div th:if="${#bools.isTrue(qna.getIsQnaOwner())}">
                                 <h5 th:if="${#bools.isTrue(qna.getIsAnswered())}" th:text="${qna.answer}"></h5>
                                 <h5 th:unless="${#bools.isTrue(qna.getIsAnswered())}"><i
                                         class="fas fa-comment-dots"></i> 답변이 아직 작성되지 않았어요</h5>
                             </div>
-                            <!--주인이 아닐시 비밀글 여부 확인-->
-                            <div th:unless="${#bools.isTrue(qna.getIsQnaOwner())}">
-                                <!--비밀글이면 보여주지않음-->
-                                <div th:if="${#bools.isTrue(qna.getIsSecret())}">
-                                    <h5 class="card-text"><i class="fas fa-lock"></i> 비밀글입니다</h5>
-                                </div>
-                                <!--주인이 아니어도 비밀글이 아니라면 보여줌-->
-                                <div th:unless="${#bools.isTrue(qna.getIsSecret())}">
-                                    <h5 th:if="${#bools.isTrue(qna.getIsAnswered())}" th:text="${qna.answer}"></h5>
-                                    <h5 th:unless="${#bools.isTrue(qna.getIsAnswered())}"><i
-                                            class="fas fa-comment-dots"></i> 답변이 아직 작성되지 않았어요</h5>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-                <div th:id="'answerForm' + ${qna.qnaId}" class="d-none">
-                    <textarea class="form-control" th:id="'answerInput' + ${qna.qnaId}" style="height: 1500px"></textarea>
-                    <button type="button" th:onclick="|qnaAnswerRequest('${qna.qnaId}');|" class="btn btn-primary" th:id="'answerButton' + ${qna.qnaId}">답변 등록하기
-                    </button>
-                </div>
             </div>
-
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center"
-                    th:with="i = ${qnaResponseWithPagination.getTotalPages()}">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#!" tabindex="-1" aria-disabled="true">Previous</a>
-                    </li>
-
-                    <li class="page-item" th:unless="${i} == 0" th:each="pages : ${#numbers.sequence(1,i)}">
-                        <a class="page-link" href="#!" th:onclick="|pageRequest('${pages}');|"
-                            th:text="${pages}">페이지</a>
-                    </li>
-
-                    <li class="page-item">
-                        <a class="page-link" href="#!">Next</a>
-                    </li>
-                </ul>
-            </nav>
-
-
-            <div>
-                <hr>
-                <h2 class="my-4">배송정보</h2>
-                <hr>
-                <p>
-                    Delivery 브랜드 업체발송은 상품설명에 별도로 기입된 브랜드 알림 배송공지 기준으로 출고되고 브랜드마다 개별 배송비가 부여됩니다.
-                    Delivery 29CM 자체발송은 오후 2시까지 결제확인된 주문은 당일 출고되고 5만원 이상 주문은 무료배송, 5만원 미만은 3,000원의 배송비가 추가됩니다.
-                    SPECIAL ORDER, PT 등 예약주문은 상세설명의 출고일정을 확인하시기 바랍니다.
-                    구두, 액세서리, 침구, 액자, 가구 등 상품설명의 제작기간을 숙지해주시기 바랍니다.
-                    가구 및 일부 상품, 제주도를 포함한 도서산간 지역은 추가배송비 입금요청이 있을 수 있습니다.
-                </p>
-
-                <hr>
-                <h2 class="my-4">교환, 환불, A/S 안내</h2>
-                <hr>
-                <p>
-                    상품 수령일로부터 7일 이내 반품 / 환불 가능합니다.
-                    변심 반품의 경우 왕복배송비를 차감한 금액이 환불되며, 제품 및 포장 상태가 재판매 가능하여야 합니다.
-                    동일상품 또는 동일상품 내 추가금액이 없는 옵션만 교환가능합니다.
-                    상품 불량인 경우는 배송비를 포함한 전액이 환불됩니다.
-                    출고 이후 환불요청 시 상품 회수 후 처리됩니다.
-                    얼리 등 주문제작상품 / 카메라 / 밀봉포장상품 등은 변심에 따른 반품 / 환불이 불가합니다.
-                    일부 완제품으로 수입된 상품의 경우 A/S가 불가합니다.
-                    특정브랜드의 상품설명에 별도로 기입된 교환 / 환불 / AS 기준이 우선합니다.
-                    구매자가 미성년자인 경우에는 상품 구입 시 법정대리인이 동의하지 아니하면 미성년자 본인 또는 법정대리인이 구매취소 할 수 있습니다.
-                </p>
+            <div th:id="'answerForm' + ${qna.qnaId}" class="d-none">
+                <textarea class="form-control" th:id="'answerInput' + ${qna.qnaId}" style="height: 1500px"></textarea>
+                <button type="button" th:onclick="|qnaAnswerRequest('${qna.qnaId}');|" class="btn btn-primary"
+                        th:id="'answerButton' + ${qna.qnaId}">답변 등록하기
+                </button>
             </div>
-
         </div>
 
-        <script>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center"
+                th:with="i = ${qnaResponseWithPagination.getTotalPages()}">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#!" tabindex="-1" aria-disabled="true">Previous</a>
+                </li>
+
+                <li class="page-item" th:unless="${i} == 0" th:each="pages : ${#numbers.sequence(1,i)}">
+                    <a class="page-link" href="#!" th:onclick="|pageRequest('${pages}');|"
+                       th:text="${pages}">페이지</a>
+                </li>
+
+                <li class="page-item">
+                    <a class="page-link" href="#!">Next</a>
+                </li>
+            </ul>
+        </nav>
+
+
+        <div>
+            <hr>
+            <h2 class="my-4">배송정보</h2>
+            <hr>
+            <p>
+                Delivery 브랜드 업체발송은 상품설명에 별도로 기입된 브랜드 알림 배송공지 기준으로 출고되고 브랜드마다 개별 배송비가 부여됩니다.
+                Delivery 29CM 자체발송은 오후 2시까지 결제확인된 주문은 당일 출고되고 5만원 이상 주문은 무료배송, 5만원 미만은 3,000원의 배송비가 추가됩니다.
+                SPECIAL ORDER, PT 등 예약주문은 상세설명의 출고일정을 확인하시기 바랍니다.
+                구두, 액세서리, 침구, 액자, 가구 등 상품설명의 제작기간을 숙지해주시기 바랍니다.
+                가구 및 일부 상품, 제주도를 포함한 도서산간 지역은 추가배송비 입금요청이 있을 수 있습니다.
+            </p>
+
+            <hr>
+            <h2 class="my-4">교환, 환불, A/S 안내</h2>
+            <hr>
+            <p>
+                상품 수령일로부터 7일 이내 반품 / 환불 가능합니다.
+                변심 반품의 경우 왕복배송비를 차감한 금액이 환불되며, 제품 및 포장 상태가 재판매 가능하여야 합니다.
+                동일상품 또는 동일상품 내 추가금액이 없는 옵션만 교환가능합니다.
+                상품 불량인 경우는 배송비를 포함한 전액이 환불됩니다.
+                출고 이후 환불요청 시 상품 회수 후 처리됩니다.
+                얼리 등 주문제작상품 / 카메라 / 밀봉포장상품 등은 변심에 따른 반품 / 환불이 불가합니다.
+                일부 완제품으로 수입된 상품의 경우 A/S가 불가합니다.
+                특정브랜드의 상품설명에 별도로 기입된 교환 / 환불 / AS 기준이 우선합니다.
+                구매자가 미성년자인 경우에는 상품 구입 시 법정대리인이 동의하지 아니하면 미성년자 본인 또는 법정대리인이 구매취소 할 수 있습니다.
+            </p>
+        </div>
+
+    </div>
+
+    <script>
             window.addEventListener('load', (e) => {
+
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
+                })
+
                 // const addToCart = 
                 // const orderNow = document.getElementById('orderNow');
 
@@ -486,7 +514,7 @@
                         return res.json()
                             // .then(json => confirm(json.message));
                             .then(json => {
-                                alert(json.errors);
+                                alert(json.message);
                             })
                     }
 
@@ -545,7 +573,7 @@
                     return res.json()
                         // .then(json => confirm(json.message));
                         .then(json => {
-                            alert(json.errors);
+                            alert(json.message);
                         })
                 }
 
@@ -719,11 +747,15 @@
                 };
 
 
-        </script>
-        <script type="text/javascript" th:src="@{/js/add_to_wish_list.js}"></script>
 
-    </div>
-    <!--End of Content-->
+
+
+
+    </script>
+    <script type="text/javascript" th:src="@{/js/add_to_wish_list.js}"></script>
+
+</div>
+<!--End of Content-->
 </body>
 
 </html>

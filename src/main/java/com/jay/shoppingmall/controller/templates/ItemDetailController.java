@@ -1,6 +1,6 @@
 package com.jay.shoppingmall.controller.templates;
 
-import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.response.item.ItemDetailResponse;
 import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;

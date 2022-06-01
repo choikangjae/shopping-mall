@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.controller.common;
+package com.jay.shoppingmall.common;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 

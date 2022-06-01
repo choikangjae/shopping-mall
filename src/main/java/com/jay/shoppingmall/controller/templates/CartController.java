@@ -1,15 +1,13 @@
 package com.jay.shoppingmall.controller.templates;
 
-import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
 import com.jay.shoppingmall.service.CartService;
-import com.jay.shoppingmall.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 

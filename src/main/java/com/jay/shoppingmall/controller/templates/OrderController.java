@@ -1,6 +1,6 @@
 package com.jay.shoppingmall.controller.templates;
 
-import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
 import com.jay.shoppingmall.dto.request.ReceiverInfoTemporarySave;
@@ -15,12 +15,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.support.RequestContextUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RequestMapping("/order")

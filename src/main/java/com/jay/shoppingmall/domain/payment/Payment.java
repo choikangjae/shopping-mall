@@ -53,7 +53,7 @@ public class Payment extends BaseTimeEntity {
         this.isValidated = true;
     }
 
-    public void isAmountFakeTrue() {
+    public void isAmountManipulatedTrue() {
         this.isAmountManipulated = true;
     }
 }

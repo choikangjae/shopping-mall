@@ -56,6 +56,9 @@ public class CartService {
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
         Cart cart = cartRepository.findByUserAndItem(user, item);
 
+        if (item.getStock() == 0) {
+            throw new ItemNotFoundException("죄송합니다. 해당 상품은 품절되었습니다");
+        }
         Integer addedQuantity = quantity;
         if (cart != null) {
             throw new AlreadyExistsException("이미 상품이 장바구니에 존재합니다");

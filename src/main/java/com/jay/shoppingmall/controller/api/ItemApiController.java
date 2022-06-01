@@ -1,6 +1,6 @@
 package com.jay.shoppingmall.controller.api;
 
-import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.ItemZzimRequest;
 import com.jay.shoppingmall.dto.response.ZzimResponse;

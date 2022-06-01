@@ -7,14 +7,19 @@ import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Where(clause = "is_deleted = 0")
+@SQLDelete(sql = "UPDATE item SET is_deleted = 1, deleted_date = NOW() WHERE id = ?")
 public class Item extends BaseTimeEntity {
 
     @Id
@@ -24,6 +29,10 @@ public class Item extends BaseTimeEntity {
     private String name;
 
     private String description;
+
+    private String mainOption;
+
+    private String subOption;
 
     @OneToMany(mappedBy = "item",
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
@@ -43,11 +52,10 @@ public class Item extends BaseTimeEntity {
 
     private Integer viewCount;
 
-    //삭제.
-    private Boolean isDeleted;
+    @Column(columnDefinition = "boolean default 0")
+    private Boolean isDeleted = false;
 
-    //임시저장.
-    private Boolean isTemporary;
+    private LocalDateTime deletedDate;
 
     public void stockMinusQuantity(Integer quantity) {
         if (quantity > stock) {

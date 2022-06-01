@@ -1,9 +1,7 @@
 package com.jay.shoppingmall.controller.templates;
 
-import com.jay.shoppingmall.controller.common.CurrentUser;
-import com.jay.shoppingmall.domain.payment.MerchantUidGenerator;
+import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.ReceiverInfoTemporarySave;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +12,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import javax.servlet.http.HttpSession;
-import java.util.List;
 
 @org.springframework.stereotype.Controller
 @RequiredArgsConstructor

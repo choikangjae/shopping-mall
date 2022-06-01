@@ -1,19 +1,25 @@
 package com.jay.shoppingmall.domain.image;
 
 
+import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.review.Review;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 /**
  * 랜덤 번호 + 원본 이미지, 썸네일 이미지, 유동적인 경로
  */
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
-public class Image {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Where(clause = "is_deleted = 0")
+@SQLDelete(sql = "UPDATE Image SET is_deleted = 1, deleted_date = NOW() WHERE id = ?")
+public class Image extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,6 +33,11 @@ public class Image {
 
     @Setter
     private Boolean isMainImage;
+
+    @Column(columnDefinition = "boolean default 0")
+    private Boolean isDeleted = false;
+
+    private LocalDateTime deletedDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")

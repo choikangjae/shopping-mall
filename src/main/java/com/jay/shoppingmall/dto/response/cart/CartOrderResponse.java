@@ -7,7 +7,7 @@ import java.util.List;
 
 @Builder
 @Getter
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class CartOrderResponse {
 

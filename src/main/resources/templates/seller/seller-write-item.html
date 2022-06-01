@@ -1,116 +1,168 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layouts/layout.html}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+    layout:decorate="~{layouts/layout.html}">
+
 <head>
     <title>판매자 글작성</title>
 </head>
+
 <body>
-<div layout:fragment="content">
-    <div class="row">
-        <div class="col-3"></div>
-        <div class="col-6">
-            <form class="needs-validation" novalidate method="post" th:action="@{/seller/write}"
-                  th:object="${writeItemRequest}" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="item" class="form-label">상품명<strong>(필수)</strong></label>
-                    <input th:field="*{name}" type="text" class="form-control" id="item" aria-describedby="itemHelp"
-                           required>
-                    <div id="itemHelp" class="form-text">상품명을 적어주세요.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="options1" class="form-label">옵션(선택)</label>
-                    <select th:name="option1" id="options1" class="form-select" aria-label="optionHelp">
-                        <option selected>눌러서 옵션 선택</option>
-                        <option value="크기">크기</option>
-                        <option value="색깔">색깔</option>
-                        <option value="직접 추가">직접 추가</option>
-                    </select>
-                    <div id="optionHelp" class="form-text">옵션을 적어주세요.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="options2" class="form-label">옵션(선택)</label>
-                    <select th:name="option2" id="options2" class="form-select" aria-label="optionHelp">
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6">
+                <form class="needs-validation" novalidate method="post" th:action="@{/seller/write}"
+                    th:object="${writeItemRequest}" enctype="multipart/form-data">
 
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="description" class="form-label">설명<strong>(필수)</strong></label>
-                    <textarea th:field="*{description}" type="text" class="form-control" id="description"
-                           aria-describedby="descriptionHelp" required></textarea>
-                    <div id="descriptionHelp" class="form-text">설명을 적어주세요.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="price" class="form-label">정가<strong>(필수)</strong></label>
-                    <input th:field="*{price}" type="number" class="form-control" id="price" aria-describedby="priceHelp"
-                           required>
-                    <div id="priceHelp" class="form-text">상품의 정가를 적어주세요.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="price" class="form-label">할인가</label>
-                    <input th:field="*{price}" min="10" type="number" class="form-control" id="salePrice" aria-describedby="salePriceHelp"
-                           required>
-                    <div id="salePriceHelp" class="form-text">할인된 가격을 적어주세요.(최소 가격 10원)</div>
-                </div>
-                <div class="mb-3">
-                    <label for="stock" class="form-label">재고<strong>(필수)</strong></label>
-                    <input th:field="*{stock}" min="1" max="9999" type="number" class="form-control" id="stock" aria-describedby="stockHelp"
-                           required>
-                    <div id="stockHelp" class="form-text">재고를 적어주세요.(최대 9999개)</div>
-                </div>
-                <div class="mb-3">
-                    <label for="mainImage" class="form-label">대표 사진을 첨부해주세요<strong>(필수)</strong></label>
-                    <input class="form-control" type="file" name="mainImage" accept="image/png, image/jpeg"
-                           id="mainImage" aria-describedby="imageHelp">
-                    <h6 id="imageHelp" class="form-text">750x500(3:2 비율) 크기의 .JPEG, .PNG 확장자만 업로드해주세요.
-                    <br>크기는 100KB에서 5MB 사이여야 합니다.</h6>
-                    <!--                <input type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple"/>-->
-                </div>
-                <div class="mb-3">
-                    <label for="descriptionImage" class="form-label">상품에 대한 설명이 들어간 사진들을 첨부해주세요(선택)</label>
-                    <input class="form-control" type="file" name="descriptionImage" accept="image/png, image/jpeg"
-                           id="descriptionImage" aria-describedby="descriptionImageHelp" multiple>
-                    <h6 id="descriptionImageHelp" class="form-text">가로 800픽셀 세로 최대 30,000픽셀. 최대 30MB 이하의 .JPEG, .PNG 확장자만 업로드해주세요.</h6>
-                    <!--                <input type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple"/>-->
-                </div>
+                    <div class="text-center" th:if="${#fields.hasErrors()}">
+                        <hr>
+                        <p class="alert alert-danger" role="alert"><strong class="text-info">(필수)</strong> 항목을 작성해주세요.
+                        </p>
+                    </div>
 
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
+                    <div class="mb-3">
+                        <label for="item" class="form-label">상품명 <strong class="text-info">(필수)</strong></label>
+                        <input th:field="*{name}" type="text" class="form-control" id="item" aria-describedby="itemHelp"
+                            required>
+                        <div id="itemHelp" class="form-text">상품명을 적어주세요.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="options1" class="form-label">옵션(선택)</label>
+                        <select th:name="option1" id="options1" class="form-select" aria-label="optionHelp">
+                            <option selected>눌러서 옵션 선택</option>
+                            <option value="크기">크기</option>
+                            <option value="색깔">색깔</option>
+                            <option value="직접 추가">직접 추가</option>
+                        </select>
+                        <div id="optionHelp" class="form-text">옵션을 적어주세요.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="options2" class="form-label">옵션(선택)</label>
+                        <select th:name="option2" id="options2" class="form-select" aria-label="optionHelp">
+
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">설명 <strong class="text-info">(필수)</strong></label>
+                        <textarea th:field="*{description}" type="text" class="form-control" id="description"
+                            aria-describedby="descriptionHelp" style="height: 200px" required></textarea>
+                        <div id="descriptionHelp" class="form-text">설명을 적어주세요.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">정가 <strong class="text-info">(필수)</strong></label>
+                        <input th:field="*{price}" type="number" class="form-control" id="price"
+                            aria-describedby="priceHelp" required>
+                        <div id="priceHelp" class="form-text">상품의 정가를 적어주세요.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">할인가</label>
+                        <input th:field="*{price}" min="10" type="number" class="form-control" id="salePrice"
+                            aria-describedby="salePriceHelp" required>
+                        <div id="salePriceHelp" class="form-text">할인된 가격을 적어주세요.(최소 가격 10원)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">재고 <strong class="text-info">(필수)</strong></label>
+                        <input th:field="*{stock}" min="1" max="9999" type="number" class="form-control" id="stock"
+                            aria-describedby="stockHelp" required>
+                        <div id="stockHelp" class="form-text">재고를 적어주세요.(최대 9999개)</div>
+                    </div>
+                    <div class="text-center" th:if="${#fields.hasErrors('mainImage')}">
+                        <hr>
+                        <p class="alert alert-danger" role="alert">
+                            <i class="fas fa-long-arrow-alt-down"> </i>
+                            <span th:errors="*{mainImage}"></span>
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="mainImage" class="form-label">대표 사진을 첨부해주세요 <strong
+                                class="text-info">(필수)</strong></label>
+                        <input class="form-control" type="file" name="mainImage" accept="image/png, image/jpeg"
+                            id="mainImage" aria-describedby="imageHelp">
+                        <p id="imageHelp" class="form-text">750x500(3:2 비율) 크기의 .JPEG, .PNG 확장자만 업로드해주세요.
+                            <br>크기는 100KB에서 5MB 사이여야 합니다.
+                        </p>
+                        <!--                <input type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple"/>-->
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label for="descriptionImage" class="form-label">상품에 대한 설명이 들어간 사진들을 첨부해주세요(선택)</label>
+                        <input class="form-control" type="file" name="descriptionImage" accept="image/png, image/jpeg"
+                            id="descriptionImage" aria-describedby="descriptionImageHelp" multiple>
+                        <p id="descriptionImageHelp" class="form-text">가로 800픽셀 세로 최대 30,000픽셀. 최대 30MB 이하의 .JPEG, .PNG
+                            확장자만 업로드해주세요.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-lg btn-primary">글 작성 완료</button>
+                            <button type="submit" data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="임시글은 한 달동안 저장 후 자동 삭제되며 사진은 저장되지 않습니다." formaction="/seller/temporary-save" id="temporarySave"
+                                class="btn btn-lg btn-secondary">임시글 저장</button>
+                        </div>
+                    </div>
+                </form>
+                <h3>임시글 저장 목록</h3>
+                <section class="py-5 text-center container" th:if="${#lists.isEmpty(itemTemporaries)}">
+                    <div class="row py-lg-5">
+                        <div class="col-lg-6 col-md-8 mx-auto">
+                                <h3>임시 저장 목록이 비어있습니다</h3>
+                        </div>
+                    </div>
+                </section>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action" data-html="true" data-bs-toggle="tooltip" data-bs-placement="top"
+                       th:title="'정가 : ' + ${itemTemporary.price} + &#10; '할인가 : ' + ${itemTemporary.salePrice}
+                       + &#10; '재고 : ' + ${itemTemporary.stock}" th:each="itemTemporary : ${itemTemporaries}">
+                      <p th:text="'상품명 : ' + ${itemTemporary.name}"></p>
+                      <p th:text="'설명 : ' + ${itemTemporary.description}"></p>
+
+                    </a>
+                  </div>
+            </div>
         </div>
+        <script>
+            window.addEventListener('load', () => {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl)
+                })
+            })
+            document.getElementById('options1').addEventListener('change', () => {
+                let optionDefaults = {
+                    size: ['90', '95', '100', '105', '110'],
+                    color: ['노랑', '빨강', '파랑'],
+                    self: ['직접']
+                }
+
+                let options1 = document.getElementById('options1')[document.getElementById('options1')
+                    .selectedIndex].text;
+                let options2 = document.getElementById('options2');
+
+                switch (options1) {
+                    case '크기':
+                        var option2 = optionDefaults.size;
+                        break;
+                    case '색깔':
+                        var option2 = optionDefaults.color;
+                        break;
+                    case '직접 추가':
+                        var option2 = optionDefaults.self;
+                        break;
+                }
+                options2.options.length = 0;
+                for (let i = 0; i < option2.length; i++) {
+                    let option = document.createElement('option');
+                    option.innerText = option2[i];
+                    options2.append(option);
+                }
+            })
+
+        </script>
+
+
     </div>
-    <script>
-        document.getElementById('options1').addEventListener('change', () => {
-            let optionDefaults = {
-                size: ['90', '95', '100', '105', '110'],
-                color: ['노랑', '빨강', '파랑'],
-                self: ['직접']
-            }
-
-            let options1 = document.getElementById('options1')[document.getElementById('options1')
-                            .selectedIndex].text;
-            let options2 = document.getElementById('options2');
-
-            switch (options1) {
-                case '크기':
-                    var option2 = optionDefaults.size;
-                    break;
-                case '색깔':
-                    var option2 = optionDefaults.color;
-                    break;
-                case '직접 추가':
-                    var option2 = optionDefaults.self;
-                    break;
-            }
-            options2.options.length = 0;
-            for (let i = 0; i < option2.length; i++) {
-                let option = document.createElement('option');
-                option.innerText = option2[i];
-                options2.append(option);
-            }
-        })
-    </script>
-
-
-</div>
 </body>
+
 </html>

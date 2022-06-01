@@ -6,6 +6,9 @@ import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.order.DeliveryStatus;
+import com.jay.shoppingmall.domain.order.Order;
+import com.jay.shoppingmall.domain.order.OrderRepository;
 import com.jay.shoppingmall.domain.payment.MerchantUidGenerator;
 import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.payment.PaymentRepository;
@@ -27,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,6 +46,7 @@ public class PaymentService {
     private final ItemRepository itemRepository;
     private final CartRepository cartRepository;
     private final MerchantUidGenerator merchantUidGenerator;
+    private final OrderRepository orderRepository;
 
     public PaymentResultResponse paymentTotal(String imp_uid, final String merchant_uid, User user) throws IOException {
         String accessToken = getAccessToken();
@@ -55,17 +60,30 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentFailedException("결제 정보가 없습니다"));
 
         if (!amountByPg.equals(paymentRecord.getAmount())) {
-            paymentRecord.isAmountFakeTrue();
+            paymentRecord.isAmountManipulatedTrue();
             throw new PaymentFailedException("결제 정보가 올바르지 않습니다.");
         }
-
         paymentRecord.isValidatedTrue();
+
 
         //장바구니 비우기 (선택 상품만 제거하는 기능 추가 예정)
         final List<Cart> carts = cartRepository.findByUser(user)
                 .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
 
-        carts.forEach(Cart::isDeletedTrue);
+        List<Item> items = new ArrayList<>();
+        for (Cart cart : carts) {
+            items.add(cart.getItem());
+            cartRepository.delete(cart);
+        }
+
+        //Order 생성
+        Order order = Order.builder()
+                .payment(paymentRecord)
+                //order 객체에 추가되지않음(확인 완)
+                .itemList(items)
+                .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
+                .build();
+        orderRepository.save(order);
 
         //재고 관리하기
         for (Cart cart : carts) {
@@ -74,8 +92,6 @@ public class PaymentService {
             if (cart.getItem().getStock() == 0) {
                 //품절일때 로직 작성
                 //seller에게 메시지 보내기
-
-                //UI적 처리
             }
         }
 

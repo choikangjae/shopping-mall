@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Table(name = "orders")
+//Payment, Delivery Status, Item 관리.
 public class Order extends BaseTimeEntity {
 
     @Id

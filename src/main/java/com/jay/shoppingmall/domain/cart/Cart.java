@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.domain.cart;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
+import com.jay.shoppingmall.common.SQLSoftDeletion;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 @Where(clause = "is_deleted = 0")
-@SQLDelete(sql = "UPDATE cart SET is_deleted = 1, deleted_now = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE cart SET is_deleted = 1, deleted_date = NOW() WHERE id = ?")
 public class Cart extends BaseTimeEntity {
 
     @Id
@@ -31,7 +32,7 @@ public class Cart extends BaseTimeEntity {
     @Column(columnDefinition = "boolean default 0")
     private Boolean isDeleted = false;
 
-    private LocalDateTime deletedNow;
+    private LocalDateTime deletedDate;
 
     public void isDeletedTrue() {
         if (this.isDeleted) {

@@ -1,6 +1,5 @@
 package com.jay.shoppingmall.service;
 
-import com.jay.shoppingmall.controller.common.CurrentUser;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
@@ -14,11 +13,9 @@ import com.jay.shoppingmall.dto.response.QnaResponse;
 import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.QnaException;
-import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.lang.Boolean.valueOf;
 

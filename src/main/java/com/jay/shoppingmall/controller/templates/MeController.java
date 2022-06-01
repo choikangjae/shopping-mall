@@ -1,10 +1,9 @@
 package com.jay.shoppingmall.controller.templates;
 
-import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
-import com.jay.shoppingmall.dto.request.PasswordCheckRequest;
 import com.jay.shoppingmall.dto.request.PasswordRequest;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.MeService;

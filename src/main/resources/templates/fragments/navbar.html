@@ -39,13 +39,13 @@
                                     id="cartAmount">0</span></span>
                         </a>
                     </li>
-                    <div sec:authorize="hasRole('SELLER')">
+                    <div sec:authorize="isAuthenticated()">
                         <li class="nav-item">
                             <a th:classappend="${#request.requestURI.startsWith('/seller') ? 'active':''}"
                                 class="nav-link" th:href="@{/seller}" href="#">판매자</a>
                         </li>
                     </div>
-                    <div sec:authorize="hasRole('USER')">
+                    <div sec:authorize="isAnonymous()">
                         <li class="nav-item">
                             <a class="nav-link" th:href="@{/seller/start}" href="#">판매자 가입</a>
                         </li>
@@ -53,7 +53,8 @@
                     <div sec:authorize="isAuthenticated()">
                         <li class="nav-item"><a class="nav-link" th:href="@{/me/delete}" href="#">회원탈퇴</a></li>
                     </div>
-                    <div sec:authorize="hasRole('ADMIN')">
+<!--                    <div sec:authorize="hasRole('ADMIN')">-->
+                    <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
                         <li class="nav-item">
                             <a th:classappend="${#request.requestURI.startsWith('/admin') ? 'active':''}"
                                 class="nav-link" th:href="@{/admin}" href="#">어드민</a>

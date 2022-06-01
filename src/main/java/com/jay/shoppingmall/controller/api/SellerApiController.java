@@ -1,12 +1,10 @@
 package com.jay.shoppingmall.controller.api;
 
-import com.jay.shoppingmall.controller.common.CurrentUser;
+import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.AgreeRequest;
 import com.jay.shoppingmall.dto.request.SellerAgreeRequest;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
-import com.jay.shoppingmall.service.MeService;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

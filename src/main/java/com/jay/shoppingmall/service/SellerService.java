@@ -4,6 +4,8 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
+import com.jay.shoppingmall.domain.item.temporary.ItemTemporaryRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
@@ -15,13 +17,11 @@ import com.jay.shoppingmall.dto.request.QnaAnswerRequest;
 import com.jay.shoppingmall.dto.request.SellerAgreeRequest;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
+import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.support.PagedListHolder;
-import org.springframework.beans.support.SortDefinition;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +43,7 @@ public class SellerService {
     private final ItemRepository itemRepository;
     private final ZzimService zzimService;
     private final QnaRepository qnaRepository;
+    private final ItemTemporaryRepository itemTemporaryRepository;
 
     private final QnaService qnaService;
 
@@ -151,5 +152,35 @@ public class SellerService {
             qna.answerUpdate(qnaAnswerRequest.getAnswer());
         }
 
+    }
+
+    public void temporarySave(final WriteItemRequest writeItemRequest, final User user) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                        .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        ItemTemporary itemTemporary = ItemTemporary.builder()
+                .name(writeItemRequest.getName())
+                .description(writeItemRequest.getDescription())
+                .price(writeItemRequest.getPrice())
+                .salePrice(writeItemRequest.getSalePrice())
+                .stock(writeItemRequest.getStock())
+                .seller(seller)
+                .build();
+
+        itemTemporaryRepository.save(itemTemporary);
+    }
+
+    public List<ItemTemporaryResponse> retrieveItemTemporaries(final User user) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        return itemTemporaryRepository.findAllBySellerId(seller.getId()).stream()
+                .map(itemTemporary -> ItemTemporaryResponse.builder()
+                        .name(itemTemporary.getName())
+                        .price(itemTemporary.getPrice())
+                        .description(itemTemporary.getDescription())
+                        .stock(itemTemporary.getStock())
+                        .salePrice(itemTemporary.getSalePrice())
+                        .build()).collect(Collectors.toList());
     }
 }
