@@ -4,6 +4,8 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.item.option.ItemOption;
+import com.jay.shoppingmall.domain.item.option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.zzim.Zzim;
 import com.jay.shoppingmall.domain.zzim.ZzimRepository;
@@ -16,15 +18,12 @@ import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +36,7 @@ public class ItemService {
     private final FileHandler fileHandler;
     private final ZzimRepository zzimRepository;
     private final ZzimService zzimService;
+    private final ItemOptionRepository itemOptionRepository;
 
     public Slice<ItemResponse> itemAll(User user, Pageable pageable) {
 //        List<ItemResponse> responses = new ArrayList<>();
@@ -50,28 +50,22 @@ public class ItemService {
                         .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
                         .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
                         .build());
-//        for (Item item : items) {
-//            Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
-//            String stringMainImage = fileHandler.getStringImage(mainImage);
-//
-//            ItemResponse itemResponse = ItemResponse.builder()
-//                    .id(item.getId())
-//                    .name(item.getName())
-//                    .price(item.getPrice())
-////                    .salePrice(item.getSalePrice())
-//                    .zzim(item.getZzim())
-//                    .mainImage(stringMainImage)
-//                    .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
-//                    .build();
-//            responses.add(itemResponse);
-//        }
-//        return responses;
     }
 
 
     public ItemDetailResponse itemDetail(User user, Long id) {
         Item item = itemRepository.findById(id).orElseThrow(
                 () -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
+
+        Map<String,List<String>> optionMap = new HashMap<>();
+        final List<ItemOption> itemOptions = itemOptionRepository.findByItemId(item.getId());
+        final List<String> option1Distinct = itemOptions.stream().map(ItemOption::getOption1).distinct().collect(Collectors.toList());
+
+        for (String option1 : option1Distinct) {
+            List<ItemOption> option2 = itemOptionRepository.findAllByOption1(option1);
+            final List<String> option2list = option2.stream().map(ItemOption::getOption2).collect(Collectors.toList());
+            optionMap.put(option1, option2list);
+        }
 
         List<String> stringDescriptionImages = new ArrayList<>();
         List<Image> descriptionImages = imageRepository.findAllByItemId(item.getId());
@@ -86,6 +80,7 @@ public class ItemService {
         return ItemDetailResponse.builder()
                 .id(item.getId())
                 .name(item.getName())
+                .optionMap(optionMap)
                 .description(item.getDescription())
                 .price(item.getPrice())
                 .stock(item.getStock())
@@ -109,30 +104,6 @@ public class ItemService {
                         .build()))
                 .orElseThrow(() -> new ItemNotFoundException("해당 키워드에 맞는 상품이 없습니다"));
 
-
-//        List<ItemResponse> itemResponses = new ArrayList<>();
-
-//        return items.stream().map(item -> ItemResponse.builder()
-//                .id(item.getId())
-//                .name(item.getName())
-//                .zzim(item.getZzim())
-//                .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
-//                .price(item.getPrice())
-//                .salePrice(item.getSalePrice())
-//                .build())
-//                .collect(Collectors.toList());
-
-//        for (Item item : items) {
-//            itemResponses.add(ItemResponse.builder()
-//                    .id(item.getId())
-//                    .name(item.getName())
-//                    .zzim(item.getZzim())
-//                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
-//                    .price(item.getPrice())
-//                    .salePrice(item.getSalePrice())
-//                    .build());
-//        }
-//        return itemResponses;
     }
 
     public ZzimResponse itemZzim(final ItemZzimRequest request, final User user) {

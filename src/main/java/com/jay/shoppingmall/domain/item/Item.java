@@ -30,16 +30,6 @@ public class Item extends BaseTimeEntity {
 
     private String description;
 
-    private String mainOption;
-
-    private String subOption;
-
-//    @OneToMany(mappedBy = "item",
-//            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
-//            orphanRemoval = true
-//    )
-//    private final List<Image> imageList = new ArrayList<>();
-
     private Integer price;
 
     private Integer salePrice;

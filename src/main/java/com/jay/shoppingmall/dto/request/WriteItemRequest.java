@@ -22,11 +22,7 @@ public class WriteItemRequest {
     @NotBlank
     private String description;
 
-//    private Map<String, List<String>> options;
-    //옵션은 테이블을 따로 만들어서 조인시키는 것이 좋아보임
-    private String option1;
-
-    private String option2;
+    private List<String> optionArray;
 
     private List<MultipartFile> image;
 

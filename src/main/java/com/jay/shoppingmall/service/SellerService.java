@@ -5,6 +5,8 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.item.option.ItemOption;
+import com.jay.shoppingmall.domain.item.option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporaryRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
@@ -28,8 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityManager;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -48,6 +48,7 @@ public class SellerService {
     private final QnaRepository qnaRepository;
     private final ItemTemporaryRepository itemTemporaryRepository;
     private final CartRepository cartRepository;
+    private final ItemOptionRepository itemOptionRepository;
 
     public Page<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -79,11 +80,31 @@ public class SellerService {
                 .stock(writeItemRequest.getStock())
                 .seller(seller)
                 .build();
+//        Item newItem = itemRepository.save(item);
+
+        for (String optionCombined : writeItemRequest.getOptionArray()) {
+
+            int index = optionCombined.indexOf('-');
+            String option1 = optionCombined.substring(0, index).trim();
+            String option2 = optionCombined.substring(index + 1).trim();
+
+            if (option1.length() > 10 || option2.length() > 10 || option1.matches("^[\\{\\}\\[\\]\\/?.,;:|\\)*~`!^\\-_+<>@\\#$%&\\\\\\=\\(\\'\\\"]$") || option2.matches("^[\\{\\}\\[\\]\\/?.,;:|\\)*~`!^\\-_+<>@\\#$%&\\\\\\=\\(\\'\\\"]$")) {
+                throw new NotValidException("잘못된 값입니다");
+            }
+
+            ItemOption itemOption = ItemOption.builder()
+                    .option1(option1)
+                    .option2(option2)
+                    .item(item)
+                    .build();
+            itemOptionRepository.save(itemOption);
+        }
 
         Image mainImage = fileHandler.parseFilesInfo(file, item);
         mainImage.setIsMainImage(true);
         imageRepository.save(mainImage);
 
+        //MultiPartFile은 input이 없을때 ''으로 들어오므로 아래와 같이 확인.
         if (!files.get(0).isEmpty()) {
             for (MultipartFile multipartFile : files) {
                 imageRepository.save(fileHandler.parseFilesInfo(multipartFile, item));

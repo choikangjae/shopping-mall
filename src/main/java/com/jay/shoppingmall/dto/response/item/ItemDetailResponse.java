@@ -3,6 +3,7 @@ package com.jay.shoppingmall.dto.response.item;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
@@ -13,6 +14,8 @@ public class ItemDetailResponse {
     private Long id;
 
     private String name;
+
+    private Map<String,List<String>> optionMap;
 
     private String description;
 

@@ -27,21 +27,39 @@
                         <div id="itemHelp" class="form-text">상품명을 적어주세요.</div>
                     </div>
                     <div class="mb-3">
-                        <label for="options1" class="form-label">옵션(선택)</label>
-                        <select th:name="option1" id="options1" class="form-select" aria-label="optionHelp">
-                            <option selected>눌러서 옵션 선택</option>
+                        <label for="options1" class="form-label">옵션(선택)
+                            <button type="button" class="btn btn-secondary" onclick="optionAddToggle()">추가</button>
+                        </label>
+                        <!-- <select th:name="option1" id="options1" class="form-select" aria-label="optionHelp">
+                            <option>눌러주세요</option>
                             <option value="크기">크기</option>
                             <option value="색깔">색깔</option>
-                            <option value="직접 추가">직접 추가</option>
-                        </select>
-                        <div id="optionHelp" class="form-text">옵션을 적어주세요.</div>
+                            <option value="직접 추가" onclick="optionAddToggle()">직접 추가</option>
+                        </select> -->
+                        <!-- <div id="optionHelp" class="form-text">옵션을 적어주세요.</div> -->
                     </div>
-                    <div class="mb-3">
-                        <label for="options2" class="form-label">옵션(선택)</label>
+                    <!-- <div class="mb-3">
+                        <label for="options2" class="form-label">세부 옵션(선택)</label>
                         <select th:name="option2" id="options2" class="form-select" aria-label="optionHelp">
-
                         </select>
+                    </div> -->
+
+                    <div id="optionAdd" class="d-none">
+                        <div class="input-group mb-3">
+                            <input type="text" id="option1" placeholder="옵션" class="form-control">
+                            <input type="text" id="option2" placeholder="세부 옵션" class="form-control">
+                            <button type="button" id="optionAddButton" class="input-group-text">옵션 추가</button>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="optionBody" class="position-relative">
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    <input type="hidden" name="optionArray" id="optionArray">
                     <div class="mb-3">
                         <label for="description" class="form-label">설명 <strong class="text-info">(필수)</strong></label>
                         <textarea th:field="*{description}" type="text" class="form-control" id="description"
@@ -98,8 +116,8 @@
                         <div class="col-6">
                             <button type="submit" class="btn btn-lg btn-primary">글 작성 완료</button>
                             <button type="submit" data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="임시글은 한 달동안 저장 후 자동 삭제되며 사진은 저장되지 않습니다." formaction="/seller/temporary-save" id="temporarySave"
-                                class="btn btn-lg btn-secondary">임시글 저장</button>
+                                title="임시글은 한 달동안 저장 후 자동 삭제되며 사진은 저장되지 않습니다." formaction="/seller/temporary-save"
+                                id="temporarySave" class="btn btn-lg btn-secondary">임시글 저장</button>
                         </div>
                     </div>
                 </form>
@@ -107,19 +125,19 @@
                 <section class="py-5 text-center container" th:if="${#lists.isEmpty(itemTemporaries)}">
                     <div class="row py-lg-5">
                         <div class="col-lg-6 col-md-8 mx-auto">
-                                <h3>임시 저장 목록이 비어있습니다</h3>
+                            <h3>임시 저장 목록이 비어있습니다</h3>
                         </div>
                     </div>
                 </section>
                 <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action" data-html="true" data-bs-toggle="tooltip" data-bs-placement="top"
-                       th:title="'정가 : ' + ${itemTemporary.price} + &#10; '할인가 : ' + ${itemTemporary.salePrice}
+                    <a href="#" class="list-group-item list-group-item-action" data-html="true" data-bs-toggle="tooltip"
+                        data-bs-placement="top" th:title="'정가 : ' + ${itemTemporary.price} + &#10; '할인가 : ' + ${itemTemporary.salePrice}
                        + &#10; '재고 : ' + ${itemTemporary.stock}" th:each="itemTemporary : ${itemTemporaries}">
-                      <p th:text="'상품명 : ' + ${itemTemporary.name}"></p>
-                      <p th:text="'설명 : ' + ${itemTemporary.description}"></p>
+                        <p th:text="'상품명 : ' + ${itemTemporary.name}"></p>
+                        <p th:text="'설명 : ' + ${itemTemporary.description}"></p>
 
                     </a>
-                  </div>
+                </div>
             </div>
         </div>
         <script>
@@ -129,10 +147,85 @@
                     return new bootstrap.Tooltip(tooltipTriggerEl)
                 })
             })
+
+            
+            function regExp(str) {
+                    var reg = /[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]/gi
+                    //특수문자 검증
+                    if (reg.test(str)) {
+                        //특수문자 제거후 리턴
+                        return str.replace(reg, "");
+                    } else {
+                        //특수문자가 없으므로 본래 문자 리턴
+                        return str;
+                    }
+                }
+            document.getElementById('optionArray').addEventListener('change', () => {
+
+            })
+
+            let optionArray = new Array();
+            let index = 0;
+            document.getElementById('optionAddButton').addEventListener('click', () => {
+                let option1 = document.getElementById('option1').value.trim();
+                let option2 = document.getElementById('option2').value.trim();
+
+                option1 = regExp(option1);
+                option2 = regExp(option2);
+
+                if (option1 == '' || option2 == '') {
+                    alert('옵션을 적어주세요');
+                    return false;
+                }
+                if (option1.length > 10 || option2.length > 10) {
+                    alert('10글자 이내로 적어주세요');
+                    return false;
+                }
+
+                let span = document.createElement('span');
+                let optionCombined = option1 + '-' + option2;
+                let text = document.createTextNode(optionCombined);
+                let button = document.createElement('button');
+                let i = document.createElement('i');
+
+                i.setAttribute('class', 'fas fa-times');
+                button.type = 'button';
+                button.setAttribute('class', 'card-link btn btn-outline-danger btn-sm');
+                button.onclick = function () {
+                    document.getElementById(this.id).remove();
+                }
+
+                span.setAttribute('id', 'span' + index);
+                button.setAttribute('id', 'span' + index);
+                index += 1;
+                button.appendChild(i);
+                span.appendChild(text);
+                span.appendChild(button);
+
+
+                document.getElementById('option2').value = '';
+                if (optionArray.includes(optionCombined)) {
+                    alert('중복값은 들어올 수 없습니다');
+                    return false;
+                } else {
+                    optionArray.push(optionCombined);
+                    document.getElementById('optionBody').appendChild(span);
+                    document.getElementById('optionArray').value = optionArray;
+                }
+            })
+
+            function optionAddToggle() {
+                document.getElementById("optionAdd").classList.toggle("d-none");
+            }
+            // document.getElementById("optionAdd").addEventListener('click', () => {
+            //     optionAddToggle();
+            // })
+
+
             document.getElementById('options1').addEventListener('change', () => {
                 let optionDefaults = {
-                    size: ['90', '95', '100', '105', '110'],
-                    color: ['노랑', '빨강', '파랑'],
+                    size: ['90, 95, 100, 105, 110', 'XS, S, M, L, XL, XXL', '직접 추가'],
+                    color: ['빨강, 주황, 노랑, 초록, 파랑, 보라', '연두색, 불그스럼한색, 시뻘건색', '직접 추가'],
                     self: ['직접']
                 }
 
@@ -146,9 +239,6 @@
                         break;
                     case '색깔':
                         var option2 = optionDefaults.color;
-                        break;
-                    case '직접 추가':
-                        var option2 = optionDefaults.self;
                         break;
                 }
                 options2.options.length = 0;

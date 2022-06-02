@@ -57,6 +57,19 @@
                 </div>
 
                 <!--                <form th:action="@{/cart/add}" method="post">-->
+<!--                th:value="${option.key}" th:text="${option.key}"-->
+                <div>
+                    <select id="options1" class="form-select form-select-sm" aria-label=".form-select-sm example">
+                        <option selected>선택해주세요</option>
+                        <option th:each="option : ${response.optionMap}" th:value="${option.key}" th:text="${option.key}">큰 범주</option>
+                    </select>
+                    <select class="form-select form-select-sm" aria-label=".form-select-sm example">
+                        <option selected>선택해주세요</option>
+                        <option th:each="option : ${response.optionMap}" th:value="${option.value}" th:text="${option.value}">작은 범주</option>
+                    </select>
+                </div>
+                <input th:each="option : ${response.optionMap}" th:id="${option.key}" th:value="${option.value}">작은 범주</input>
+
                 <input type="hidden" th:name="id" id="id" th:value="${response.id}"/>
                 <div class="col-6 d-flex">
                     <a class="btn btn-link px-2"
@@ -106,12 +119,12 @@
                 </form>
 
                 <div th:if="${qnaResponseWithPagination.getIsSellerItem()} == true">
+                    <form method="post" th:action="@{/seller/delete/item}">
                     <hr>
-                    <a type="button" id="itemUpdate" class="btn btn-outline-primary">
+                    <button type="submit" id="itemUpdate" class="btn btn-outline-primary" formaction="/seller/update/item">
                         <i class="fas fa-edit"></i>
                         수정
-                    </a>
-                    <form method="post" th:action="@{/seller/delete/item}">
+                    </button>
                         <input type="hidden" name="deleteItem" th:value="${response.getId()}">
                     <button onclick="if (!confirm('정말 삭제하시겠습니까?')) {return false}" type="submit" id="itemDelete" class="btn btn-outline-danger">
                         <i class="fas fa-trash-alt"></i>
@@ -420,6 +433,11 @@
         </div>
 
     </div>
+    <script th:inline="javascript">
+        let a = '[[${response.optionMap}]]';
+        /*[# th:each="option : ${response.optionMap}"]*/
+        let b = /*[[${option.value}]]*/
+    </script>
 
     <script>
             window.addEventListener('load', (e) => {
@@ -431,6 +449,37 @@
                     window.scrollTo(0, window.scrollY);
                 } else {
                     window.scrollTo(0, scrollNow);
+                }
+            })
+            
+            document.getElementById('options1').addEventListener('change', () => {
+                a.forEach(function(){
+                    alert()
+                })
+
+                let optionDefaults = {
+                    size: ['90, 95, 100, 105, 110', 'XS, S, M, L, XL, XXL', '직접 추가'],
+                    color: ['빨강, 주황, 노랑, 초록, 파랑, 보라', '연두색, 불그스럼한색, 시뻘건색', '직접 추가'],
+                    self: ['직접']
+                }
+
+                let options1 = document.getElementById('options1')[document.getElementById('options1')
+                    .selectedIndex].text;
+                let options2 = document.getElementById('options2');
+
+                switch (options1) {
+                    case '크기':
+                        var option2 = optionDefaults.size;
+                        break;
+                    case '색깔':
+                        var option2 = optionDefaults.color;
+                        break;
+                }
+                options2.options.length = 0;
+                for (let i = 0; i < option2.length; i++) {
+                    let option = document.createElement('option');
+                    option.innerText = option2[i];
+                    options2.append(option);
                 }
             })
 
