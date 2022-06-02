@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.domain.payment;
+package com.jay.shoppingmall.domain.payment.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

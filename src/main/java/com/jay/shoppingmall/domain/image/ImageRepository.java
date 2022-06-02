@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
-    Image findByItemId(Long id);
+//    Image findByItemId(Long id);
 
     Image findByItemIdAndIsMainImageTrue(Long id);
 

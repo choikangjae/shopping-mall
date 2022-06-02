@@ -34,11 +34,11 @@ public class Item extends BaseTimeEntity {
 
     private String subOption;
 
-    @OneToMany(mappedBy = "item",
-            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
-            orphanRemoval = true
-    )
-    private final List<Image> imageList = new ArrayList<>();
+//    @OneToMany(mappedBy = "item",
+//            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+//            orphanRemoval = true
+//    )
+//    private final List<Image> imageList = new ArrayList<>();
 
     private Integer price;
 
@@ -64,9 +64,9 @@ public class Item extends BaseTimeEntity {
         this.stock -= quantity;
     }
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+//    @ManyToOne
+//    @JoinColumn(name = "order_id")
+//    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
@@ -95,11 +95,11 @@ public class Item extends BaseTimeEntity {
     }
 
     //Image 테이블에 item_id 필드값 할당.
-    public void addImage(Image image) {
-        imageList.add(image);
-
-        if (image.getItem() != this)
-            image.setItem(this);
-    }
+//    public void addImage(Image image) {
+//        imageList.add(image);
+//
+//        if (image.getItem() != this)
+//            image.setItem(this);
+//    }
 
 }

@@ -3,6 +3,7 @@ package com.jay.shoppingmall.config;
 import com.jay.shoppingmall.security.CustomUserDetailsService;
 import com.jay.shoppingmall.security.LoginFailureHandler;
 import com.jay.shoppingmall.security.LoginSuccessHandler;
+import com.jay.shoppingmall.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

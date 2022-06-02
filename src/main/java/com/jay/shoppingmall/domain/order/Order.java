@@ -2,7 +2,9 @@ package com.jay.shoppingmall.domain.order;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.payment.Payment;
+import com.jay.shoppingmall.domain.user.User;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,17 +17,22 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Table(name = "orders")
-//Payment, Delivery Status, Item 관리.
+//Payment, Delivery Status, OrderItemList. receiver,
 public class Order extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(mappedBy = "order")
-    private List<Item> itemList = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "order_item_id", referencedColumnName = "id", nullable = false)
+//    private OrderItem orderItem;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", referencedColumnName = "id", nullable = false)
     private Payment payment;
 

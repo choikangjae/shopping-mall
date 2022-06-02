@@ -2,6 +2,7 @@ package com.jay.shoppingmall.service.handler;
 
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
+import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.dto.request.ImageUpload;
 import com.jay.shoppingmall.exception.exceptions.FileException;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +10,6 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -19,9 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
 
 @Service
 @Transactional
@@ -144,7 +141,7 @@ public class FileHandler {
 //        imageList.get(indexOfMainImage).setIsMainImage(true);
 //        return imageList;
 //    }
-    public Image parseFilesInfo(MultipartFile multipartFile) {
+    public Image parseFilesInfo(MultipartFile multipartFile, final Item item) {
 
             //폴더명을 업로드 한 날짜로 변환 후 저장
             LocalDateTime now = LocalDateTime.now();
@@ -182,19 +179,21 @@ public class FileHandler {
                 String fileName = System.nanoTime() + originalFileExtension;
 
                 //DTO -> Image -> List<Image>
-                ImageUpload imageUpload = ImageUpload.builder()
+//                ImageUpload imageUpload = ImageUpload.builder()
+//                        .originalFileName(multipartFile.getOriginalFilename())
+//                        .filePath(path + File.separator + fileName)
+//                        .fileSize(multipartFile.getSize())
+//                        .
+//                        .isMainImage(false)
+//                        .build();
+
+                Image image = Image.builder()
                         .originalFileName(multipartFile.getOriginalFilename())
-                        .filePath(path + File.separator + fileName)
                         .fileSize(multipartFile.getSize())
+                        .filePath(path + File.separator + fileName)
+                        .item(item)
                         .isMainImage(false)
                         .build();
-
-                Image image = new Image(
-                        imageUpload.getOriginalFileName(),
-                        imageUpload.getFilePath(),
-                        imageUpload.getFileSize(),
-                        imageUpload.isMainImage()
-                );
 
                 //업로드 한 파일 데이터를 지정한 파일에 저장.
                 file = new File(absolutePath + path + File.separator + fileName);

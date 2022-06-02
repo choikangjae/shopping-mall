@@ -88,13 +88,11 @@ public class OrderController {
         return "/order/payment";
     }
 
-    //payment정보.상품정보.받는사람정보. payment로 돈을 받았다고치고 카트에서 제거하고 상품을 불러와서 재고 깎고
     @PostMapping("/payment")
     public String paymentAction(@Valid PaymentRequest paymentRequest, @CurrentUser User user, RedirectAttributes redirectAttributes) {
 //        OrderResultResponse response = orderService.doOrderPaymentProcess(paymentRequest, user);
 
 //        redirectAttributes.addFlashAttribute("response", response);
-
         return "redirect:/order/payment-result";
     }
 

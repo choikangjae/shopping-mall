@@ -6,6 +6,7 @@ import com.jay.shoppingmall.dto.response.item.ItemDetailResponse;
 import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;
 import com.jay.shoppingmall.service.ItemService;
 import com.jay.shoppingmall.service.QnaService;
+import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,6 +23,7 @@ public class ItemDetailController {
 
     private final ItemService itemService;
     private final QnaService qnaService;
+    private final SellerService sellerService;
 
     @GetMapping(
             value = "/item/details/{id}",
@@ -33,7 +35,7 @@ public class ItemDetailController {
 
         ItemDetailResponse response = itemService.itemDetail(user, itemId);
         QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(itemId, user, pageable);
-        Boolean isSellerItem = qnaService.sellerCheck(itemId, user);
+        Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
 
 //        model.addAttribute("isSellerItem", isSellerItem);
         model.addAttribute("response", response);

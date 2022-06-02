@@ -36,7 +36,7 @@ public class Review extends BaseTimeEntity {
     private Star star;
 
     @Column(columnDefinition = "boolean default 0")
-    private Boolean isDeleted = false;
+    private final Boolean isDeleted = false;
 
     private LocalDateTime deletedDate;
 

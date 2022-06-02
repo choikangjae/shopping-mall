@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
@@ -27,8 +28,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,8 +47,7 @@ public class SellerService {
     private final ZzimService zzimService;
     private final QnaRepository qnaRepository;
     private final ItemTemporaryRepository itemTemporaryRepository;
-
-    private final QnaService qnaService;
+    private final CartRepository cartRepository;
 
     public Page<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -62,23 +64,6 @@ public class SellerService {
                         .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
                         .build());
 
-//        List<ItemResponse> itemResponses = new ArrayList<>();
-//        for (Item item : items) {
-////            Image mainImage = imageRepository.findByItemIdAndIsMainImageTrue(item.getId());
-////            String stringMainImage = fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId()));
-//
-//            ItemResponse itemResponse = ItemResponse.builder()
-//                    .id(item.getId())
-//                    .name(item.getName())
-//                    .price(item.getPrice())
-////                    .salePrice(item.getSalePrice())
-//                    .zzim(item.getZzim())
-//                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
-//                    .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
-//                    .build();
-//            itemResponses.add(itemResponse);
-//        }
-//        return itemResponses;
     }
 
     public Long writeItem(WriteItemRequest writeItemRequest, final MultipartFile file, final List<MultipartFile> files, final User user) {
@@ -87,17 +72,6 @@ public class SellerService {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(userForId.getId())
                         .orElseThrow(() -> new SellerNotFoundException("판매자 자격이 없습니다"));
 
-        List<Image> imageList = new ArrayList<>();
-
-        Image mainImage = fileHandler.parseFilesInfo(file);
-        mainImage.setIsMainImage(true);
-        imageList.add(mainImage);
-
-        if (!files.get(0).isEmpty()) {
-            for (MultipartFile multipartFile : files) {
-                imageList.add(fileHandler.parseFilesInfo(multipartFile));
-            }
-        }
         Item item = Item.builder()
                 .name(writeItemRequest.getName())
                 .description(writeItemRequest.getDescription())
@@ -106,9 +80,16 @@ public class SellerService {
                 .seller(seller)
                 .build();
 
-        for (Image image : imageList) {
-            item.addImage(imageRepository.save(image));
+        Image mainImage = fileHandler.parseFilesInfo(file, item);
+        mainImage.setIsMainImage(true);
+        imageRepository.save(mainImage);
+
+        if (!files.get(0).isEmpty()) {
+            for (MultipartFile multipartFile : files) {
+                imageRepository.save(fileHandler.parseFilesInfo(multipartFile, item));
+            }
         }
+
         return itemRepository.save(item).getId();
     }
 
@@ -146,7 +127,7 @@ public class SellerService {
                 .map(Item::getId)
                 .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지 않습니다"));
 
-        if (qnaService.sellerCheck(itemId, user)) {
+        if (this.sellerCheck(itemId, user)) {
             Qna qna = qnaRepository.findById(qnaId)
                     .orElseThrow(() -> new QnaException("QnA가 존재하지 않습니다"));
             qna.answerUpdate(qnaAnswerRequest.getAnswer());
@@ -182,5 +163,27 @@ public class SellerService {
                         .stock(itemTemporary.getStock())
                         .salePrice(itemTemporary.getSalePrice())
                         .build()).collect(Collectors.toList());
+    }
+    public Boolean sellerCheck(final Long itemId, final User user) {
+        if (user == null) {
+            return false;
+        }
+        Long sellerId = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .map(Seller::getId)
+                .orElse(-1L);
+
+        Long sellerId2 = itemRepository.findById(itemId)
+                .map(Item::getSeller)
+                .map(Seller::getId)
+                .orElse(-2L);
+        return Objects.equals(sellerId, sellerId2);
+    }
+
+    public void itemDelete(final User user, final Long itemId) {
+        if (!this.sellerCheck(itemId, user)) {
+            throw new SellerNotFoundException("판매자가 아닙니다");
+        }
+        itemRepository.deleteById(itemId);
+        cartRepository.deleteByItemId(itemId);
     }
 }

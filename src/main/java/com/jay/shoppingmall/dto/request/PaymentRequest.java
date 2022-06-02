@@ -1,12 +1,8 @@
 package com.jay.shoppingmall.dto.request;
 
-import com.jay.shoppingmall.domain.payment.PayMethod;
-import com.jay.shoppingmall.domain.payment.Pg;
+import com.jay.shoppingmall.domain.payment.model.PayMethod;
+import com.jay.shoppingmall.domain.payment.model.Pg;
 import lombok.*;
-
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.validation.constraints.NotNull;
 
 @Getter
 @Builder

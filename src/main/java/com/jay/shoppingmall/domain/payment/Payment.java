@@ -1,13 +1,13 @@
 package com.jay.shoppingmall.domain.payment;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
+import com.jay.shoppingmall.domain.payment.model.PayMethod;
+import com.jay.shoppingmall.domain.payment.model.Pg;
+import com.jay.shoppingmall.domain.payment.model.ReceiverInfo;
+import com.jay.shoppingmall.domain.user.User;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 @Getter
@@ -20,7 +20,7 @@ public class Payment extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Long userId;
+//    private Long userId;
 
     @Enumerated(EnumType.STRING)
     private Pg pg;
@@ -30,7 +30,6 @@ public class Payment extends BaseTimeEntity {
 
     private String merchantUid;
 
-    //이름 생성 전략 생각할 것
     private String name;
 
     private Long amount;
@@ -48,6 +47,13 @@ public class Payment extends BaseTimeEntity {
     private Boolean isValidated;
 
     private Boolean isAmountManipulated;
+
+    @Embedded
+    private ReceiverInfo receiverInfo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
 
     public void isValidatedTrue() {
         this.isValidated = true;

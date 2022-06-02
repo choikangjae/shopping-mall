@@ -9,23 +9,9 @@
 <div layout:fragment="content">
     <div class="container">
     <div>
-        <h1>마이 페이지</h1>
+        <h1>주문 상세 정보</h1>
     </div>
-<!--    <div th:replace="fragments/me-list :: me-list">-->
-        <!--본문 들어갈 곳-->
         <div class="container position-relative">
-            <div>
-                <h5 th:if="${user.getName()?.getFullName() != null}" th:text="${user.getName()?.getFullName() + ' 님 안녕하세요!'}"></h5>
-                <h5 th:if="${user.getName()?.getFullName() == null}" th:text="${user.getEmail() + ' 님 안녕하세요!'}"></h5>
-            </div>
-            <div th:if="${user.getAgree()?.getIsMandatoryAgree() == null}">
-                <form action="/me/privacy" method="post">
-                <h5 th:text="${user.getEmail() + '회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요'}"></h5>
-                     </br>
-                <button type="submit" class="btn btn-primary">개인정보 입력하러 가기</button>
-                </form>
-            </div>
-
             <a type="button" href="me/update" class="btn btn-primary mt-3">개인정보 수정</a>
 
             <a type="button" href="me/zzim" class="btn btn-primary mt-3">찜목록</a>
@@ -37,21 +23,20 @@
             <a type="button" href="me/update" class="btn btn-primary mt-3">나의 리뷰</a>
 
             <table class="table">
+                <h5>주문 상품 정보</h5>
                 <thead>
                 <tr>
-                    <th scope="col">주문날짜</th>
                     <th scope="col"></th>
+                    <th scope="col">제품</th>
                     <th scope="col">주문내역</th>
                     <th scope="col">배송상태</th>
-                    <th scope="col">주문번호</th>
-                    <th scope="col">결제금액</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="order : ${orders}" style="cursor:pointer;" th:onclick="|goToOrderDetail('${order.id}');|">
-                    <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">주문날짜</td>
                     <td style="width: 6rem;"><img class="bd-placeholder-img card-img-top img-fluid" width="100%" height="100%"
-                         th:src="'data:image/jpeg;base64,'+${order.mainImage}" alt="..." /></td>
+                                                  th:src="'data:image/jpeg;base64,'+${order.mainImage}" alt="..." /></td>
+                    <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">옵션</td>
                     <td th:text="${order.name}">주문내역</td>
                     <td th:text="${order.deliveryStatus}">배송상태</td>
                     <td th:text="${order.merchantUid}">주문번호</td>

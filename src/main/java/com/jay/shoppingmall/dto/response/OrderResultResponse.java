@@ -1,6 +1,6 @@
 package com.jay.shoppingmall.dto.response;
 
-import com.jay.shoppingmall.domain.payment.Pg;
+import com.jay.shoppingmall.domain.payment.model.Pg;
 import com.jay.shoppingmall.dto.response.cart.CartOrderResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import lombok.*;

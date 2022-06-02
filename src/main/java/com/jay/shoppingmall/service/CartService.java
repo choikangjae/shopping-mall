@@ -101,11 +101,10 @@ public class CartService {
                 .totalQuantity(this.getTotalQuantity(user))
                 .build();
     }
-    //todo 상품제거하는 기능 구현하기. 삭제된 시간과 롤백 기능.
+    //삭제된 시간과 롤백 기능.
     public CartResponse deleteCart(final CartRequest request, final User user) {
         Item item = itemRepository.findById(request.getId())
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
-        Image image = imageRepository.findByItemId(request.getId());
         Cart cart = cartRepository.findByUserAndItem(user, item);
         if (cart == null) {
             throw new ItemNotFoundException("해당 상품이 존재하지않습니다");

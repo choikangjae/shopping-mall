@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.domain.payment;
+package com.jay.shoppingmall.domain.payment.model;
 
 public enum Pg {
     HTML5_INICIS,

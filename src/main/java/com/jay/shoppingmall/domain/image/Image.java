@@ -11,9 +11,6 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * 랜덤 번호 + 원본 이미지, 썸네일 이미지, 유동적인 경로
- */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -24,6 +21,8 @@ public class Image extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+//    private Long itemId;
 
     private String originalFileName;
 
@@ -48,20 +47,21 @@ public class Image extends BaseTimeEntity {
 //    private Review review;
 
     @Builder
-    public Image(String originalFileName, String filePath, Long fileSize, boolean isMainImage) {
+    public Image(String originalFileName, String filePath, Long fileSize, boolean isMainImage, Item item) {
         this.originalFileName = originalFileName;
         this.filePath = filePath;
         this.fileSize = fileSize;
         this.isMainImage = isMainImage;
+        this.item = item;
     }
 
     //상품 정보 저장
-    public void setItem(Item item) {
-        this.item = item;
+//    public void setItem(Item item) {
+//        this.item = item;
 
         //게시글에 현재 파일이 존재하지 않으면 파일 추가.
-        if (!item.getImageList().contains(this))
-            item.getImageList().add(this);
-    }
+//        if (!item.getImageList().contains(this))
+//            item.getImageList().add(this);
+//    }
 
 }

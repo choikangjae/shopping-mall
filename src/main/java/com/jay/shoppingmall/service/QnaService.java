@@ -35,6 +35,7 @@ public class QnaService {
     private final ItemRepository itemRepository;
     private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
+    private final SellerService sellerService;
 
     public QnaResponse qnaFindById(final Long id) {
         Qna qna = qnaRepository.findById(id)
@@ -98,7 +99,8 @@ public class QnaService {
 
     public QnaResponseWithPagination getQnaListByPaging(Long itemId, User user, Pageable pageable) {
         Page<Qna> qnas = qnaRepository.findAllByItemId(itemId, pageable);
-        Boolean isSellerItem = sellerCheck(itemId, user);
+        Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
+
         List<QnaResponse> qnaResponses = new ArrayList<>();
         for (Qna qna : qnas) {
             Boolean isQnaOwner = false;
@@ -138,14 +140,12 @@ public class QnaService {
             qnaResponses.add(qnaResponse);
         }
 
-        QnaResponseWithPagination qnaResponseWithPagination = QnaResponseWithPagination.builder()
+        return QnaResponseWithPagination.builder()
                 .isSellerItem(isSellerItem)
                 .totalElements(qnas.getTotalElements())
                 .totalPages(qnas.getTotalPages() == 0 ? 1 : qnas.getTotalPages())
                 .qnaResponses(qnaResponses)
                 .build();
-
-        return qnaResponseWithPagination;
     }
 
     public void qnaDelete(final Long id, final User user) {
@@ -160,19 +160,5 @@ public class QnaService {
 
     //유저가 있으면 셀러에서 유저id로 찾아보고 유저가 없으면 false.
     //유저id로 찾아본 셀러와 아이템으로 찾아본 셀러의 id가 같으면 true.
-    public Boolean sellerCheck(final Long itemId, final User user) {
-        if (user == null) {
-            return false;
-        }
-        Long sellerId = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
-                .map(Seller::getId)
-                .orElse(-1L);
 
-        Long sellerId2 = itemRepository.findById(itemId)
-                .map(Item::getSeller)
-                .map(Seller::getId)
-                .orElse(-2L);
-        System.out.println(sellerId + " " + sellerId2);
-        return Objects.equals(sellerId, sellerId2);
-    }
 }
