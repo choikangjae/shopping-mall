@@ -31,7 +31,7 @@ public class CartApiController {
     @PostMapping("/add")
     public ResponseEntity<?> addToCart(@Valid @RequestBody CartRequest request, @CurrentUser User user) {
 
-        cartService.addItemToCart(request.getId(), request.getQuantity(), user);
+        cartService.addItemToCart(request, user);
 
         return ResponseEntity.ok().body(null);
     }

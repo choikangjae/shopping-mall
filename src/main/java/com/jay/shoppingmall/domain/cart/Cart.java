@@ -3,6 +3,7 @@ package com.jay.shoppingmall.domain.cart;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.common.SQLSoftDeletion;
 import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.domain.item.option.ItemOption;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
 import com.jay.shoppingmall.exception.exceptions.QuantityException;
@@ -46,14 +47,19 @@ public class Cart extends BaseTimeEntity {
     private Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_option_id")
+    private ItemOption itemOption;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @Builder
-    public Cart(final Integer quantity, final Item item, final User user) {
+    public Cart(final Integer quantity, final Item item, final User user, final ItemOption itemOption) {
         this.quantity = quantity;
         this.item = item;
         this.user = user;
+        this.itemOption = itemOption;
     }
 
     public Integer manipulateQuantity(Integer quantity) {

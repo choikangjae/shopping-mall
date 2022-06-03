@@ -6,6 +6,8 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.item.option.ItemOption;
+import com.jay.shoppingmall.domain.item.option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.CartRequest;
 import com.jay.shoppingmall.dto.response.cart.CartResponse;
@@ -31,6 +33,7 @@ public class CartService {
     private final ImageRepository imageRepository;
     private final CartRepository cartRepository;
     private final FileHandler fileHandler;
+    private final ItemOptionRepository itemOptionRepository;
 
     public List<ItemAndQuantityResponse> showCartItemsList(User user) {
         final List<Cart> carts = cartRepository.findByUser(user)
@@ -40,7 +43,10 @@ public class CartService {
         for (Cart cart : carts) {
 
             itemAndQuantityResponses.add(ItemAndQuantityResponse.builder()
-                            .id(cart.getItem().getId())
+                            .itemId(cart.getItem().getId())
+                            .option1(cart.getItemOption().getOption1())
+                            .option2(cart.getItemOption().getOption2())
+                            .optionId(cart.getItemOption().getId())
                             .name(cart.getItem().getName())
                             .price(cart.getItem().getPrice())
                             .salePrice(cart.getItem().getSalePrice())
@@ -51,24 +57,30 @@ public class CartService {
         }
         return itemAndQuantityResponses;
     }
-    public Integer addItemToCart(Long itemId, Integer quantity, User user) {
-        Item item = itemRepository.findById(itemId)
+    public Integer addItemToCart(CartRequest request, User user) {
+        Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
-        Cart cart = cartRepository.findByUserAndItem(user, item);
+        ItemOption itemOption = itemOptionRepository.findByOption1AndOption2AndItemId(request.getOption1(), request.getOption2(), request.getItemId())
+                .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
+
+        Cart cart = cartRepository.findByUserAndItemAndItemOption(user, item, itemOption);
 
         if (item.getStock() == 0) {
             throw new ItemNotFoundException("죄송합니다. 해당 상품은 품절되었습니다");
         }
-        Integer addedQuantity = quantity;
+        Integer addedQuantity = request.getQuantity();
         if (cart != null) {
-            throw new AlreadyExistsException("이미 상품이 장바구니에 존재합니다");
-//            addedQuantity = quantity + cart.getQuantity();
-//            cart.manipulateQuantity(addedQuantity);
-//            cartRepository.save(cart);
+//            if (Objects.equals(cart.getItemOption().getId(), itemOption.getId())) {
+                throw new AlreadyExistsException("이미 상품이 장바구니에 존재합니다");
+                //            addedQuantity = quantity + cart.getQuantity();
+                //            cart.manipulateQuantity(addedQuantity);
+                //            cartRepository.save(cart);
+//            }
         } else {
             Cart newCart = Cart.builder()
                     .user(user)
                     .item(item)
+                    .itemOption(itemOption)
                     .quantity(addedQuantity)
                     .build();
             cartRepository.save(newCart);
@@ -77,11 +89,11 @@ public class CartService {
     }
 
     public CartResponse updateCart(final CartRequest request, final User user) {
-//        int IntTotalPrice = Integer.parseInt(request.getTotalPrice());
-        Item item = itemRepository.findById(request.getId())
+        Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
-//        Image image = imageRepository.findByItemId(request.getId());
-        Cart cart = cartRepository.findByUserAndItem(user, item);
+        ItemOption itemOption = itemOptionRepository.findById(request.getOptionId())
+                .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
+        Cart cart = cartRepository.findByUserAndItemAndItemOption(user, item, itemOption);
 
         if (Objects.equals(request.getQuantity(), cart.getQuantity())) {
             throw new AlreadyExistsException("상품 개수가 변동되지 않았습니다");
@@ -103,7 +115,7 @@ public class CartService {
     }
     //삭제된 시간과 롤백 기능.
     public CartResponse deleteCart(final CartRequest request, final User user) {
-        Item item = itemRepository.findById(request.getId())
+        Item item = itemRepository.findById(request.getItemId())
                 .orElseThrow(()-> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
         Cart cart = cartRepository.findByUserAndItem(user, item);
         if (cart == null) {

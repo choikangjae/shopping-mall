@@ -58,10 +58,10 @@ public class ItemService {
                 () -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
 
         Map<String,List<String>> optionMap = new HashMap<>();
-        final List<ItemOption> itemOptions = itemOptionRepository.findByItemId(item.getId());
-        final List<String> option1Distinct = itemOptions.stream().map(ItemOption::getOption1).distinct().collect(Collectors.toList());
+        final List<String> itemOptions = itemOptionRepository.findByItemId(item.getId()).stream().map(ItemOption::getOption1).distinct().collect(Collectors.toList());
+//        final List<String> option1Distinct = itemOptions.stream().map(ItemOption::getOption1).distinct().collect(Collectors.toList());
 
-        for (String option1 : option1Distinct) {
+        for (String option1 : itemOptions) {
             List<ItemOption> option2 = itemOptionRepository.findAllByOption1(option1);
             final List<String> option2list = option2.stream().map(ItemOption::getOption2).collect(Collectors.toList());
             optionMap.put(option1, option2list);

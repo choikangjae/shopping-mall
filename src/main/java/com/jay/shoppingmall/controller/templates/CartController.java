@@ -45,12 +45,12 @@ public class CartController {
             return "redirect:/auth/login";
         }
 
-        try {
-            cartService.addItemToCart(itemId, quantity, user);
-        } catch (Exception e) {
-//            model.addAttribute("error", e.getMessage());
-            return "redirect:/item/details/" + itemId;
-        }
+//        try {
+//            cartService.addItemToCart(itemId, quantity, user);
+//        } catch (Exception e) {
+////            model.addAttribute("error", e.getMessage());
+//            return "redirect:/item/details/" + itemId;
+//        }
 
 //        redirectAttributes.addFlashAttribute("message", "장바구니에 상품이 추가되었습니다");
 

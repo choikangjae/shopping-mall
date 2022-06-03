@@ -8,9 +8,15 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CartRequest {
 
-    private Long id;
+    private Long itemId;
 
     private Integer quantity;
+
+    private Long optionId;
+
+    private String option1;
+
+    private String option2;
 
     private Integer totalPrice;
 

@@ -9,11 +9,17 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemAndQuantityResponse {
 
-    private Long id;
+    private Long itemId;
 
     private String image;
 
     private String name;
+
+    private Long optionId;
+
+    private String option1;
+
+    private String option2;
 
     private Integer zzim;
 

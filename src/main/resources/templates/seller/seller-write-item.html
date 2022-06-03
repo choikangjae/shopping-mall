@@ -47,7 +47,8 @@
                     <div id="optionAdd" class="d-none">
                         <div class="input-group mb-3">
                             <input type="text" id="option1" placeholder="옵션" class="form-control">
-                            <input type="text" id="option2" placeholder="세부 옵션" class="form-control">
+                            <input type="text" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="엔터를 눌러 입력이 가능합니다!" id="option2" placeholder="세부 옵션" class="form-control">
                             <button type="button" id="optionAddButton" class="input-group-text">옵션 추가</button>
                         </div>
 
@@ -148,18 +149,23 @@
                 })
             })
 
-            
-            function regExp(str) {
-                    var reg = /[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]/gi
-                    //특수문자 검증
-                    if (reg.test(str)) {
-                        //특수문자 제거후 리턴
-                        return str.replace(reg, "");
-                    } else {
-                        //특수문자가 없으므로 본래 문자 리턴
-                        return str;
+            document.addEventListener('keydown', function (event) {
+                if (event.keyCode === 13) {
+                    if (document.activeElement.id == 'option2') {
+                        document.getElementById("optionAddButton").click();
                     }
+                    event.preventDefault();
+                };
+            }, true);
+
+            function regExp(str) {
+                var reg = /[\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@\#$%&\\\=\(\'\"]/gi
+                if (reg.test(str)) {
+                    return str.replace(reg, "");
+                } else {
+                    return str;
                 }
+            }
             document.getElementById('optionArray').addEventListener('change', () => {
 
             })

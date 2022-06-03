@@ -42,7 +42,7 @@
                         </div>
 
                         <th:block th:each="item : ${items}">
-                            <div class="card rounded-3 mb-2" th:id="${item.id}">
+                            <div class="card rounded-3 mb-2" th:id="${item.itemId}">
                                 <div class="card-body p-4">
                                     <div class="row d-flex justify-content-between align-items-center">
 
@@ -58,16 +58,20 @@
                                             <!--                                            class="img-fluid rounded-3" alt="Cotton T-shirt">-->
                                         </div>
                                         <div class="col-md-3 col-lg-3 col-xl-3">
-                                            <!--                                            <div th:id="${item.id}" th:text="${item.id}" hidden></div>-->
-                                            <a th:href="@{'/item/details/' + ${item.id}}"
+                                            <!--                                            <div th:id="${item.itemId}" th:text="${item.itemId}" hidden></div>-->
+                                            <a th:href="@{'/item/details/' + ${item.itemId}}"
                                                 class="text-reset text-decoration-none">
                                                 <p class="lead fw-normal mb-2" th:text="${item.name}">이름</p>
                                             </a>
-                                            <p><span class="text-muted">Size: </span>M <span class="text-muted">Color:
-                                                </span>Grey</p>
+                                            <input type="hidden" th:value="${item.optionId}">
+                                            <p><span class="text-muted">옵션1: </span>
+                                                <span th:text="${item.option1}"></span>
+                                                <span class="text-muted">옵션2:</span>
+                                                <span th:text="${item.option2}"></span>
+                                            </p>
                                         </div>
                                         <div class="col-2">
-                                            <h5 class="mb-0" th:id="'eachPrice' + ${item.id}"
+                                            <h5 class="mb-0" th:id="'eachPrice' + ${item.itemId}"
                                                 th:text="${#numbers.formatDecimal(item.price, 0, 'DEFAULT', 0, 'DEFAULT')}">
                                                 개당 가격</h5>
                                             <h5>원 </h5>
@@ -77,7 +81,7 @@
                                                 onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
                                                 <i class="fas fa-minus"></i>
                                             </a>
-                                            <input th:id="'quantity' + ${item.id}" min="1" name="quantity"
+                                            <input th:id="'quantity' + ${item.itemId}" min="1" name="quantity"
                                                 th:value="${item.quantity}" type="number"
                                                 class="form-control form-control-sm" />
                                             <a class="btn btn-link px-2"
@@ -86,17 +90,17 @@
                                             </a>
                                         </div>
                                         <div class="col-md-2 col-lg-2 col-xl-2">
-                                            <h5 class="mb-0" th:id="'multipliedPrice' + ${item.id}"
+                                            <h5 class="mb-0" th:id="'multipliedPrice' + ${item.itemId}"
                                                 th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'DEFAULT', 0, 'DEFAULT')}">
                                                 합산 가격</h5>
                                             <h5>원 </h5>
                                         </div>
                                         <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                                            <a href="#!" th:id="'updateButton' + ${item.id}"
-                                                th:onclick="|updateItem('${item.id}');|" class="text-success mr-2"><i
+                                            <a href="#!" th:id="'updateButton' + ${item.itemId}"
+                                                th:onclick="|updateItem('${item.itemId}', '${item.optionId}');|" class="text-success mr-2"><i
                                                     class="fas fa-redo-alt fa-lg"></i></a>
-                                            <a href="#!" th:id="'deleteButton' + ${item.id}"
-                                                th:onclick="|deleteItem('${item.id}');|" class="text-danger"><i
+                                            <a href="#!" th:id="'deleteButton' + ${item.itemId}"
+                                                th:onclick="|deleteItem('${item.itemId}');|" class="text-danger"><i
                                                     class="fas fa-trash fa-lg"></i></a>
                                         </div>
                                     </div>
@@ -239,9 +243,9 @@
                     });
             }
 
-            function updateItem(id) {
+            function updateItem(itemId, optionId) {
 
-                const quantity = document.getElementById('quantity' + id).value;
+                const quantity = document.getElementById('quantity' + itemId).value;
                 let totalPrice = document.getElementById('totalPrice').textContent;
                 totalPrice = parseInt(totalPrice.replace(/,/g, ""));
                 let totalQuantity = document.getElementById('totalQuantity').textContent;
@@ -250,7 +254,8 @@
                 let data = {
                     method: 'POST',
                     body: JSON.stringify({
-                        id,
+                        itemId,
+                        optionId,
                         quantity,
                         totalPrice,
                         totalQuantity
