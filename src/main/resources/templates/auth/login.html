@@ -14,6 +14,8 @@
       }
 
 
+
+
     </style>
 
 </head>
@@ -30,33 +32,35 @@
         <h1 class="h3 mb-3 fw-normal">로그인</h1>
 
         <div class="form-floating">
-            <input type="email" th:if="${param.error}" th:value="${username}" name="username" class="form-control" id="floatingInputError" placeholder="name@example.com">
-            <input type="email" th:unless="${param.error}" th:value="${username}" name="username" class="form-control" id="floatingInput" placeholder="name@example.com"
+            <input type="email" th:if="${param.error}" th:value="${username}" name="username" class="form-control"
+                   id="floatingInputError" placeholder="name@example.com">
+            <input type="email" th:unless="${param.error}" th:value="${username}" name="username" class="form-control"
+                   id="floatingInput" placeholder="name@example.com"
                    autofocus>
             <label for="floatingInput">이메일</label>
         </div>
         <div class="form-floating">
-            <input type="password" th:if="${param.error}" name="password" class="form-control" id="floatingPasswordError" placeholder="Password" autofocus>
-            <input type="password" th:unless="${param.error}" name="password" class="form-control" id="floatingPassword" placeholder="Password">
+            <input type="password" th:if="${param.error}" name="password" class="form-control"
+                   id="floatingPasswordError" placeholder="Password" autofocus>
+            <input type="password" th:unless="${param.error}" name="password" class="form-control" id="floatingPassword"
+                   placeholder="Password">
             <label for="floatingPassword">비밀번호</label>
         </div>
 
 
-        <div class="checkbox mb-3">
-            <label>
-                <input type="checkbox" name="remember-me" value="remember-me"> 로그인 유지
-            </label>
-            <a class="small" href="/auth/forgot-password">비밀번호 찾기</a>
-            <button class="w-100 btn btn-lg btn-primary" type="submit">로그인</button>
+        <div class="checkbox text-center mb-2">
+            <input type="checkbox" id="remember-me" name="remember-me" value="remember-me">
+            <label for="remember-me">로그인 유지</label>
         </div>
+        <div class="text-center mb-2">
+            <a class="btn" href="/auth/forgot-password">비밀번호 찾기</a>
+        </div>
+        <button class="w-100 btn btn-lg btn-primary" type="submit">로그인</button>
     </form>
     <hr>
     <div class="row position-relative">
         <div class="col-6">
-            <form class="user" method="post" th:action="@{/auth/login}">
-                <input type="hidden" name="username" value="user@role"/>
-                <input type="hidden" name="password" value="role123123"/>
-                <input type="hidden" name="remember-me" value="remember-me" th:checked="true">
+            <form class="user" method="post" th:action="@{/demo/login/user}">
                 <button type="submit" class="btn btn-warning btn-user btn-block">
                     <i class="fas fa-user"></i>
                     DEMO USER
@@ -64,47 +68,37 @@
             </form>
         </div>
         <div class="col-6">
-            <form class="user" method="post" th:action="@{/auth/login}">
-                <input type="hidden" name="username" value="admin@role"/>
-                <input type="hidden" name="password"
-                       value="$2a$12$vAfYdOjIZhkKWCX0KzjsVeL8au1Opf56dkL56LjP5ua9ZsCUi65x6"/>
-                <input type="hidden" name="remember-me" value="remember-me" th:checked="true">
+            <form class="user" method="post" th:action="@{/demo/login/seller}">
                 <button type="submit" class="btn btn-danger btn-user btn-block">
+                    <i class="fas fa-user-tie"></i>
+                    DEMO SELLER
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="row position-relative mt-3">
+
+        <div class="col-6">
+            <form class="user" method="post" th:action="@{/demo/login/admin}">
+                <button type="submit" class="btn btn-success btn-user btn-block">
                     <i class="fas fa-user-graduate"></i>
                     DEMO ADMIN
                 </button>
             </form>
         </div>
-    </div>
-        <div class="row mt-3">
-            <div class="col-6">
-                <form class="user" method="post" th:action="@{/auth/login}">
-                    <input type="hidden" name="username" value="seller@role"/>
-                    <input type="hidden" name="password"
-                           value="seller123123"/>
-                    <input type="hidden" name="remember-me" value="remember-me" th:checked="true">
-                    <button type="submit" class="btn btn-success btn-user btn-block">
-                        <i class="fas fa-user-tie"></i>
-                        DEMO SELLER
-                    </button>
-                </form>
-            </div>
-            <div class="col-6">
-                <form class="user" method="post" th:action="@{/auth/login}">
-                    <input type="hidden" name="username" value="role@seller"/>
-                    <input type="hidden" name="password"
-                           value="seller123123"/>
-                    <input type="hidden" name="remember-me" value="remember-me" th:checked="true">
-                    <input type="submit" class="btn btn-primary btn-user btn-block"
-                           formaction="/random-user-generator" value="랜덤 아이디로 로그인"/>
-                </form>
-            </div>
-
+        <div class="col-6">
+            <form class="user" method="post" th:action="@{/random-user-generator}">
+                <button type="submit" class="btn btn-primary btn-user btn-block">
+                    <i class="fas fa-question"></i>
+                    DEMO RANDOM
+                </button>
+            </form>
+        </div>
 
     </div>
     <hr>
     <div class="text-center">
-        <a class="small" href="/auth/signup">회원가입</a>
+        <a class="btn" th:href="@{/auth/signup}">회원가입</a>
     </div>
 
     <hr>

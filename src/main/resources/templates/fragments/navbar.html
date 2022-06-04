@@ -39,21 +39,18 @@
                                     id="cartAmount">0</span></span>
                         </a>
                     </li>
-                    <div sec:authorize="isAuthenticated()">
+                    <div th:if="${#authorization.expression('hasRole(''SELLER'')')}">
                         <li class="nav-item">
                             <a th:classappend="${#request.requestURI.startsWith('/seller') ? 'active':''}"
                                 class="nav-link" th:href="@{/seller}" href="#">판매자</a>
                         </li>
                     </div>
-                    <div sec:authorize="hasRole('USER')">
+                    <div th:unless="${#authorization.expression('hasRole(''SELLER'')')}">
                         <li class="nav-item">
-                            <a class="nav-link" th:href="@{/seller/start}" href="#">판매자 가입</a>
+                            <a th:classappend="${#request.requestURI.startsWith('/seller') ? 'active':''}"
+                               class="nav-link" th:href="@{/seller/start}" href="#">판매자 가입</a>
                         </li>
                     </div>
-                    <div sec:authorize="isAuthenticated()">
-                        <li class="nav-item"><a class="nav-link" th:href="@{/me/delete}" href="#">회원탈퇴</a></li>
-                    </div>
-<!--                    <div sec:authorize="hasRole('ADMIN')">-->
                     <div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
                         <li class="nav-item">
                             <a th:classappend="${#request.requestURI.startsWith('/admin') ? 'active':''}"
@@ -64,17 +61,18 @@
                         <a class="nav-link" th:href="@{/index}" href="#">채팅</a>
                     </li>
                     <div sec:authorize="isAuthenticated()">
-                        <li class="nav-item">
-                            <div class="text-white" sec:authentication="principal.authorities"></div>
+                        <li class="nav-item text-white">
+                            아이디: <span class="text-white" sec:authentication="name"></span>
                         </li>
-                        <li class="nav-item">
-                            <div class="text-white" sec:authentication="name"></div>
+<!--                        데모용 -->
+                        <li class="nav-item text-white">
+                            비밀번호: <span class="text-white" th:text="${#session.getAttribute('demo')}"></span>
                         </li>
                     </div>
                 </ul>
                 <div class="dropdown">
                     <a class="btn" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-bell"></i>
+                        <i class="fas fa-bell text-white"></i>
                         <span class="badge bg-primary rounded-pill">0</span>
                     </a>
                   

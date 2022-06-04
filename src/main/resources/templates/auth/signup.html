@@ -8,25 +8,21 @@
 <body>
 <div layout:fragment="content">
     <div class="bg-gradient-primary">
-        <div class="container">
+        <div class="container col-9">
             <div class="card o-hidden border-0 shadow-lg my-5">
                 <div class="card-body p-0">
                     <!-- Nested Row within Card Body -->
                     <div class="row">
-                        <!--                <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>-->
-                        <!--                <div class="col-lg-7">-->
                         <div class="p-5">
                             <div class="text-center">
                                 <a href="/">
                                     <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72"
                                          height="57">
                                 </a>
-                                <h1 class="h4 text-gray-900 mb-4">회원가입</h1>
+                                <h4 class="mb-4">회원가입</h4>
                             </div>
-                            <form class="user" method="post" th:action="@{/auth/signup}" th:object="${userValidationRequest}">
-                                <div class="form-group row">
-                                </div>
-                                <div class="form-group">
+                            <form method="post" th:action="@{/auth/signup}" th:object="${userValidationRequest}">
+                                <div class="input-group mb-3">
                                     <input th:field="*{email}" type="email" class="form-control form-control-user"
                                            id="InputEmail"
                                            placeholder="이메일 주소" required autofocus>
@@ -36,8 +32,7 @@
                                            th:errors="*{email}">이메일 주소가 올바르지 않습니다.</p>
                                     </div>
                                 </div>
-                                <hr>
-                                <div class="form-group row">
+                                <div class="input-group mb-3 row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
                                         <input th:field="*{password}" type="password"
                                                class="form-control form-control-user"
@@ -56,25 +51,23 @@
                                     <p class="alert alert-danger" role="alert"
                                        th:errors="*{password}">비밀번호가 올바르지 않습니다.</p>
                                 </div>
-                                <hr>
-                                <button type="submit" class="btn btn-primary">회원가입</button>
-                                <hr>
-                                <a href="index.html" class="btn btn-google btn-user btn-block">
+                                <div class="d-grid gap-2 col-4 mx-auto">
+                                <button type="submit" class="btn btn-outline-success btn-lg">회원가입</button>
+                                </div>
+
+                                <div class="text-center mt-3">
+                                <a href="index.html" class="btn btn-outline-danger">
                                     <i class="fab fa-google fa-fw"></i> 구글로 로그인
                                 </a>
-                                <a href="index.html" class="btn btn-facebook btn-user btn-block">
+                                <a href="index.html" class="btn btn-outline-primary">
                                     <i class="fab fa-facebook-f fa-fw"></i> 페이스북으로 로그인
                                 </a>
+                                </div>
                             </form>
-                            <hr>
-                            <div class="text-center text-decoration-none">
-                                <a class="small" href="/auth/forgot-password">비밀번호를 잊으셨나요?</a>
-                            </div>
-                            <div class="text-center text-decoration-none">
-                                <a class="small" href="/auth/login">로그인하기</a>
-                            </div>
-                            <div class="text-center text-decoration-none">
-                                <a class="small" href="/auth/seller-signup">판매자로 회원가입하기</a>
+                            <div class="text-center mt-3">
+                                <a class="btn" href="/auth/forgot-password">비밀번호를 잊으셨나요?</a>
+                                <a class="btn" href="/auth/login">로그인하기</a>
+                                <a class="btn" href="/auth/seller-signup">판매자로 회원가입하기</a>
                             </div>
                         </div>
                     </div>

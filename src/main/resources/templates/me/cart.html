@@ -9,7 +9,6 @@
 <body>
 
     <div layout:fragment="content">
-        <!--    <div th:replace="fragments/me-list :: me-list"></div>-->
         <section class="h-100" style="background-color: #eee;">
             <div class="container h-100 py-5">
                 <div class="row d-flex justify-content-center align-items-center h-100">
@@ -36,9 +35,9 @@
                             </form>
                         </div>
 
-                        <div class="container" th:if="${#lists.isEmpty(items)}">
+                        <div class="container text-center" th:if="${#lists.isEmpty(items)}">
                             <h3>장바구니가 비어있습니다</h3>
-                            <a th:href="@{/}"><i class="fas fa-home fa-4x"></i></a>
+                            <a class="text-dark" th:href="@{/}"><i class="fas fa-home fa-4x"></i></a>
                         </div>
 
                         <th:block th:each="item : ${items}">

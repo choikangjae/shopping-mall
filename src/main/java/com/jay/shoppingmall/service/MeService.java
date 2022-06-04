@@ -128,9 +128,6 @@ public class MeService {
 
     public void deleteMe(final DeleteMeRequest request, final User user) {
 
-        if (!passwordCheck(request.getPassword(), user)) {
-            throw new PasswordInvalidException("비밀번호가 일치하지 않습니다");
-        }
         userRepository.delete(user);
     }
 

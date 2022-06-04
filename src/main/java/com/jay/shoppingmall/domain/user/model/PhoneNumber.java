@@ -31,6 +31,9 @@ public class PhoneNumber {
         this.last = last;
     }
     public String getFullNumber() {
+        if (this.first == null || this.middle == null || this.last == null) {
+            return "";
+        }
         return String.format("%s-%s-%s", this.first, this.middle, this.last);
     }
 }

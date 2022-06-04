@@ -5,8 +5,8 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
-import com.jay.shoppingmall.domain.item.option.ItemOption;
-import com.jay.shoppingmall.domain.item.option.ItemOptionRepository;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
+import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporaryRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
@@ -76,7 +76,7 @@ public class SellerService {
         Item item = Item.builder()
                 .name(writeItemRequest.getName())
                 .description(writeItemRequest.getDescription())
-                .price(writeItemRequest.getPrice())
+                .price(writeItemRequest.getOriginalPrice())
                 .stock(writeItemRequest.getStock())
                 .seller(seller)
                 .build();
@@ -163,7 +163,7 @@ public class SellerService {
         ItemTemporary itemTemporary = ItemTemporary.builder()
                 .name(writeItemRequest.getName())
                 .description(writeItemRequest.getDescription())
-                .price(writeItemRequest.getPrice())
+                .price(writeItemRequest.getOriginalPrice())
                 .salePrice(writeItemRequest.getSalePrice())
                 .stock(writeItemRequest.getStock())
                 .seller(seller)

@@ -15,76 +15,149 @@
                     th:object="${writeItemRequest}" enctype="multipart/form-data">
 
                     <div class="text-center" th:if="${#fields.hasErrors()}">
-                        <hr>
                         <p class="alert alert-danger" role="alert"><strong class="text-info">(필수)</strong> 항목을 작성해주세요.
                         </p>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-5">
                         <label for="item" class="form-label">상품명 <strong class="text-info">(필수)</strong></label>
-                        <input th:field="*{name}" type="text" class="form-control" id="item" aria-describedby="itemHelp"
+                        <input th:field="*{name}" type="text" class="form-control" id="itemName" aria-describedby="itemHelp"
                             required>
                         <div id="itemHelp" class="form-text">상품명을 적어주세요.</div>
                     </div>
-                    <div class="mb-3">
-                        <label for="options1" class="form-label">옵션(선택)
+
+                    <input type="hidden" name="optionArray" id="optionArray">
+
+                    <div class="mb-2">
+                        <label class="form-label">옵션(선택)
                             <button type="button" class="btn btn-secondary" onclick="optionAddToggle()">추가</button>
                         </label>
-                        <!-- <select th:name="option1" id="options1" class="form-select" aria-label="optionHelp">
-                            <option>눌러주세요</option>
-                            <option value="크기">크기</option>
-                            <option value="색깔">색깔</option>
-                            <option value="직접 추가" onclick="optionAddToggle()">직접 추가</option>
-                        </select> -->
-                        <!-- <div id="optionHelp" class="form-text">옵션을 적어주세요.</div> -->
                     </div>
-                    <!-- <div class="mb-3">
-                        <label for="options2" class="form-label">세부 옵션(선택)</label>
-                        <select th:name="option2" id="options2" class="form-select" aria-label="optionHelp">
-                        </select>
-                    </div> -->
 
                     <div id="optionAdd" class="d-none">
-                        <div class="input-group mb-3">
-                            <input type="text" id="option1" placeholder="옵션" class="form-control">
-                            <input type="text" data-bs-toggle="tooltip" data-bs-placement="top"
-                            title="엔터를 눌러 입력이 가능합니다!" id="option2" placeholder="세부 옵션" class="form-control">
-                            <button type="button" id="optionAddButton" class="input-group-text">옵션 추가</button>
-                        </div>
-
                         <div class="card">
                             <div class="card-body">
+                                <div class=" mb-3">
+                                    <label for="option1" class="form-label">옵션 <strong
+                                            class="text-info">(필수)</strong></label>
+                                    <input type="text" id="option1" placeholder="예시)색깔" class="form-control">
+                                </div>
+                                <div class=" mb-3">
+                                    <label for="option2" class="form-label">세부 옵션 <strong
+                                            class="text-info">(필수)</strong></label>
+                                    <input type="text" id="option2" aria-describedby="option2Help" placeholder="예시)빨간색"
+                                        class="form-control">
+                                    <!-- <div id="option2Help" class="form-text">옵션을 쉼표(,)로 구분해서 적어주세요 (최대 5개)
+                                    </div> -->
+                                </div>
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">판매가 <strong
+                                            class="text-info">(필수)</strong></label>
+                                    <input min="10" type="number" class="form-control" id="optionSalePrice"
+                                        aria-describedby="optionSalePriceHelp" required>
+                                    <div id="optionSalePriceHelp" class="form-text">고객에게 판매하고자 하는 가격을 적어주세요 (최소 10원)
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">정상가</label>
+                                    <input min="10" type="number" class="form-control" id="optionOriginalPrice"
+                                        aria-describedby="optionOriginalPriceHelp">
+                                    <div id="optionOriginalPriceHelp" class="form-text">상품이 할인 되기 전의 가격을 적어주세요 (최소
+                                        10원)<br>
+                                        정상가가 기입되면 할인율이 계산되어 고객에게 노출됩니다
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="stock" class="form-label">재고 <strong
+                                            class="text-info">(필수)</strong></label>
+                                    <input min="1" max="9999" type="number" class="form-control" id="optionStock"
+                                        aria-describedby="optionStockHelp" required>
+                                    <div id="optionStockHelp" class="form-text">재고를 적어주세요.(최대 9999개)</div>
+                                </div>
+                                <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="엔터를 눌러 입력이 가능합니다!" id="optionAddButton" class="input-group-text">옵션
+                                    추가</button>
+                            </div>
+                        </div>
+
+                        <div class="card mt-3 mb-3">
+                            <div class="card-body">
                                 <div id="optionBody" class="position-relative">
+                                </div>
+                                <div id="cardBody" class="row row-cols-1 row-cols-md-3 g-4">
+                                    <div class="d-none" <!-- 원본 시작 -->
+                                        <div class="col" id="optionCard">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <p class="card-text">옵션
+                                                        <span id="optionValueOption1"></span>
+                                                    </p>
+                                                    <p class="card-text">세부 옵션
+                                                        <span id="optionValueOption2"></span>
+                                                    </p>
+                                                    <p class="card-text">판매가
+                                                        <span id="optionValueSalePrice"></span>
+                                                    </p>
+                                                    <p class="card-text">정상가
+                                                        <span id="optionValueOriginalPrice"></span>
+                                                    </p>
+                                                    <p class="card-text">재고
+                                                        <span id="optionValueStock"></span>
+                                                    </p>
+                                                    <button type="button" class="btn btn-outline-danger"
+                                                        id="optionRemove">삭제하기</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- 원본 끝 -->
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <input type="hidden" name="optionArray" id="optionArray">
-                    <div class="mb-3">
+                    <div id="noOptionItem" class="">
+                        <div class="mb-5">
+                            <label for="salePrice" class="form-label">판매가 <strong
+                                    class="text-info">(필수)</strong></label>
+                            <input th:field="*{salePrice}" type="number" class="form-control" id="salePrice"
+                                aria-describedby="salePriceHelp" required>
+                            <div id="salePriceHelp" class="form-text">고객에게 판매하고자 하는 가격을 적어주세요</div>
+                        </div>
+                        <div class="mb-5">
+                            <label for="originalPrice" class="form-label">정상가</label>
+                            <input th:field="*{originalPrice}" min="10" type="number" class="form-control"
+                                id="originalPrice" aria-describedby="originalPriceHelp">
+                            <div id="originalPriceHelp" class="form-text">상품이 할인 되기 전의 가격을 적어주세요<br>
+                                정상가가 기입되면 할인율이 계산되어 고객에게 노출됩니다
+                            </div>
+                        </div>
+                        <div class="mb-5">
+                            <label for="stock" class="form-label">재고 <strong class="text-info">(필수)</strong></label>
+                            <input th:field="*{stock}" min="1" max="9999" type="number" class="form-control" id="stock"
+                                aria-describedby="stockHelp" required>
+                            <div id="stockHelp" class="form-text">재고를 적어주세요.(최대 9999개)</div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="text-center" th:if="${#fields.hasErrors('description')}">
+                        <hr>
+                        <p class="alert alert-danger" role="alert">
+                            <i class="fas fa-long-arrow-alt-down"> </i>
+                            <span th:errors="*{description}"></span>
+                        </p>
+                    </div>
+
+                    <div class="mt-3 mb-5">
                         <label for="description" class="form-label">설명 <strong class="text-info">(필수)</strong></label>
-                        <textarea th:field="*{description}" type="text" class="form-control" id="description"
+                        <textarea th:field="*{description}" class="form-control" id="description"
                             aria-describedby="descriptionHelp" style="height: 200px" required></textarea>
                         <div id="descriptionHelp" class="form-text">설명을 적어주세요.</div>
                     </div>
-                    <div class="mb-3">
-                        <label for="price" class="form-label">정가 <strong class="text-info">(필수)</strong></label>
-                        <input th:field="*{price}" type="number" class="form-control" id="price"
-                            aria-describedby="priceHelp" required>
-                        <div id="priceHelp" class="form-text">상품의 정가를 적어주세요.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="price" class="form-label">할인가</label>
-                        <input th:field="*{price}" min="10" type="number" class="form-control" id="salePrice"
-                            aria-describedby="salePriceHelp" required>
-                        <div id="salePriceHelp" class="form-text">할인된 가격을 적어주세요.(최소 가격 10원)</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="stock" class="form-label">재고 <strong class="text-info">(필수)</strong></label>
-                        <input th:field="*{stock}" min="1" max="9999" type="number" class="form-control" id="stock"
-                            aria-describedby="stockHelp" required>
-                        <div id="stockHelp" class="form-text">재고를 적어주세요.(최대 9999개)</div>
-                    </div>
+
                     <div class="text-center" th:if="${#fields.hasErrors('mainImage')}">
                         <hr>
                         <p class="alert alert-danger" role="alert">
@@ -93,7 +166,7 @@
                         </p>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-5">
                         <label for="mainImage" class="form-label">대표 사진을 첨부해주세요 <strong
                                 class="text-info">(필수)</strong></label>
                         <input class="form-control" type="file" name="mainImage" accept="image/png, image/jpeg"
@@ -104,25 +177,24 @@
                         <!--                <input type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple"/>-->
                     </div>
 
-                    <hr>
-
-                    <div class="mb-3">
+                    <div class="mb-5">
                         <label for="descriptionImage" class="form-label">상품에 대한 설명이 들어간 사진들을 첨부해주세요(선택)</label>
                         <input class="form-control" type="file" name="descriptionImage" accept="image/png, image/jpeg"
                             id="descriptionImage" aria-describedby="descriptionImageHelp" multiple>
                         <p id="descriptionImageHelp" class="form-text">가로 800픽셀 세로 최대 30,000픽셀. 최대 30MB 이하의 .JPEG, .PNG
                             확장자만 업로드해주세요.</p>
                     </div>
+
                     <div class="text-center">
-                        <div class="col-6">
-                            <button type="submit" class="btn btn-lg btn-primary">글 작성 완료</button>
-                            <button type="submit" data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="임시글은 한 달동안 저장 후 자동 삭제되며 사진은 저장되지 않습니다." formaction="/seller/temporary-save"
-                                id="temporarySave" class="btn btn-lg btn-secondary">임시글 저장</button>
-                        </div>
+                        <button type="button" id="optionItemSubmit" class="btn btn-lg btn-primary d-none">옵션 상품 작성
+                            완료</button>
+                        <button type="submit" id="oneItemSubmit" class="btn btn-lg btn-primary">단일 상품 작성 완료</button>
+                        <button type="submit" data-bs-toggle="tooltip" data-bs-placement="top"
+                            title="임시글은 한 달동안 저장 후 자동 삭제되며 사진은 저장되지 않습니다." formaction="/seller/temporary-save"
+                            id="temporarySave" class="btn btn-lg btn-secondary">임시글 저장</button>
                     </div>
                 </form>
-                <h3>임시글 저장 목록</h3>
+                <h4>임시글 저장 목록</h4>
                 <section class="py-5 text-center container" th:if="${#lists.isEmpty(itemTemporaries)}">
                     <div class="row py-lg-5">
                         <div class="col-lg-6 col-md-8 mx-auto">
@@ -142,6 +214,10 @@
             </div>
         </div>
         <script>
+            function removeOption() {
+                document.getElementById(this.id).parentNode.parentNode.parentNode.parentNode.removeChild(document.getElementById(this.id).parentNode.parentNode.parentNode);
+            }
+
             window.addEventListener('load', () => {
                 var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
                 var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -151,9 +227,9 @@
 
             document.addEventListener('keydown', function (event) {
                 if (event.keyCode === 13) {
-                    if (document.activeElement.id == 'option2') {
-                        document.getElementById("optionAddButton").click();
-                    }
+                    // if (document.activeElement.id == 'option2') {
+                    //     document.getElementById("optionAddButton").click();
+                    // }
                     event.preventDefault();
                 };
             }, true);
@@ -175,6 +251,10 @@
             document.getElementById('optionAddButton').addEventListener('click', () => {
                 let option1 = document.getElementById('option1').value.trim();
                 let option2 = document.getElementById('option2').value.trim();
+                let optionSalePrice = document.getElementById('optionSalePrice').value.trim();
+                let optionOriginalPrice = document.getElementById('optionOriginalPrice').value.trim();
+                let optionStock = document.getElementById('optionStock').value.trim();
+
 
                 option1 = regExp(option1);
                 option2 = regExp(option2);
@@ -183,31 +263,42 @@
                     alert('옵션을 적어주세요');
                     return false;
                 }
+                if (optionSalePrice == '') {
+                    alert('판매가를 적어주세요');
+                    return false;
+                }
+                if (optionStock == '') {
+                    alert('재고를 적어주세요');
+                    return false;
+                }
                 if (option1.length > 10 || option2.length > 10) {
                     alert('10글자 이내로 적어주세요');
                     return false;
                 }
 
-                let span = document.createElement('span');
-                let optionCombined = option1 + '-' + option2;
-                let text = document.createTextNode(optionCombined);
-                let button = document.createElement('button');
-                let i = document.createElement('i');
+                let opitonCardOriginal = document.getElementById('optionCard');
+                let optionCard = opitonCardOriginal.cloneNode(true);
+                addIdToClone(optionCard);
+                document.getElementById('cardBody').appendChild(optionCard);
 
-                i.setAttribute('class', 'fas fa-times');
-                button.type = 'button';
-                button.setAttribute('class', 'card-link btn btn-outline-danger btn-sm');
-                button.onclick = function () {
-                    document.getElementById(this.id).remove();
+                document.getElementById('optionValueOption1' + index).textContent = option1;
+                document.getElementById('optionValueOption2' + index).textContent = option2;
+                document.getElementById('optionValueSalePrice' + index).textContent = optionSalePrice;
+                document.getElementById('optionValueOriginalPrice' + index).textContent = optionOriginalPrice;
+                document.getElementById('optionValueStock' + index).textContent = optionStock;
+                document.getElementById('optionRemove' + index).onclick = removeOption;
+
+                index++;
+
+                let optionObject = {
+                    option1: option1,
+                    option2: option2,
+                    optionSalePrice: optionSalePrice,
+                    optionOriginalPrice: optionOriginalPrice,
+                    optionStock: optionStock
                 }
-
-                span.setAttribute('id', 'span' + index);
-                button.setAttribute('id', 'span' + index);
-                index += 1;
-                button.appendChild(i);
-                span.appendChild(text);
-                span.appendChild(button);
-
+                optionArray.push(optionObject);
+                console.log();
 
                 document.getElementById('option2').value = '';
                 if (optionArray.includes(optionCombined)) {
@@ -220,20 +311,59 @@
                 }
             })
 
+            function addIdToClone(clone) {
+                clone.id = clone.id + index;
+                for (let i = 0; i < clone.childElementCount; i++) {
+                    addIdToClone(clone.children[i]);
+                }
+            }
+
             function optionAddToggle() {
                 document.getElementById("optionAdd").classList.toggle("d-none");
-            }
-            // document.getElementById("optionAdd").addEventListener('click', () => {
-            //     optionAddToggle();
-            // })
+                document.getElementById("noOptionItem").classList.toggle("d-none");
+                document.getElementById("optionItemSubmit").classList.toggle("d-none");
+                document.getElementById("oneItemSubmit").classList.toggle("d-none");
 
+            }
+
+            agreeButton.addEventListener('click', (e) => {
+                // e.preventDefault();
+
+                let isMandatoryAgree = document.getElementById('isMandatoryCheck').checked;
+                let isMarketingAgree = document.getElementById('isMarketingCheck').checked;
+
+                let agreeData = {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        isMandatoryAgree,
+                        isMarketingAgree
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                const onSuccess = res => {
+                    window.location.replace('http://localhost:8080/me/update')
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                fetch(`/api/v1/privacy/agree`, agreeData)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+            })
 
             document.getElementById('options1').addEventListener('change', () => {
-                let optionDefaults = {
-                    size: ['90, 95, 100, 105, 110', 'XS, S, M, L, XL, XXL', '직접 추가'],
-                    color: ['빨강, 주황, 노랑, 초록, 파랑, 보라', '연두색, 불그스럼한색, 시뻘건색', '직접 추가'],
-                    self: ['직접']
-                }
 
                 let options1 = document.getElementById('options1')[document.getElementById('options1')
                     .selectedIndex].text;

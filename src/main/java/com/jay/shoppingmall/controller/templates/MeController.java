@@ -11,6 +11,7 @@ import com.jay.shoppingmall.service.MeService;
 import com.jay.shoppingmall.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -48,9 +49,6 @@ public class MeController {
         if (user == null) {
             return "redirect:/";
         }
-//        if (user.getAddress() != null || user.getName() != null || user.getPhoneNumber() != null) {
-//            return "redirect:/";
-//        }
         model.addAttribute("user", user);
         return "me/agreement";
     }
@@ -109,14 +107,22 @@ public class MeController {
     }
 
     @PostMapping("delete")
-    public String deleteMeAction(DeleteMeRequest deleteMeRequest, BindingResult result, @CurrentUser User user, RedirectAttributes redirectAttributes) {
+    public String deleteMeAction(DeleteMeRequest deleteMeRequest, BindingResult result, @CurrentUser User user, Model model, RedirectAttributes redirectAttributes) {
         if (user.getRole().equals(Role.ROLE_ADMIN)) {
             return "redirect:/";
         }
-        meService.deleteMe(deleteMeRequest, user);
-        if (result.hasErrors()) {
-            return "redirect:/me/delete";
+        if (!meService.passwordCheck(deleteMeRequest.getPassword(), user)) {
+            result.rejectValue("password", "PASSWORD_MISMATCH", "비밀번호가 일치하지 않습니다.");
+            model.addAttribute("user", user);
+            return "me/delete";
         }
+        //TODO 데모용.
+        if (user.getEmail().equals("demo@user") || user.getEmail().equals("demo@admin") || user.getEmail().equals("demo@seller")) {
+            result.rejectValue("password", "PASSWORD_MISMATCH", "데모 계정은 삭제가 불가능합니다..!");
+            model.addAttribute("user", user);
+            return "me/delete";
+        }
+        meService.deleteMe(deleteMeRequest, user);
 
         redirectAttributes.addFlashAttribute("message", "회원탈퇴가 완료되었습니다");
         return "redirect:/logout";

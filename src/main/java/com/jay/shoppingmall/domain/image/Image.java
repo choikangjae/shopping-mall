@@ -22,8 +22,6 @@ public class Image extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-//    private Long itemId;
-
     private String originalFileName;
 
     private String filePath;
@@ -38,6 +36,9 @@ public class Image extends BaseTimeEntity {
 
     private LocalDateTime deletedDate;
 
+    @Enumerated(EnumType.STRING)
+    private ImageRelation imageRelation;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private Item item;
@@ -47,21 +48,12 @@ public class Image extends BaseTimeEntity {
 //    private Review review;
 
     @Builder
-    public Image(String originalFileName, String filePath, Long fileSize, boolean isMainImage, Item item) {
+    public Image(String originalFileName, String filePath, Long fileSize, boolean isMainImage, Item item, ImageRelation imageRelation) {
         this.originalFileName = originalFileName;
         this.filePath = filePath;
         this.fileSize = fileSize;
         this.isMainImage = isMainImage;
         this.item = item;
+        this.imageRelation = imageRelation;
     }
-
-    //상품 정보 저장
-//    public void setItem(Item item) {
-//        this.item = item;
-
-        //게시글에 현재 파일이 존재하지 않으면 파일 추가.
-//        if (!item.getImageList().contains(this))
-//            item.getImageList().add(this);
-//    }
-
 }

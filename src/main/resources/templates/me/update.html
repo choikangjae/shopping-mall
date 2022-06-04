@@ -11,8 +11,10 @@
 <body>
     <div layout:fragment="content">
         <div class="container">
+            <div th:replace="me/me-navbar :: me-navbar"></div>
+
             <div>
-                <h1>개인 정보 수정</h1>
+                <h3>개인 정보 수정</h3>
             </div>
 
             <div class="col-md-7 col-lg-8 mt-5">
@@ -54,7 +56,7 @@
                         <div class="col-sm-6">
                             <label for="lastName" class="form-label">성</label>
                             <input type="text" class="form-control" id="lastName" placeholder="홍" value=""
-                                th:value="${user.getName()?.getLast()}" required>
+                                th:value="${user.getName().getLast()}" required>
                             <div class="invalid-feedback">
                                 성을 적어주세요
                             </div>
@@ -63,7 +65,7 @@
                         <div class="col-sm-6">
                             <label for="firstName" class="form-label">이름</label>
                             <input type="text" class="form-control" id="firstName" placeholder="길동" value=""
-                                th:value="${user.getName()?.getFirst()}" required>
+                                th:value="${user.getName().getFirst()}" required>
                             <div class="invalid-feedback">
                                 이름을 적어주세요
                             </div>
@@ -74,7 +76,7 @@
                         <div class="col-md-6">
                             <label for="zipcode" class="form-label">우편번호</label>
                             <input type="text" class="form-control" id="zipcode" placeholder="우편번호" readonly
-                                th:value="${user.getAddress()?.getZipcode()}" required>
+                                th:value="${user.getAddress().getZipcode()}" required>
                             <div class="invalid-feedback">
                                 우편번호를 입력해주세요
                             </div>
@@ -86,7 +88,7 @@
                         <div class="col-12">
                             <label for="address" class="form-label">주소</label>
                             <input type="text" class="form-control" id="address" placeholder="도로명 주소"
-                                th:value="${user.getAddress()?.getAddress()}" readonly required>
+                                th:value="${user.getAddress().getAddress()}" readonly required>
                             <div class="invalid-feedback">
                                 도로명 주소를 입력해주세요
                             </div>
@@ -95,7 +97,7 @@
                         <div class="col-6">
                             <label for="detailAddress" class="form-label">상세 주소</label>
                             <input type="text" class="form-control" id="detailAddress" placeholder="상세 주소"
-                                th:value="${user.getAddress()?.getDetailAddress()}" required>
+                                th:value="${user.getAddress().getDetailAddress()}" required>
                             <div class="invalid-feedback">
                                 상세 주소를 입력해주세요
                             </div>
@@ -103,7 +105,7 @@
                         <div class="col-6">
                             <label for="extraAddress" class="form-label">참고항목</label>
                             <input type="text" class="form-control" id="extraAddress"
-                                th:value="${#objects.nullSafe(user.getAddress()?.getExtraAddress(),'')}" readonly>
+                                th:value="${#objects.nullSafe(user.getAddress().getExtraAddress(),'')}" readonly>
                         </div>
                     </div>
 
@@ -118,13 +120,13 @@
                         <div class="col-6">
                             <label for="phoneNumber" class="form-label">휴대폰 번호</label>
                             <input type="text" class="form-control" id="phoneNumber" placeholder="010(-)1234(-)5678"
-                                th:value="${user.getPhoneNumber()?.getFullNumber()}" required>
+                                   th:value="${#objects.nullSafe(user.getPhoneNumber().getFullNumber(),'')}" required>
                             <div class="invalid-feedback">
                                 휴대폰 번호를 입력해주세요
                             </div>
                         </div>
                         <div class="col-6">
-                            <a class="btn btn-primary" onclick="" type="button">번호 인증</a>
+                            <button class="btn btn-primary" onclick="" type="button" disabled>번호 인증</button>
                         </div>
                     </div>
 
@@ -138,8 +140,6 @@
                             </label>
                         </div>
                         <div class="form-check">
-<!--                            <input th:if="${#session.getAttribute('isMarketingAgree')} != null" class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${#session.getAttribute('isMarketingAgree')}">-->
-<!--                            <input th:if="${user.getAgree()?.getIsMarketingAgree()} != null" class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${user.getAgree().getIsMarketingAgree()}">-->
                             <input class="form-check-input" type="checkbox" value="" id="isMarketingAgree" th:checked="${#session.getAttribute('isMarketingAgree') == null ? user.getAgree().getIsMarketingAgree() : #session.getAttribute('isMarketingAgree')}">
                             <label class="form-check-label" for="isMarketingAgree">
                                 광고성 개인 정보 수집 동의 여부 (선택)

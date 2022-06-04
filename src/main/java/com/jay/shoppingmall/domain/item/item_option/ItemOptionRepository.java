@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.domain.item.option;
+package com.jay.shoppingmall.domain.item.item_option;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

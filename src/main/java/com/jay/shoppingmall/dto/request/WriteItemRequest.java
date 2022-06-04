@@ -29,9 +29,9 @@ public class WriteItemRequest {
     @NotNull
     private MultipartFile mainImage;
 
-    @NotNull
-    private Integer price;
+    private Integer originalPrice;
 
+    @NotNull
     private Integer salePrice;
 
     @NotNull

@@ -54,6 +54,10 @@ public class SellerController {
                                    @RequestParam("mainImage") MultipartFile file,
                                    @RequestParam(value = "descriptionImage", required = false) List<MultipartFile> files,
                                    @CurrentUser User user) {
+        if (writeItemRequest.getDescription().length() > 200) {
+            result.rejectValue("description", "EXCEED_LIMIT","설명은 200글자까지만 가능합니다");
+            return "/seller/seller-write-item";
+        }
         if (file.isEmpty()) {
             result.rejectValue("mainImage", "MAIN_NOT_EXISTS","대표 사진을 첨부해주세요");
             return "/seller/seller-write-item";

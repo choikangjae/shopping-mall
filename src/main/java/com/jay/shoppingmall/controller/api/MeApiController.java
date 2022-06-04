@@ -51,13 +51,17 @@ public class MeApiController {
 
     @PostMapping("/me/password-update")
     public ResponseEntity<?> passwordUpdate(@Valid @RequestBody PasswordChangeRequest passwordChangeRequest, @CurrentUser User user) {
+
         if (user == null) {
             throw new UserNotFoundException("잘못된 요청입니다");
         }
         if (!passwordChangeRequest.getPasswordAfter().equals(passwordChangeRequest.getRepeatPasswordAfter())) {
             throw new PasswordInvalidException("바꿀 비밀번호가 일치하지 않습니다");
         }
-
+        //TODO 데모용.
+        if (user.getEmail().equals("demo@user") || user.getEmail().equals("demo@admin") || user.getEmail().equals("demo@seller")) {
+            return ResponseEntity.ok(null);
+        }
         authService.passwordChange(passwordChangeRequest, user);
         sessionUpdater.sessionUpdateToken(user.getEmail(), passwordChangeRequest.getPasswordAfter());
 

@@ -2,6 +2,7 @@ package com.jay.shoppingmall.domain.item;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.image.Image;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.user.User;
@@ -42,6 +43,9 @@ public class Item extends BaseTimeEntity {
 
     private Integer viewCount;
 
+    @OneToMany(mappedBy = "item")
+    private List<ItemOption> itemOptions = new ArrayList<>();
+
     @Column(columnDefinition = "boolean default 0")
     private Boolean isDeleted = false;
 
@@ -54,17 +58,9 @@ public class Item extends BaseTimeEntity {
         this.stock -= quantity;
     }
 
-//    @ManyToOne
-//    @JoinColumn(name = "order_id")
-//    private Order order;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
-
-//    @ManyToOne
-//    @JoinColumn(name = "user_id")
-//    private User user;
 
     public void viewCountUp() {
         if (this.getViewCount() == null) {
@@ -83,13 +79,4 @@ public class Item extends BaseTimeEntity {
         this.stock = stock;
         this.seller = seller;
     }
-
-    //Image 테이블에 item_id 필드값 할당.
-//    public void addImage(Image image) {
-//        imageList.add(image);
-//
-//        if (image.getItem() != this)
-//            image.setItem(this);
-//    }
-
 }

@@ -1,7 +1,7 @@
 package com.jay.shoppingmall.domain.cart;
 
 import com.jay.shoppingmall.domain.item.Item;
-import com.jay.shoppingmall.domain.item.option.ItemOption;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

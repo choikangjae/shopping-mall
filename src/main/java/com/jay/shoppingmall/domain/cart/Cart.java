@@ -1,9 +1,8 @@
 package com.jay.shoppingmall.domain.cart;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
-import com.jay.shoppingmall.common.SQLSoftDeletion;
 import com.jay.shoppingmall.domain.item.Item;
-import com.jay.shoppingmall.domain.item.option.ItemOption;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
 import com.jay.shoppingmall.exception.exceptions.QuantityException;

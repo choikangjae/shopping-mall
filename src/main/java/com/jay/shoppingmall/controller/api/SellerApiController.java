@@ -1,24 +1,26 @@
 package com.jay.shoppingmall.controller.api;
 
 import com.jay.shoppingmall.common.CurrentUser;
+import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.SellerAgreeRequest;
+import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -28,12 +30,26 @@ public class SellerApiController {
     private final SellerService sellerService;
     private final AuthenticationManager authenticationManager;
 
+    @PostMapping(value = "/write", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<?> sellerItemWrite(@Valid @RequestBody WriteItemRequest writeItemRequest,
+                                             @RequestParam("mainImage") MultipartFile file,
+                                             @RequestParam(value = "descriptionImage", required = false) List<MultipartFile> files,
+                                             @CurrentUser User user) {
+        //TODO 상품 작성 이후 처리 과정 작성
+        return ResponseEntity.ok(null);
+    }
+
     @PostMapping("/agree")
     public ResponseEntity<?> agreeCheck(@Valid @RequestBody SellerAgreeRequest sellerAgreeRequest, @CurrentUser User user, HttpServletRequest request) {
         if (user == null) {
             throw new UserNotFoundException("잘못된 요청입니다");
         }
         Long id = user.getId();
+
+        //TODO 데모용
+        if (user.getEmail().equals("demo@user")) {
+            throw new UserNotFoundException("판매자 계정을 이용해주세요..!");
+        }
 
         if (sellerAgreeRequest.getIsSellerAgree() == null || sellerAgreeRequest.getIsLawAgree() == null) {
             throw new AgreeException("잘못된 요청입니다");

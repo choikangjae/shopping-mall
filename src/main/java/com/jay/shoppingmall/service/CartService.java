@@ -2,12 +2,11 @@ package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
-import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
-import com.jay.shoppingmall.domain.item.option.ItemOption;
-import com.jay.shoppingmall.domain.item.option.ItemOptionRepository;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
+import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.CartRequest;
 import com.jay.shoppingmall.dto.response.cart.CartResponse;
