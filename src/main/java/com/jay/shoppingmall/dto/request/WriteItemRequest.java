@@ -22,17 +22,17 @@ public class WriteItemRequest {
     @NotBlank
     private String description;
 
-    private List<String> optionArray;
+//    private List<String> optionArray;
 
     private List<MultipartFile> image;
 
     @NotNull
     private MultipartFile mainImage;
 
-    private Integer originalPrice;
+    private Long originalPrice;
 
     @NotNull
-    private Integer salePrice;
+    private Long salePrice;
 
     @NotNull
     private Integer stock;

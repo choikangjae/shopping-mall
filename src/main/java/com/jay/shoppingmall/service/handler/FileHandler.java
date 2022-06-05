@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.service.handler;
 
 import com.jay.shoppingmall.domain.image.Image;
+import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.dto.request.ImageUpload;
@@ -141,7 +142,7 @@ public class FileHandler {
 //        imageList.get(indexOfMainImage).setIsMainImage(true);
 //        return imageList;
 //    }
-    public Image parseFilesInfo(MultipartFile multipartFile, final Item item) {
+    public Image parseFilesInfo(MultipartFile multipartFile, ImageRelation imageRelation, Long foreignId) {
 
             //폴더명을 업로드 한 날짜로 변환 후 저장
             LocalDateTime now = LocalDateTime.now();
@@ -175,23 +176,18 @@ public class FileHandler {
                         originalFileExtension = ".jpg";
                     else if (contentType.contains("image/png"))
                         originalFileExtension = ".png";
-                //파일명은 나노초+확장자
-                String fileName = System.nanoTime() + originalFileExtension;
 
-                //DTO -> Image -> List<Image>
-//                ImageUpload imageUpload = ImageUpload.builder()
-//                        .originalFileName(multipartFile.getOriginalFilename())
-//                        .filePath(path + File.separator + fileName)
-//                        .fileSize(multipartFile.getSize())
-//                        .
-//                        .isMainImage(false)
-//                        .build();
+                String fileName = System.nanoTime() + "";
+                        //확장자를 붙여 저장하는 것은 보안에 취약.
+                        //+ originalFileExtension;
 
                 Image image = Image.builder()
                         .originalFileName(multipartFile.getOriginalFilename())
                         .fileSize(multipartFile.getSize())
                         .filePath(path + File.separator + fileName)
-                        .item(item)
+                        .fileExtension(originalFileExtension)
+                        .imageRelation(imageRelation)
+                        .foreignId(foreignId)
                         .isMainImage(false)
                         .build();
 
@@ -199,28 +195,25 @@ public class FileHandler {
                 file = new File(absolutePath + path + File.separator + fileName);
                 try {
                     multipartFile.transferTo(file);
-                    Thumbnails.of(file)
-                            .size(100, 100)
-                            .toFile(thumbnailFile + File.separator + fileName);
+//                    Thumbnails.of(file)
+//                            .size(750, 500)
+//                            .toFile(thumbnailFile + File.separator + fileName);
                 } catch (IOException e) {
                     throw new FileException("File I/O failed");
                 }
-
         return image;
     }
 
     public String getStringImage(Image image) {
         String absolutePath = new File("").getAbsolutePath() + File.separator;
         String path = absolutePath + image.getFilePath();
-        String stringImage = null;
 
+        String stringImage = null;
         try {
             InputStream inputStream = new FileInputStream(path);
             byte[] imageBytes = IOUtils.toByteArray(inputStream);
             stringImage = Base64.getEncoder().encodeToString(imageBytes);
-
             inputStream.close();
-
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
@@ -16,12 +17,10 @@ import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.MeDetailResponse;
 import com.jay.shoppingmall.dto.request.UserUpdateRequest;
-import com.jay.shoppingmall.exception.exceptions.AgreeException;
-import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
-import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
-import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +32,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@ToString
 public class MeService {
 
     private final UserRepository userRepository;
@@ -146,12 +146,22 @@ public class MeService {
                     .id(item.getId())
                     .name(item.getName())
                     .zzim(item.getZzim())
-                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
-                    .price(item.getPrice())
-                    .salePrice(item.getSalePrice())
+                    .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
+                    .priceNow(item.getPrice())
+                    .originalPrice(item.getSalePrice())
                             .isZzimed(zzim.getIsZzimed())
                     .build());
         }
         return itemResponses;
+    }
+
+    public void duplicationCheck(final String phoneNumber) {
+        final PhoneNumber splitPhoneNumber = splitPhoneNumber(phoneNumber);
+
+        if (userRepository.findByPhoneNumber(
+                splitPhoneNumber.getFirst(), splitPhoneNumber.getMiddle(), splitPhoneNumber.getLast()
+        ).isPresent()) {
+            throw new AlreadyExistsException("이미 해당 번호가 존재합니다");
+        }
     }
 }

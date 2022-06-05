@@ -23,7 +23,7 @@ public class ItemDetailResponse {
 
     private List<String> descriptionImages;
 
-    private Integer price;
+    private Long price;
 
     private Integer stock;
 

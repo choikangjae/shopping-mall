@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.common.CurrentUser;
+import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
@@ -24,7 +25,7 @@ public class HomeController {
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
     )
     public String write(Model model, @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @CurrentUser User user) {
-        Slice<ItemResponse> responses = itemService.itemAll(user, pageable);
+        PageDto responses = itemService.itemAll(user, pageable);
         model.addAttribute("items", responses);
 
         return "home";

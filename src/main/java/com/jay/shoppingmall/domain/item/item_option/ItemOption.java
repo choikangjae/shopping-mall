@@ -28,6 +28,8 @@ public class ItemOption extends BaseTimeEntity {
 
     private String option2;
 
+    private Boolean isOptionMainItem;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_stock_id")
     private ItemStock itemStock;

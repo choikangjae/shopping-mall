@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ItemSale {
+public class ItemOnSale {
 
-    private Long salePrice;
+    private Long onSalePrice;
 
-    private LocalDateTime saleFinishDate;
+    private LocalDateTime onSaleFinishDate;
 
-    private LocalDateTime saleStartDate;
+    private LocalDateTime onSaleStartDate;
 }

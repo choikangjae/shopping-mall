@@ -12,9 +12,9 @@ public class ItemTemporaryResponse {
 
     private String description;
 
-    private Integer price;
+    private Long price;
 
-    private Integer salePrice;
+    private Long salePrice;
 
     private Integer stock;
 }

@@ -43,7 +43,7 @@
 <!--                        </div>-->
 <!--                    </div>-->
 <!--                    <th:block th:each="item : ${items}"></th:block>-->
-                    <div class="col" th:each="item : ${items}">
+                    <div class="col" th:each="item : ${items.getContent()}">
                         <div class="card shadow-sm">
                             <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none">
                                 <img class="bd-placeholder-img card-img-top" width="100%" height="225" th:src="'data:image/jpeg;base64,'+${item.mainImage}"
@@ -56,7 +56,7 @@
                                     <a th:href="@{'/item/details/' + ${item.id}}" class="text-reset text-decoration-none"></a>
                                         <h5 class="fw-bolder" th:text="${item.name}">상품 이름</h5>
                                 </p>
-                                <h5 class="fw-bolder" th:text="${#numbers.formatDecimal(item.price, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">상품 가격</h5>
+                                <h5 class="fw-bolder" th:text="${#numbers.formatDecimal(item.priceNow, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">상품 가격</h5>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="btn-group">
                                         <button th:onclick="|addToWishList('${item.id}');|" class="btn btn-sm btn-outline-secondary">

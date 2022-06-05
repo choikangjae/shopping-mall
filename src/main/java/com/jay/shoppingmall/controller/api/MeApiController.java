@@ -6,6 +6,7 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.*;
 import com.jay.shoppingmall.exception.ErrorResponse;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
+import com.jay.shoppingmall.exception.exceptions.NotValidException;
 import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.AuthService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Map;
 import java.util.Objects;
 
 @RequiredArgsConstructor
@@ -98,5 +100,15 @@ public class MeApiController {
         sessionUpdater.sessionUpdateToken(user.getEmail(), request.getPassword());
 
         return ResponseEntity.ok().body(null);
+    }
+
+    @PostMapping("/phone/duplication-check")
+    public ResponseEntity<?> phoneDuplicationCheck(@RequestBody Map<String, String> phoneNumberMap) {
+
+        String phoneNumber = phoneNumberMap.get("phoneNumber");
+        phoneNumber = phoneNumber.trim().replace("-", "");
+        meService.duplicationCheck(phoneNumber);
+
+        return ResponseEntity.ok(null);
     }
 }

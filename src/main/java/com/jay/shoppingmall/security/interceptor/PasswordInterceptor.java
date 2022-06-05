@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 
 @Component
-@ToString
 public class PasswordInterceptor implements HandlerInterceptor {
 
     @Override

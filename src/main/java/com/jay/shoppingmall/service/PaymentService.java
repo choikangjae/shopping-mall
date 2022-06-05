@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.image.Image;
+import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
@@ -81,7 +82,7 @@ public class PaymentService {
 
         for (Cart cart : carts) {
             //대표 사진 관리에 대한 주체를 OrderItem에게 넘김. 상품이 삭제될 수 있으므로.
-            final Long mainImageId = imageRepository.findByItemIdAndIsMainImageTrue(cart.getItem().getId()).getId();
+            final Long mainImageId = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,cart.getItem().getId()).getId();
             OrderItem orderItem = OrderItem.builder()
                     .mainImageId(mainImageId)
                     .order(order)

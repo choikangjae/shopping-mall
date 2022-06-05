@@ -30,16 +30,16 @@ class ItemServiceTest {
     void 키워드에_따라_결과가_나온다() {
         Item item1 = Item.builder()
                 .name("상품명")
-                .salePrice(1000)
+                .salePrice(1000L)
                 .stock(20)
-                .price(1500)
+                .price(1500L)
                 .description("상품설명")
                 .build();
         Item item2 = Item.builder()
                 .name("상세품상품명")
-                .salePrice(1000)
+                .salePrice(1000L)
                 .stock(20)
-                .price(1500)
+                .price(1500L)
                 .description("상 품 설 명")
                 .build();
 

@@ -1,16 +1,22 @@
 package com.jay.shoppingmall.controller.api;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jay.shoppingmall.common.CurrentUser;
+import com.jay.shoppingmall.common.model.OptionValue;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.request.ApiWriteItemRequest;
 import com.jay.shoppingmall.dto.request.SellerAgreeRequest;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,18 +31,32 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/seller")
+@PreAuthorize("hasRole('SELLER')")
 public class SellerApiController {
 
     private final SellerService sellerService;
     private final AuthenticationManager authenticationManager;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(value = "/write", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> sellerItemWrite(@Valid @RequestBody WriteItemRequest writeItemRequest,
+    public ResponseEntity<?> sellerItemWrite(@Valid @RequestPart ApiWriteItemRequest apiWriteItemRequest,
                                              @RequestParam("mainImage") MultipartFile file,
                                              @RequestParam(value = "descriptionImage", required = false) List<MultipartFile> files,
                                              @CurrentUser User user) {
+        System.out.println(apiWriteItemRequest.getDescription());
+        System.out.println(file.getOriginalFilename());
+        final List<OptionValue> optionValues = objectMapper.convertValue(apiWriteItemRequest.getOptionArray(), new TypeReference<List<OptionValue>>() {
+        });
+        for (OptionValue optionValue : optionValues) {
+            System.out.println(optionValue.getOption2());
+            System.out.println(optionValue.getOption1());
+            System.out.println(optionValue.getOptionStock());
+            System.out.println(optionValue.getIsOptionMainItem());
+        }
+        Long itemId = sellerService.writeOptionItem(apiWriteItemRequest, optionValues, file, files, user);
+
         //TODO 상품 작성 이후 처리 과정 작성
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(itemId);
     }
 
     @PostMapping("/agree")

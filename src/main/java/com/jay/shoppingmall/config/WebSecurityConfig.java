@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jay.shoppingmall.security.CustomUserDetailsService;
 import com.jay.shoppingmall.security.LoginFailureHandler;
 import com.jay.shoppingmall.security.LoginSuccessHandler;
@@ -89,6 +90,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //로그아웃시 세션을 통해 발급한 모든 쿠키 삭제.
                 .deleteCookies("JSESSIONID", "remember-me")
                 .invalidateHttpSession(true);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
     @Bean

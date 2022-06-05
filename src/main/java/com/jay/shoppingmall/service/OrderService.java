@@ -3,6 +3,7 @@ package com.jay.shoppingmall.service;
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.image.Image;
+import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
@@ -62,9 +63,9 @@ public class OrderService {
                     .name(item.getName())
                     .zzim(item.getZzim())
                     .cartQuantity(cart.getQuantity())
-                    .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
-                    .price(item.getPrice())
-                    .salePrice(item.getSalePrice())
+                    .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
+                    .priceNow(item.getPrice())
+                    .originalPrice(item.getSalePrice())
                     .build());
         }
 

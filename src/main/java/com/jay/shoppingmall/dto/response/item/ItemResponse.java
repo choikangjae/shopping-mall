@@ -18,9 +18,9 @@ public class ItemResponse {
 
     private Integer zzim;
 
-    private Integer price;
+    private Long originalPrice;
 
-    private Integer salePrice;
+    private Long priceNow;
 
     private Integer cartQuantity;
 

@@ -21,8 +21,8 @@
 
                     <div class="mb-5">
                         <label for="item" class="form-label">상품명 <strong class="text-info">(필수)</strong></label>
-                        <input th:field="*{name}" type="text" class="form-control" id="itemName" aria-describedby="itemHelp"
-                            required>
+                        <input th:field="*{name}" type="text" class="form-control" id="itemName"
+                            aria-describedby="itemHelp" required>
                         <div id="itemHelp" class="form-text">상품명을 적어주세요.</div>
                     </div>
 
@@ -47,8 +47,6 @@
                                             class="text-info">(필수)</strong></label>
                                     <input type="text" id="option2" aria-describedby="option2Help" placeholder="예시)빨간색"
                                         class="form-control">
-                                    <!-- <div id="option2Help" class="form-text">옵션을 쉼표(,)로 구분해서 적어주세요 (최대 5개)
-                                    </div> -->
                                 </div>
                                 <div class="mb-3">
                                     <label for="price" class="form-label">판매가 <strong
@@ -74,21 +72,21 @@
                                         aria-describedby="optionStockHelp" required>
                                     <div id="optionStockHelp" class="form-text">재고를 적어주세요.(최대 9999개)</div>
                                 </div>
-                                <button type="button" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="엔터를 눌러 입력이 가능합니다!" id="optionAddButton" class="input-group-text">옵션
+                                <button type="button" id="optionAddButton" class="input-group-text">옵션
                                     추가</button>
                             </div>
                         </div>
 
                         <div class="card mt-3 mb-3">
                             <div class="card-body">
-                                <div id="optionBody" class="position-relative">
-                                </div>
+                                <sapn class="text-muted">대표로 노출할 상품을 선택해주세요</sapn>
                                 <div id="cardBody" class="row row-cols-1 row-cols-md-3 g-4">
-                                    <div class="d-none" <!-- 원본 시작 -->
+                                    <div class="d-none">
+                                        <!-- 원본 시작 -->
                                         <div class="col" id="optionCard">
-                                            <div class="card">
+                                            <div class="card" id="optionMainItem">
                                                 <div class="card-body">
+                                                    <!-- <input type="checkbox" id="isOptionMainItem"> -->
                                                     <p class="card-text">옵션
                                                         <span id="optionValueOption1"></span>
                                                     </p>
@@ -174,7 +172,6 @@
                         <p id="imageHelp" class="form-text">750x500(3:2 비율) 크기의 .JPEG, .PNG 확장자만 업로드해주세요.
                             <br>크기는 100KB에서 5MB 사이여야 합니다.
                         </p>
-                        <!--                <input type="file" name="image" accept="image/png, image/jpeg" id="formFileMultiple"/>-->
                     </div>
 
                     <div class="mb-5">
@@ -214,8 +211,73 @@
             </div>
         </div>
         <script>
+            document.getElementById('optionItemSubmit').addEventListener('click', (e) => {
+                e.preventDefault();
+
+                //대표로 선택된 상품의 세부 옵션.
+                let option2Value = document.querySelector('.border-primary').firstElementChild.firstElementChild.nextElementSibling.firstElementChild.textContent;
+
+                let mainOptionTrue = optionArray.find(el => 
+                    el.option2 === option2Value);
+                // if (!mainOptionTrue) {
+                //     alert('대표 상품을 선택해주세요');
+                //     return false;
+                // }
+                mainOptionTrue.isOptionMainItem = true;
+
+                let itemName = document.getElementById('itemName').value;
+                let description = document.getElementById('description').value;
+                let mainImage = document.getElementById('mainImage').files[0];
+                let descriptionImage = document.getElementById('descriptionImage').files;
+
+                let formData = new FormData();
+
+                formData.append('mainImage', mainImage);
+                formData.append('descriptionImage', descriptionImage);
+                formData.append('apiWriteItemRequest', new Blob([JSON.stringify({
+                    itemName,
+                    description,
+                    optionArray
+                })], {
+                    type: "application/json"
+                }));
+
+                let data = {
+                    method: 'POST',
+                    body: formData
+                };
+
+                const onSuccess = res => {
+                    res.json()
+                    .then((data) => {
+                        alert('상품 등록이 완료되었습니다');
+                        window.location.replace('http://localhost:8080/item/details/' + data);
+                    })
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                fetch(`/api/v1/seller/write`, data)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+            })
+
             function removeOption() {
                 document.getElementById(this.id).parentNode.parentNode.parentNode.parentNode.removeChild(document.getElementById(this.id).parentNode.parentNode.parentNode);
+               
+                let number = optionArray.findIndex(el => {
+                    el.identifier == this.id});
+                optionArray.splice(number,1);
+                document.getElementById('optionArray').value = optionArray;
             }
 
             window.addEventListener('load', () => {
@@ -227,9 +289,9 @@
 
             document.addEventListener('keydown', function (event) {
                 if (event.keyCode === 13) {
-                    // if (document.activeElement.id == 'option2') {
-                    //     document.getElementById("optionAddButton").click();
-                    // }
+                    if (document.activeElement.id == 'option2') {
+                        document.getElementById("optionAddButton").click();
+                    }
                     event.preventDefault();
                 };
             }, true);
@@ -249,6 +311,7 @@
             let optionArray = new Array();
             let index = 0;
             document.getElementById('optionAddButton').addEventListener('click', () => {
+                
                 let option1 = document.getElementById('option1').value.trim();
                 let option2 = document.getElementById('option2').value.trim();
                 let optionSalePrice = document.getElementById('optionSalePrice').value.trim();
@@ -258,16 +321,27 @@
 
                 option1 = regExp(option1);
                 option2 = regExp(option2);
+                
 
-                if (option1 == '' || option2 == '') {
+                if (optionArray.find(el => el.option2 === option2)) {
+                    alert('세부 옵션은 중복될 수 없습니다');
+                    return false;
+                }
+                if (optionOriginalPrice) {
+                    if (optionSalePrice > optionOriginalPrice) {
+                        alert('판매 가격은 정상가격보다 낮거나 같아야 합니다');
+                        return false;
+                    }
+                }
+                if (!option1 || !option2) {
                     alert('옵션을 적어주세요');
                     return false;
                 }
-                if (optionSalePrice == '') {
+                if (!optionSalePrice) {
                     alert('판매가를 적어주세요');
                     return false;
                 }
-                if (optionStock == '') {
+                if (!optionStock) {
                     alert('재고를 적어주세요');
                     return false;
                 }
@@ -287,28 +361,27 @@
                 document.getElementById('optionValueOriginalPrice' + index).textContent = optionOriginalPrice;
                 document.getElementById('optionValueStock' + index).textContent = optionStock;
                 document.getElementById('optionRemove' + index).onclick = removeOption;
-
-                index++;
+                document.getElementById('optionMainItem' + index).onclick = optionMainItemToggle;
+                
+                if (!optionArray.length) {
+                    document.getElementById('optionMainItem' + index).classList.toggle("border");
+                    document.getElementById('optionMainItem' + index).classList.toggle("border-2");
+                    document.getElementById('optionMainItem' + index).classList.toggle("border-primary");
+                }
 
                 let optionObject = {
+                    identifier: 'optionRemove' + index,
+                    isOptionMainItem: false,
                     option1: option1,
                     option2: option2,
                     optionSalePrice: optionSalePrice,
                     optionOriginalPrice: optionOriginalPrice,
                     optionStock: optionStock
                 }
-                optionArray.push(optionObject);
-                console.log();
+                index++;
 
-                document.getElementById('option2').value = '';
-                if (optionArray.includes(optionCombined)) {
-                    alert('중복값은 들어올 수 없습니다');
-                    return false;
-                } else {
-                    optionArray.push(optionCombined);
-                    document.getElementById('optionBody').appendChild(span);
-                    document.getElementById('optionArray').value = optionArray;
-                }
+                optionArray.push(optionObject);
+                document.getElementById('optionArray').value = optionArray;
             })
 
             function addIdToClone(clone) {
@@ -323,45 +396,22 @@
                 document.getElementById("noOptionItem").classList.toggle("d-none");
                 document.getElementById("optionItemSubmit").classList.toggle("d-none");
                 document.getElementById("oneItemSubmit").classList.toggle("d-none");
-
             }
 
-            agreeButton.addEventListener('click', (e) => {
-                // e.preventDefault();
-
-                let isMandatoryAgree = document.getElementById('isMandatoryCheck').checked;
-                let isMarketingAgree = document.getElementById('isMarketingCheck').checked;
-
-                let agreeData = {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        isMandatoryAgree,
-                        isMarketingAgree
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
-
-                const onSuccess = res => {
-                    window.location.replace('http://localhost:8080/me/update')
-                }
-                const onFailure = res => {
-                    return res.json().then(json => alert(json.message));
+            function optionMainItemToggle() {
+                
+                let el = document.querySelector('.border-primary');
+                if (el) {
+                    el.firstElementChild.firstElementChild.checked = false;
+                    el.classList.remove("border", "border-2", "border-primary");
                 }
 
-                fetch(`/api/v1/privacy/agree`, agreeData)
-                    .then(res => {
-                        if (!res.ok) {
-                            throw res;
-                        }
-                        return res
-                    })
-                    .then(onSuccess, onFailure)
-                    .catch(err => {
-                        alert(err.message);
-                    });
-            })
+                document.getElementById(this.id).classList.toggle("border");
+                document.getElementById(this.id).classList.toggle("border-2");
+                document.getElementById(this.id).classList.toggle("border-primary");
+                document.getElementById(this.id).firstElementChild.firstElementChild.checked = true;
+            }
+
 
             document.getElementById('options1').addEventListener('change', () => {
 

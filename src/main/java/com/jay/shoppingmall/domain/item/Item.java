@@ -19,6 +19,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Where(clause = "is_deleted = 0")
 @SQLDelete(sql = "UPDATE item SET is_deleted = 1, deleted_date = NOW() WHERE id = ?")
 public class Item extends BaseTimeEntity {
@@ -31,9 +32,9 @@ public class Item extends BaseTimeEntity {
 
     private String description;
 
-    private Integer price;
+    private Long price;
 
-    private Integer salePrice;
+    private Long salePrice;
 
     @Setter
     private Integer stock;
@@ -42,6 +43,10 @@ public class Item extends BaseTimeEntity {
     private Integer zzim;
 
     private Integer viewCount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id")
+    private Image image;
 
     @OneToMany(mappedBy = "item")
     private List<ItemOption> itemOptions = new ArrayList<>();
@@ -71,7 +76,7 @@ public class Item extends BaseTimeEntity {
     }
 
     @Builder
-    public Item(String name, String description, Integer price, Integer salePrice, Integer stock, Seller seller) {
+    public Item(String name, String description, Long price, Long salePrice, Integer stock, Seller seller) {
         this.name = name;
         this.description = description;
         this.price = price;

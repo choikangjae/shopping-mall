@@ -13,9 +13,9 @@ public class CartResponse {
 
     private Integer quantity;
 
-    private Integer multipliedPrice;
+    private Long multipliedPrice;
 
-    private Integer totalPrice;
+    private Long totalPrice;
 
     private Integer totalQuantity;
 

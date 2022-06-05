@@ -1,12 +1,18 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.common.model.OptionValue;
 import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.image.Image;
+import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
+import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
+import com.jay.shoppingmall.domain.item.item_price.ItemPriceRepository;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStockRepository;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporaryRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
@@ -16,6 +22,7 @@ import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
+import com.jay.shoppingmall.dto.request.ApiWriteItemRequest;
 import com.jay.shoppingmall.dto.request.QnaAnswerRequest;
 import com.jay.shoppingmall.dto.request.SellerAgreeRequest;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
@@ -49,6 +56,8 @@ public class SellerService {
     private final ItemTemporaryRepository itemTemporaryRepository;
     private final CartRepository cartRepository;
     private final ItemOptionRepository itemOptionRepository;
+    private final ItemPriceRepository itemPriceRepository;
+    private final ItemStockRepository itemStockRepository;
 
     public Page<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -58,10 +67,10 @@ public class SellerService {
                 .map(item -> ItemResponse.builder()
                         .id(item.getId())
                         .name(item.getName())
-                        .price(item.getPrice())
+//                        .priceNow(item.getPrice())
 //                    .salePrice(item.getSalePrice())
                         .zzim(item.getZzim())
-                        .mainImage(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(item.getId())))
+                        .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
                         .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
                         .build());
 
@@ -80,39 +89,68 @@ public class SellerService {
                 .stock(writeItemRequest.getStock())
                 .seller(seller)
                 .build();
-//        Item newItem = itemRepository.save(item);
 
-        for (String optionCombined : writeItemRequest.getOptionArray()) {
-
-            int index = optionCombined.indexOf('-');
-            String option1 = optionCombined.substring(0, index).trim();
-            String option2 = optionCombined.substring(index + 1).trim();
-
-            if (option1.length() > 10 || option2.length() > 10 || option1.matches("^[\\{\\}\\[\\]\\/?.,;:|\\)*~`!^\\-_+<>@\\#$%&\\\\\\=\\(\\'\\\"]$") || option2.matches("^[\\{\\}\\[\\]\\/?.,;:|\\)*~`!^\\-_+<>@\\#$%&\\\\\\=\\(\\'\\\"]$")) {
-                throw new NotValidException("잘못된 값입니다");
-            }
-
-            ItemOption itemOption = ItemOption.builder()
-                    .option1(option1)
-                    .option2(option2)
-                    .item(item)
-                    .build();
-            itemOptionRepository.save(itemOption);
-        }
-
-        Image mainImage = fileHandler.parseFilesInfo(file, item);
+        Image mainImage = fileHandler.parseFilesInfo(file, ImageRelation.ITEM_MAIN, item.getId());
         mainImage.setIsMainImage(true);
         imageRepository.save(mainImage);
 
         //MultiPartFile은 input이 없을때 ''으로 들어오므로 아래와 같이 확인.
         if (!files.get(0).isEmpty()) {
             for (MultipartFile multipartFile : files) {
-                imageRepository.save(fileHandler.parseFilesInfo(multipartFile, item));
+                imageRepository.save(fileHandler.parseFilesInfo(multipartFile, ImageRelation.ITEM_DESCRIPTION, item.getId()));
             }
         }
 
         return itemRepository.save(item).getId();
     }
+
+    //상품명, 설명 Item // 사진, 부가사진, Image// 여러개의 옵션들과 가격 재고 ItemOption이 가격과 재고를 들고있음. 가격변동까지.
+    //상품이 삭제되더라도 Image의 썸네일은 남아있어 썸네일로 접근하면 됨.
+    public Long writeOptionItem(final ApiWriteItemRequest apiWriteItemRequest, final List<OptionValue> optionValues, final MultipartFile file, final List<MultipartFile> files, final User user) {
+        final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+        Item item = Item.builder()
+                .description(apiWriteItemRequest.getDescription())
+                .name(apiWriteItemRequest.getItemName())
+                .seller(seller)
+                .build();
+        Item savedItem = itemRepository.save(item);
+
+        //이미지의 아이디만 받아와서 아이디를 저장
+        Image image = fileHandler.parseFilesInfo(file, ImageRelation.ITEM_MAIN, item.getId());
+        imageRepository.save(image);
+
+        //REST API로 올때는 ''이 아니라 null!
+        if (files != null) {
+            for (MultipartFile multipartFile : files) {
+                imageRepository.save(fileHandler.parseFilesInfo(multipartFile, ImageRelation.ITEM_DESCRIPTION, item.getId()));
+            }
+        }
+
+        for (OptionValue optionValue : optionValues) {
+            ItemPrice itemPrice = ItemPrice.builder()
+                    .priceNow(optionValue.getOptionSalePrice())
+                    .originalPrice(optionValue.getOptionOriginalPrice() == null ? optionValue.getOptionSalePrice() : optionValue.getOptionOriginalPrice())
+                    .build();
+            ItemStock itemStock = ItemStock.builder()
+                    .stock(optionValue.getOptionStock())
+                    .build();
+            ItemOption itemOption = ItemOption.builder()
+                    .option1(optionValue.getOption1())
+                    .option2(optionValue.getOption2())
+                    .isOptionMainItem(optionValue.getIsOptionMainItem())
+                    .itemStock(itemStock)
+                    .itemPrice(itemPrice)
+                    .item(item)
+                    .build();
+
+            itemOptionRepository.save(itemOption);
+            itemPriceRepository.save(itemPrice);
+            itemStockRepository.save(itemStock);
+        }
+        return savedItem.getId();
+    }
+
 
     public Boolean sellerAgreeCheck(final SellerAgreeRequest sellerAgreeRequest, final Long id) {
         User user = userRepository.findById(id)

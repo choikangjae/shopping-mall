@@ -12,5 +12,6 @@ public interface ItemOptionRepository extends JpaRepository<ItemOption, Long> {
 
     Optional<ItemOption> findByOption1AndOption2AndItemId(String option1, String option2, Long id);
 
+    ItemOption findByItemIdAndIsOptionMainItemTrue(Long itemId);
 //    List<String> findOption2ByOption1AndItemId(String option1, Long id);
 }

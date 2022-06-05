@@ -1,6 +1,6 @@
 package com.jay.shoppingmall.domain.item.item_price;
 
-import com.jay.shoppingmall.domain.item.item_price.model.ItemSale;
+import com.jay.shoppingmall.domain.item.item_price.model.ItemOnSale;
 import com.jay.shoppingmall.domain.item.item_price.price_history.PriceHistory;
 import lombok.*;
 
@@ -23,10 +23,13 @@ public class ItemPrice {
 
     private Long originalPrice;
 
-    private Boolean isOnSale;
+    private Long priceNow;
+
+    @Column(columnDefinition = "boolean default 0")
+    private Boolean isOnSale = false;
 
     @Embedded
-    private ItemSale itemSale;
+    private ItemOnSale itemOnSale;
 
     @OneToMany(mappedBy = "itemPrice")
     private List<PriceHistory> priceHistories = new ArrayList<>();

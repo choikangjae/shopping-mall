@@ -2,6 +2,7 @@ package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
+import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
@@ -49,7 +50,7 @@ public class CartService {
                             .name(cart.getItem().getName())
                             .price(cart.getItem().getPrice())
                             .salePrice(cart.getItem().getSalePrice())
-                            .image(fileHandler.getStringImage(imageRepository.findByItemIdAndIsMainImageTrue(cart.getItem().getId())))
+                            .image(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,cart.getItem().getId())))
                             .zzim(cart.getItem().getZzim())
                             .quantity(cart.getQuantity())
                     .build());
@@ -98,9 +99,9 @@ public class CartService {
             throw new AlreadyExistsException("상품 개수가 변동되지 않았습니다");
         }
 
-        final int oldTotalPrice = request.getTotalPrice() - cart.getQuantity() * cart.getItem().getPrice();
-        final int multipliedPrice = cart.manipulateQuantity(request.getQuantity()) * cart.getItem().getPrice();
-        final Integer newTotalPrice = oldTotalPrice + multipliedPrice;
+        final long oldTotalPrice = request.getTotalPrice() - cart.getQuantity() * cart.getItem().getPrice();
+        final long multipliedPrice = cart.manipulateQuantity(request.getQuantity()) * cart.getItem().getPrice();
+        final Long newTotalPrice = oldTotalPrice + multipliedPrice;
 
         cartRepository.saveAndFlush(cart);
 
@@ -120,7 +121,7 @@ public class CartService {
         if (cart == null) {
             throw new ItemNotFoundException("해당 상품이 존재하지않습니다");
         }
-        final int totalPrice = request.getTotalPrice() - cart.getQuantity() * cart.getItem().getPrice();
+        final Long totalPrice = request.getTotalPrice() - cart.getQuantity() * cart.getItem().getPrice();
 
         cartRepository.delete(cart);
 

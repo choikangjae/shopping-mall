@@ -23,9 +23,9 @@ public class ItemAndQuantityResponse {
 
     private Integer zzim;
 
-    private Integer price;
+    private Long price;
 
-    private Integer salePrice;
+    private Long salePrice;
 
     private Integer quantity;
 }
