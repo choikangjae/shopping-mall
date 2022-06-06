@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemOptionRepository extends JpaRepository<ItemOption, Long> {
+
     List<ItemOption> findByItemId(Long id);
 
     List<ItemOption> findAllByOption1(String option1);

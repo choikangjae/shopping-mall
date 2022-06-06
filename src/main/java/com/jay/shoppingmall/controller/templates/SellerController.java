@@ -5,6 +5,7 @@ import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
+import com.jay.shoppingmall.dto.response.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
 import com.jay.shoppingmall.service.SellerService;
@@ -28,6 +29,7 @@ import java.util.List;
 public class SellerController {
 
     private final SellerService sellerService;
+
     @GetMapping
     public String sellerHome() {
         return "seller/seller-home";
@@ -80,6 +82,14 @@ public class SellerController {
 
         return "redirect:/";
     }
+    @GetMapping("/settings")
+    public String sellerDefaultSettings(@CurrentUser User user, Model model) {
+        final SellerDefaultSettingsResponse sellerDefaultSettingsResponse = sellerService.sellerDefaultSettings(user);
+        model.addAttribute("response", sellerDefaultSettingsResponse);
+
+        return "/seller/settings";
+    }
+
 
     @GetMapping("/agree")
     public String sellerAgree(@CurrentUser User user, Model model) {

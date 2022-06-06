@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.dto.response.item;
 
+import com.jay.shoppingmall.dto.response.ReviewStarCalculationResponse;
 import lombok.*;
 
 import java.util.List;
@@ -16,6 +17,8 @@ public class ItemResponse {
 
     private String name;
 
+//    private String brandName;
+
     private Integer zzim;
 
     private Long originalPrice;
@@ -23,6 +26,8 @@ public class ItemResponse {
     private Long priceNow;
 
     private Integer cartQuantity;
+
+    private ReviewStarCalculationResponse reviewStarCalculationResponse;
 
     private Boolean isZzimed;
 }

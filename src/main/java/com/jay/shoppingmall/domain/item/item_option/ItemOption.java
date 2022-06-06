@@ -34,7 +34,6 @@ public class ItemOption extends BaseTimeEntity {
     @JoinColumn(name = "item_stock_id")
     private ItemStock itemStock;
 
-    //todo 아이템 가격과 연관관계.
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_price_id")
     private ItemPrice itemPrice;

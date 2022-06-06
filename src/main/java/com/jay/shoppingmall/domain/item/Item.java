@@ -30,6 +30,8 @@ public class Item extends BaseTimeEntity {
 
     private String name;
 
+    private String brandName;
+
     private String description;
 
     private Long price;
@@ -43,6 +45,8 @@ public class Item extends BaseTimeEntity {
     private Integer zzim;
 
     private Integer viewCount;
+
+    private Double reviewAverageRating;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
@@ -76,8 +80,9 @@ public class Item extends BaseTimeEntity {
     }
 
     @Builder
-    public Item(String name, String description, Long price, Long salePrice, Integer stock, Seller seller) {
+    public Item(String name, String brandName, String description, Long price, Long salePrice, Integer stock, Seller seller) {
         this.name = name;
+        this.brandName = brandName;
         this.description = description;
         this.price = price;
         this.salePrice = salePrice;

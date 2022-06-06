@@ -22,10 +22,9 @@ import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
-import com.jay.shoppingmall.dto.request.ApiWriteItemRequest;
-import com.jay.shoppingmall.dto.request.QnaAnswerRequest;
-import com.jay.shoppingmall.dto.request.SellerAgreeRequest;
-import com.jay.shoppingmall.dto.request.WriteItemRequest;
+import com.jay.shoppingmall.domain.user.model.Address;
+import com.jay.shoppingmall.dto.request.*;
+import com.jay.shoppingmall.dto.response.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
@@ -39,6 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,8 +109,10 @@ public class SellerService {
     public Long writeOptionItem(final ApiWriteItemRequest apiWriteItemRequest, final List<OptionValue> optionValues, final MultipartFile file, final List<MultipartFile> files, final User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+        
         Item item = Item.builder()
                 .description(apiWriteItemRequest.getDescription())
+                .brandName(apiWriteItemRequest.getItemBrandName())
                 .name(apiWriteItemRequest.getItemName())
                 .seller(seller)
                 .build();
@@ -244,5 +246,68 @@ public class SellerService {
         }
         itemRepository.deleteById(itemId);
         cartRepository.deleteByItemId(itemId);
+    }
+
+    public void sellerDefaultSettingSave(SellerDefaultSettingsRequest request, User user) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        final Address itemReleaseAddress = Address.builder()
+                .address(request.getItemReleaseAddress())
+                .detailAddress(request.getItemReleaseDetailAddress())
+                .extraAddress(request.getItemReleaseExtraAddress())
+                .zipcode(request.getItemReleaseZipcode())
+                .build();
+
+        if (Objects.equals(request.getItemReturnAddress(), "") || Objects.equals(request.getItemReturnDetailAddress(), "") || Objects.equals(request.getItemReturnZipcode(), "") ) {
+            seller.sellerDefaultUpdate(
+                    request.getCompanyName(),
+                    itemReleaseAddress,
+                    itemReleaseAddress,
+                    request.getShippingFeeDefault(),
+                    request.getReturnShippingFeeDefault(),
+                    request.getShippingFeeFreePolicy(),
+                    request.getDefaultDeliveryCompany());
+        } else {
+            final Address itemReturnAddress = Address.builder()
+                    .address(request.getItemReturnAddress())
+                    .detailAddress(request.getItemReturnDetailAddress())
+                    .extraAddress(request.getItemReturnExtraAddress())
+                    .zipcode(request.getItemReturnZipcode())
+                    .build();
+
+            seller.sellerDefaultUpdate(
+                    request.getCompanyName(),
+                    itemReleaseAddress,
+                    itemReturnAddress,
+                    request.getShippingFeeDefault(),
+                    request.getReturnShippingFeeDefault(),
+                    request.getShippingFeeFreePolicy(),
+                    request.getDefaultDeliveryCompany());
+        }
+    }
+
+    public SellerDefaultSettingsResponse sellerDefaultSettings(User user) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        return SellerDefaultSettingsResponse.builder()
+                .companyName(seller.getCompanyName())
+                .shippingFeeDefault(seller.getShippingFeeDefault())
+                .shippingFeeFreePolicy(seller.getShippingFeeFreePolicy())
+
+                .itemReleaseZipcode(seller.getItemReleaseAddress().getZipcode())
+                .itemReleaseAddress(seller.getItemReleaseAddress().getAddress())
+                .itemReleaseDetailAddress(seller.getItemReleaseAddress().getDetailAddress())
+                .itemReleaseExtraAddress(seller.getItemReleaseAddress().getExtraAddress())
+
+                .itemReturnZipcode(seller.getItemReturnAddress().getZipcode())
+                .itemReturnAddress(seller.getItemReturnAddress().getAddress())
+                .itemReturnDetailAddress(seller.getItemReturnAddress().getDetailAddress())
+                .itemReturnExtraAddress(seller.getItemReturnAddress().getExtraAddress())
+
+                .defaultDeliveryCompany(seller.getDefaultDeliveryCompany())
+                .returnShippingFeeDefault(seller.getReturnShippingFeeDefault())
+                .build();
     }
 }

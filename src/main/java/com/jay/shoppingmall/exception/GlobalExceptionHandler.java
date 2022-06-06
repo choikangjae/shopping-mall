@@ -46,6 +46,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 //    }
 
+    @ExceptionHandler(OptionDuplicatedException.class)
+    public ResponseEntity<?> handleOptionDuplicatedException(OptionDuplicatedException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("OPTION_DUPLICATED")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
     @ExceptionHandler(AgreeException.class)
     public ResponseEntity<?> handleAgreeException(AgreeException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()

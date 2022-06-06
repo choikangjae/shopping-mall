@@ -20,18 +20,36 @@
             </div>
 
             <div class="col-md-4">
-                <h3 th:text="'이름: ' + ${response.name}" class="my-3">상품 이름
+                <h4 th:text="${response.brandName}" class="my-3">브랜드명
+                </h4>
+
+                <h3 th:text="${response.name}" class="my-3">상품 이름
                 </h3>
 
-                <h4 th:text="'가격: ' + ${#numbers.formatDecimal(response.price, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
-                    가격</h4>
-                <h3 class="my-3">상세설명</h3>
+                <h4>
+                <del>
+                    <h5 class="fw-bolder" th:if="${response.originalPrice != response.priceNow}"
+                        th:text="${#numbers.formatDecimal(response.originalPrice, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                        정상가</h5>
+                </del>
+                <strong>
+                    <span class="fw-bolder text-warning"
+                          th:text="${#numbers.formatDecimal(response.priceNow, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">판매가</span>
+                </strong>
+                <span class="fw-bolder" th:if="${response.originalPrice != response.priceNow}"
+                      th:text="'(' + ${((response.originalPrice-response.priceNow) * 100) / response.originalPrice} + '%)'">할인율</span>
+                </h4>
+
+                <h5>
+                <span class="fa fa-star text-warning" th:if="${response.reviewStarCalculationResponse.fullStar != 0}" th:each="star : ${#numbers.sequence(1, response.reviewStarCalculationResponse.fullStar)}"></span><span class="fa fa-star-half-alt text-warning" th:if="${response.reviewStarCalculationResponse.halfStar != 0}" th:each="star : ${#numbers.sequence(1, response.reviewStarCalculationResponse.halfStar)}"></span><span class="fa fa-star" th:if="${response.reviewStarCalculationResponse.emptyStar != 0}" th:each="star : ${#numbers.sequence(1, response.reviewStarCalculationResponse.emptyStar)}"></span>
+                <span th:text="'(' + ${response.reviewStarCalculationResponse.reviewAverageRating} + ')'"></span>
+                </h5>
+
                 <div class="row">
                     <div class="col-6">
 
                         <ul>
                             <li th:text="'재고: ' + ${response.stock} + ' 개'">재고</li>
-                            <li th:text="'설명: ' + ${response.description}">설명</li>
                         </ul>
                     </div>
                     <div class="col-6" sec:authorize="isAuthenticated()">
@@ -58,7 +76,7 @@
 
                 <!--                <form th:action="@{/cart/add}" method="post">-->
 <!--                th:value="${option.key}" th:text="${option.key}"-->
-                <div>
+                <div class="mt-3 mb-3">
                     <select id="options1" class="form-select form-select-sm" aria-label=".form-select-sm example">
                         <option selected>선택해주세요</option>
                         <option th:each="option : ${response.optionMap}" th:value="${option.key}" th:text="${option.key}">큰 범주</option>
@@ -70,21 +88,40 @@
                     </select>
                 </div>
                 <!-- <input th:each="option : ${response.optionMap}" th:id="${option.key}" th:value="${option.value}">작은 범주</input> -->
+                <div id="cardBody">
+                <div class="col" id="optionCard">
+                    <div class="card" id="optionMainItem">
+                        <div class="card-body">
+                            <!-- <input type="checkbox" id="isOptionMainItem"> -->
+                                <span id="optionValueOption1">옵션1</span>
 
-                <input type="hidden" th:name="id" id="id" th:value="${response.id}"/>
-                <div class="col-6 d-flex">
-                    <a class="btn btn-link px-2"
-                       onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                        <i class="fas fa-minus"></i>
-                    </a>
+                                <span id="optionValueOption2">옵션2</span>
 
-                    <input id="quantity" min="1" th:max="${response.stock}" th:name="quantity" value="1"
-                           type="number" class="form-control form-control-sm"/>
-                    <a class="btn btn-link px-2"
-                       onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                        <i class="fas fa-plus"></i>
-                    </a>
+                                <span id="optionValueSalePrice">가격</span>
+
+                                <span id="optionValueStock">재고</span>
+
+                            <button type="button" class="btn btn-outline-danger"
+                                id="optionRemove">삭제</button>
+                        </div>
+                    </div>
                 </div>
+                </div>
+                
+                <input type="hidden" th:name="id" id="id" th:value="${response.id}"/>
+<!--                <div class="col-6 d-flex">-->
+<!--                    <a class="btn btn-link px-2"-->
+<!--                       onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-->
+<!--                        <i class="fas fa-minus"></i>-->
+<!--                    </a>-->
+
+<!--                    <input id="quantity" min="1" th:max="${response.stock}" th:name="quantity" value="1"-->
+<!--                           type="number" class="form-control form-control-sm"/>-->
+<!--                    <a class="btn btn-link px-2"-->
+<!--                       onclick="this.parentNode.querySelector('input[type=number]').stepUp()">-->
+<!--                        <i class="fas fa-plus"></i>-->
+<!--                    </a>-->
+<!--                </div>-->
                 <hr>
                 <div sec:authorize="isAuthenticated()">
                     <th:block th:if="${response.stock} == 0">
@@ -142,7 +179,7 @@
 
         <!-- Related Projects Row -->
         <br>
-        <h2 class="my-4">관련 상품</h2>
+        <h2 class="my-4 text-center">판매자의 다른 상품들</h2>
         <div class="row">
             <div class="col-md-3 col-sm-6 mb-4">
                 <a href="#">
@@ -167,6 +204,8 @@
         </div>
 
         <hr>
+        <h4 class="text-center mb-3">상품 설명</h4>
+        <h5 class="text-center" th:text="${response.description}">설명</h5>
 
 
         <div class="col-md-8" th:each="descriptionImage : ${response.descriptionImages}">
@@ -185,7 +224,7 @@
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star"></i>
                     <i class="fas fa-star-half-alt"></i>
-                </span>
+            </span>
         </h2>
 
         <div>
@@ -447,17 +486,21 @@
                     window.scrollTo(0, scrollNow);
                 }
             })
-            
-            let optionDefaults = {
-                    size: ['90, 95, 100, 105, 110', 'XS, S, M, L, XL, XXL', '직접 추가'],
-                    color: ['빨강, 주황, 노랑, 초록, 파랑, 보라', '연두색, 불그스럼한색, 시뻘건색', '직접 추가'],
-                    self: ['직접']
-                }
+
+
 
             document.getElementById('options1').addEventListener('change', () => {
                 let options1 = document.getElementById('options1')[document.getElementById('options1')
                     .selectedIndex].text;
                 let options2 = document.getElementById('options2');
+
+                if (options1 === '선택해주세요') {
+                    options2.options.length = 0;
+                    let defaultOption = document.createElement('option');
+                    defaultOption.innerText = '선택해주세요';
+                    options2.append(defaultOption);
+                    return false;
+                }
 
                 let object = JSON.parse('[[${response.optionMap}]]');
                 let keys = Object.keys(object);
@@ -470,11 +513,130 @@
                 }
 
                 options2.options.length = 0;
+
+                let defaultOption = document.createElement('option');
+                defaultOption.innerText = '선택해주세요';
+                options2.append(defaultOption);
+
                 for (let i = 0; i < option2.length; i++) {
                     let option = document.createElement('option');
                     option.innerText = option2[i];
                     options2.append(option);
                 }
+            })
+
+            function removeOption() {
+                let option1 = document.getElementById(this.id).previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.textContent;
+                let option2 = document.getElementById(this.id).previousElementSibling.previousElementSibling.previousElementSibling.textContent;
+
+                let data = {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            option1,
+                            option2                           
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    };
+                    const onSuccess = res => {
+                        res.json()
+                            .then(() => {
+
+                            })
+                    }
+                    const onFailure = res => {
+                        return res.json()
+                            .then(() => {
+                                alert(json.message);
+                            })
+                    }
+
+                    fetch(`/api/v1/item/option/delete`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            console.log(err.message);
+                        });
+                
+
+                document.getElementById(this.id).parentNode.parentNode.parentNode.parentNode.removeChild(document.getElementById(this.id).parentNode.parentNode.parentNode);
+            }
+
+            function addIdToClone(clone) {
+                clone.id = clone.id + index;
+                for (let i = 0; i < clone.childElementCount; i++) {
+                    addIdToClone(clone.children[i]);
+                }
+            }
+            let index = 0;
+            document.getElementById('options2').addEventListener('change', () => {
+                    let itemId = '[[${response.id}]]';
+                    let option1 = document.getElementById('options1')[document.getElementById('options1')
+                    .selectedIndex].text;
+                    let option2 = document.getElementById('options2')[document.getElementById('options2')
+                    .selectedIndex].text;
+
+                    let data = {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            itemId,
+                            option1,
+                            option2                           
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    };
+                    const onSuccess = res => {
+                        res.json()
+                            .then((data) => {
+                                let opitonCardOriginal = document.getElementById('optionCard');
+                                    let optionCard = opitonCardOriginal.cloneNode(true);
+                                    document.getElementById('cardBody').appendChild(optionCard);
+
+                                    addIdToClone(optionCard);
+
+                                        document.getElementById('cardBody').appendChild(optionCard);
+
+                                        document.getElementById('optionValueOption1' + index).textContent = data.option1;
+                                        document.getElementById('optionValueOption2' + index).textContent = data.option2;
+                                        document.getElementById('optionValueSalePrice' + index).textContent = data.itemPrice;
+                                        document.getElementById('optionValueStock' + index).textContent = data.itemStock;
+                                        document.getElementById('optionRemove' + index).onclick = removeOption;
+
+                                        index++;
+
+                                        document.getElementById('options2').selectedIndex = 0;
+                              })
+                    }
+                    const onFailure = res => {
+                        return res.json()
+                            .then(json => alert(json.message));
+                    }
+
+                    fetch(`/api/v1/item/option`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                if (res.status == 400) {
+                                    if (confirm('로그인이 필요한 서비스입니다. 로그인을 하시겠습니까?')) {
+                                        window.location.replace(baseUrl + 'auth/login');
+                                    }
+                                    return false;
+                                }
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            console.log(err.message);
+                        });
             })
 
             document.getElementById('addToCart').addEventListener('click', (e) => {
@@ -500,18 +662,15 @@
                             option1,
                             option2                           
                         }),
-                        // redirect: 'follow',
-                        // credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json',
-                            // 'Accept': 'application/json'
                         }
                     };
                     const onSuccess = res => {
-                        res.text()
+                        res.json()
                             .then(() => {
                                 if (confirm("장바구니에 추가되었습니다. 장바구니로 이동하시겠습니까?")) {
-                                    window.location.replace('http://localhost:8080/cart');
+                                    window.location.replace(baseUrl + 'cart');
                                 }
                             })
                     }
@@ -520,7 +679,7 @@
                             // .then(json => confirm(json.message));
                             .then(() => {
                                 if (confirm("이미 장바구니에 상품이 존재합니다. 장바구니로 이동하시겠습니까?")) {
-                                    window.location.replace('http://localhost:8080/cart')
+                                    window.location.replace(baseUrl + 'cart')
                                 }
                             })
                     }
@@ -537,6 +696,7 @@
                             console.log(err.message);
                         });
                 })
+                
                 document.getElementById('qnaWrite').addEventListener('click', (e) => {
                     e.preventDefault();
 

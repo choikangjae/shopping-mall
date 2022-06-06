@@ -1,12 +1,10 @@
 package com.jay.shoppingmall.domain.seller;
 
+import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -21,11 +19,47 @@ public class Seller {
 
     private Long userId;
 
+    private String companyName;
+
+    @AttributeOverrides({
+            @AttributeOverride(name = "zipcode", column = @Column(name = "item_release_zipcode")),
+            @AttributeOverride(name = "address", column = @Column(name = "item_release_address")),
+            @AttributeOverride(name = "detailAddress", column = @Column(name = "item_release_detailAddress")),
+            @AttributeOverride(name = "extraAddress", column = @Column(name = "item_release_extraAddress"))
+    })
+    @Embedded
+    private Address itemReleaseAddress;
+
+    @AttributeOverrides({
+            @AttributeOverride(name = "zipcode", column = @Column(name = "item_return_zipcode")),
+            @AttributeOverride(name = "address", column = @Column(name = "item_return_address")),
+            @AttributeOverride(name = "detailAddress", column = @Column(name = "item_return_detailAddress")),
+            @AttributeOverride(name = "extraAddress", column = @Column(name = "item_return_extraAddress"))
+    })
+    @Embedded
+    private Address itemReturnAddress;
+
+    private Integer shippingFeeDefault;
+
+    private Integer returnShippingFeeDefault;
+
+    private Integer shippingFeeFreePolicy;
+
+    private String defaultDeliveryCompany;
+
     private Boolean isSellerAgree;
 
     private Boolean isLawAgree;
 
     private Boolean isActivated;
 
-    private Integer shippingFeePolicy;
+    public void sellerDefaultUpdate(final String companyName, final Address itemReleaseAddress, final Address itemReturnAddress, final Integer shippingFeeDefault, final Integer returnShippingFeeDefault, final Integer shippingFeeFreePolicy, final String defaultDeliveryCompany) {
+        this.companyName = companyName;
+        this.itemReleaseAddress = itemReleaseAddress;
+        this.itemReturnAddress = itemReturnAddress;
+        this.shippingFeeDefault = shippingFeeDefault;
+        this.returnShippingFeeDefault = returnShippingFeeDefault;
+        this.shippingFeeFreePolicy = shippingFeeFreePolicy;
+        this.defaultDeliveryCompany = defaultDeliveryCompany;
+    }
 }

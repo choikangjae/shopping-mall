@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+    <link href="../navbar-top.css" rel="stylesheet">
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg justify-content-center" th:fragment="seller-navbar">
+    <div class="container-fluid">
+        <a type="button" th:href="@{/seller}" class="navbar-brand"><strong>판매자 홈</strong></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/settings') ? 'active':''}" th:href="@{/seller/settings}" class="nav-link">판매자 기본 설정</a>
+                </li>
+                <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/write') ? 'active':''}" th:href="@{/seller/write}" class="nav-link">상품 작성</a>
+                </li>
+                <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/items') ? 'active':''}" th:href="@{/seller/items}" class="nav-link">상품 목록 보기</a>
+                </li>
+                <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/statistics') ? 'active':''}" th:href="@{/seller/statistics}" class="nav-link">최근 주문 확인</a>
+                </li>
+             </ul>
+        </div>
+    </div>
+</nav>
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.dto.response.item;
 
+import com.jay.shoppingmall.dto.response.ReviewStarCalculationResponse;
 import lombok.*;
 
 import java.util.List;
@@ -15,6 +16,8 @@ public class ItemDetailResponse {
 
     private String name;
 
+    private String brandName;
+
     private Map<String,List<String>> optionMap;
 
     private String description;
@@ -23,7 +26,11 @@ public class ItemDetailResponse {
 
     private List<String> descriptionImages;
 
-    private Long price;
+    private Long originalPrice;
+
+    private Long priceNow;
+
+    private ReviewStarCalculationResponse reviewStarCalculationResponse;
 
     private Integer stock;
 

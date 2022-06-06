@@ -117,7 +117,7 @@
                     res.json()
                         .then(() => {
                             if (confirm("장바구니에 추가되었습니다. 장바구니로 이동하시겠습니까?")) {
-                                window.location.replace('http://localhost:8080/cart')
+                                window.location.replace(baseUrl + 'cart')
                             }
                         })
                 }
@@ -126,7 +126,7 @@
                         // .then(json => confirm(json.message));
                         .then(() => {
                             if (confirm("이미 장바구니에 상품이 존재합니다. 장바구니로 이동하시겠습니까?")) {
-                                window.location.replace('http://localhost:8080/cart')
+                                window.location.replace(baseUrl + 'cart')
                             }
                         })
 

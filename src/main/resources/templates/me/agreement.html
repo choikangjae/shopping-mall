@@ -59,7 +59,7 @@
                     };
 
                     const onSuccess = res => {
-                        window.location.replace('http://localhost:8080/me/update')
+                        window.location.replace(baseUrl + 'me/update')
                     }
                     const onFailure = res => {
                         return res.json().then(json => alert(json.message));

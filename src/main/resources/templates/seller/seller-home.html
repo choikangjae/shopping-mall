@@ -8,14 +8,14 @@
 <body>
 <div layout:fragment="content">
     <div class="container">
+        <div th:replace="seller/seller-navbar :: seller-navbar"></div>
 
-        <h1>판매자 홈페이지</h1>
 
-        <a class="btn btn-primary" th:href="@{/seller/write}" href="#" role="button">상품 작성</a>
-
-        <a class="btn btn-primary" th:href="@{/seller/items}" href="#" role="button">상품 목록 보기</a>
-
-        <a class="btn btn-primary" th:href="@{/seller/statistics}" href="#" role="button">최근 주문 확인</a>
+        브랜드명
+        택배비
+        출고지
+        반품/교환지
+        반품배송비
     </div>
 </div>
 </body>

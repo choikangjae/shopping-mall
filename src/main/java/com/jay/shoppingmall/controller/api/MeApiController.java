@@ -62,7 +62,7 @@ public class MeApiController {
         }
         //TODO 데모용.
         if (user.getEmail().equals("demo@user") || user.getEmail().equals("demo@admin") || user.getEmail().equals("demo@seller")) {
-            return ResponseEntity.ok(null);
+            throw new PasswordInvalidException("데모 계정은 비밀번호 변경이 불가능합니다..!");
         }
         authService.passwordChange(passwordChangeRequest, user);
         sessionUpdater.sessionUpdateToken(user.getEmail(), passwordChangeRequest.getPasswordAfter());

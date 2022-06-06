@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head>
+    <link href="../navbar-top.css" rel="stylesheet">
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg" th:fragment="admin-navbar">
+    <div class="container-fluid">
+        <a type="button" th:href="@{/admin}" class="navbar-brand"><strong>어드민 홈</strong></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/admin/management/users') ? 'active':''}" th:href="@{/admin/management/users}" class="nav-link">회원 관리</a>
+                </li>
+                <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/admin/management/sellers') ? 'active':''}" th:href="@{/admin/management/sellers}" class="nav-link">판매자 관리</a>
+                </li>
+             </ul>
+        </div>
+    </div>
+</nav>
+</body>
+
+</html>

@@ -8,14 +8,9 @@
 <body>
 <div layout:fragment="content">
     <div class="container">
+        <div th:replace="admin/admin-navbar :: admin-navbar"></div>
 
-        <h1>어드민 홈</h1>
 
-<!--        <a class="btn btn-primary" th:href="@{/admin/write}" href="#" role="button">상품 작성</a>-->
-
-        <a class="btn btn-primary" th:href="@{/admin/management/users}" href="#" role="button">회원 관리</a>
-
-        <a class="btn btn-primary" th:href="@{/admin/management/sellers}" href="#" role="button">판매자 관리</a>
     </div>
 </div>
 </body>

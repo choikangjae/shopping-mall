@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+    layout:decorate="~{layouts/layout.html}">
+
+<head>
+    <title>판매자</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container">
+            <div th:replace="seller/seller-navbar :: seller-navbar"></div>
+
+            <div class="col-md-7 col-lg-8 mt-5">
+                <form class="needs-validation" novalidate>
+                    <div class="row g-3">
+
+                        <div class="col-12">
+                            <label for="companyName" class="form-label">판매자 회사명 <strong class="text-info">(필수)</strong></label>
+                            <input type="text" class="form-control" id="companyName" th:value="${response.companyName}">
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="shippingFeeDefault" class="form-label">기본 배송비 <strong class="text-info">(필수)</strong></label>
+                            <input type="number" class="form-control" id="shippingFeeDefault" value=""
+                                th:value="${response.shippingFeeDefault}" required>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="shippingFeeFreePolicy" class="form-label">배송비 무료 가격</label>
+                            <input type="number" class="form-control" id="shippingFeeFreePolicy" value=""
+                                th:value="${response.shippingFeeFreePolicy}">
+                            <label for="shippingFeeFreePolicy" class="form-label">상기 가격 이상으로 결제시 배송비가 무료로 책정됩니다</label>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="defaultDeliveryCompany" class="form-label">기본 운송 회사 <strong class="text-info">(필수)</strong></label>
+                            <input type="text" class="form-control" id="defaultDeliveryCompany" value=""
+                                   th:value="${response.defaultDeliveryCompany}" required>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="returnShippingFeeDefault" class="form-label">반품 배송비 <strong class="text-info">(필수)</strong></label>
+                            <input type="number" class="form-control" id="returnShippingFeeDefault" value=""
+                                th:value="${response.returnShippingFeeDefault}" required>
+                            <label class="form-label">고객 변심으로 인한 반품시 반품 배송비가 청구됩니다</label>
+                        </div>
+
+
+                        <hr class="my-4">
+
+                        <h5>출고지 주소 설정 <strong class="text-info">(필수)</strong></h5>
+                        <div class="col-md-6">
+                            <label for="itemReleaseZipcode" class="form-label">우편번호</label>
+                            <input type="text" class="form-control" id="itemReleaseZipcode" placeholder="우편번호" readonly
+                                th:value="${response.itemReleaseZipcode}" required>
+                            <div class="invalid-feedback">
+                                우편번호를 입력해주세요
+                            </div>
+                        </div>
+                        <div class="col-4 position-relative">
+                            <a class="btn btn-primary" onclick="getItemReleaseAddressApi()" type="button">주소 검색</a>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="itemReleaseAddress" class="form-label">주소</label>
+                            <input type="text" class="form-control" id="itemReleaseAddress" placeholder="도로명 주소"
+                                th:value="${response.itemReleaseAddress}" readonly required>
+                            <div class="invalid-feedback">
+                                도로명 주소를 입력해주세요
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <label for="itemReleaseDetailAddress" class="form-label">상세 주소</label>
+                            <input type="text" class="form-control" id="itemReleaseDetailAddress" placeholder="상세 주소"
+                                th:value="${response.itemReleaseDetailAddress}" required>
+                            <div class="invalid-feedback">
+                                상세 주소를 입력해주세요
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label for="itemReleaseExtraAddress" class="form-label">참고항목</label>
+                            <input type="text" class="form-control" id="itemReleaseExtraAddress"
+                                th:value="${#objects.nullSafe(response.itemReleaseExtraAddress,'')}" readonly>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5>반품/교환지 주소 설정</h5>
+                        <label class="text-muted">미설정시 출고지와 같은 주소로 설정됩니다</label>
+                        <div class="col-md-6">
+                            <label for="itemReturnZipcode" class="form-label">우편번호</label>
+                            <input type="text" class="form-control" id="itemReturnZipcode" placeholder="우편번호" readonly
+                                th:value="${response.itemReturnZipcode}">
+                            <div class="invalid-feedback">
+                                우편번호를 입력해주세요
+                            </div>
+                        </div>
+                        <div class="col-4 position-relative">
+                            <a class="btn btn-primary" onclick="getItemReturnAddressApi()" type="button">주소 검색</a>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="itemReturnAddress" class="form-label">주소</label>
+                            <input type="text" class="form-control" id="itemReturnAddress" placeholder="도로명 주소"
+                                th:value="${response.itemReturnAddress}" readonly>
+                            <div class="invalid-feedback">
+                                도로명 주소를 입력해주세요
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <label for="itemReturnDetailAddress" class="form-label">상세 주소</label>
+                            <input type="text" class="form-control" id="itemReturnDetailAddress" placeholder="상세 주소"
+                                th:value="${response.itemReturnDetailAddress}">
+                            <div class="invalid-feedback">
+                                상세 주소를 입력해주세요
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label for="itemReturnExtraAddress" class="form-label">참고항목</label>
+                            <input type="text" class="form-control" id="itemReturnExtraAddress"
+                                th:value="${#objects.nullSafe(response.itemReturnExtraAddress,'')}" readonly>
+                        </div>
+
+                    </div>
+
+                    <hr class="my-4">
+
+                    <button id="sellerDefaultSettings" class="w-100 btn btn-outline-primary btn-lg" type="button">판매자 기본 설정 완료</button>
+                </form>
+
+            </div>
+
+        </div>
+        <script>
+            document.getElementById("sellerDefaultSettings").addEventListener('click', (e) => {
+                e.preventDefault();
+
+                let companyName = document.getElementById('companyName').value;
+                let shippingFeeDefault = document.getElementById('shippingFeeDefault').value;
+                let shippingFeeFreePolicy = document.getElementById('shippingFeeFreePolicy').value;
+                let defaultDeliveryCompany = document.getElementById('defaultDeliveryCompany').value;
+                let returnShippingFeeDefault = document.getElementById('returnShippingFeeDefault').value;
+
+                let itemReleaseZipcode = document.getElementById('itemReleaseZipcode').value;
+                let itemReleaseAddress = document.getElementById('itemReleaseAddress').value;
+                let itemReleaseDetailAddress = document.getElementById('itemReleaseDetailAddress').value;
+                let itemReleaseExtraAddress = document.getElementById('itemReleaseExtraAddress').value;
+
+                let itemReturnZipcode = document.getElementById('itemReturnZipcode').value;
+                let itemReturnAddress = document.getElementById('itemReturnAddress').value;
+                let itemReturnDetailAddress = document.getElementById('itemReturnDetailAddress').value;
+                let itemReturnExtraAddress = document.getElementById('itemReturnExtraAddress').value;
+
+                let data = {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            companyName,
+                            shippingFeeDefault,
+                            shippingFeeFreePolicy,
+                            defaultDeliveryCompany,
+                            returnShippingFeeDefault,
+
+                            itemReleaseZipcode,
+                            itemReleaseAddress,
+                            itemReleaseDetailAddress,
+                            itemReleaseExtraAddress,
+
+                            itemReturnZipcode,
+                            itemReturnAddress,
+                            itemReturnDetailAddress,
+                            itemReturnExtraAddress
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    };
+
+                    const onSuccess = res => {
+                        res.text()
+                            .then(() =>
+                                alert('기본 설정이 업데이트되었습니다'));
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
+                    fetch(`/api/v1/seller/settings`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            alert(err.message);
+                        });
+                
+            })
+        </script>
+
+        <script>
+            function getItemReleaseAddressApi() {
+                new daum.Postcode({
+                    oncomplete: function (data) {
+                        // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                        // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                        // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                        var addr = ''; // 주소 변수
+                        var extraAddr = ''; // 참고항목 변수
+
+                        //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                        if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                            addr = data.roadAddress;
+                        } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                            addr = data.jibunAddress;
+                        }
+
+                        // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                        if (data.userSelectedType === 'R') {
+                            // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                            // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                            if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                                extraAddr += data.bname;
+                            }
+                            // 건물명이 있고, 공동주택일 경우 추가한다.
+                            if (data.buildingName !== '' && data.apartment === 'Y') {
+                                extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                            }
+                            // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                            if (extraAddr !== '') {
+                                extraAddr = ' (' + extraAddr + ')';
+                            }
+                            // 조합된 참고항목을 해당 필드에 넣는다.
+                            document.getElementById("itemReleaseExtraAddress").value = extraAddr;
+
+                        } else {
+                            document.getElementById("itemReleaseExtraAddress").value = '';
+                        }
+
+                        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                        document.getElementById('itemReleaseZipcode').value = data.zonecode;
+                        document.getElementById("itemReleaseAddress").value = addr;
+                        // 커서를 상세주소 필드로 이동한다.
+                        document.getElementById("itemReleaseDetailAddress").focus();
+                    }
+                }).open();
+            }
+            function getItemReturnAddressApi() {
+                new daum.Postcode({
+                    oncomplete: function (data) {
+                        // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                        // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                        // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                        var addr = ''; // 주소 변수
+                        var extraAddr = ''; // 참고항목 변수
+
+                        //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                        if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                            addr = data.roadAddress;
+                        } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                            addr = data.jibunAddress;
+                        }
+
+                        // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                        if (data.userSelectedType === 'R') {
+                            // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                            // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                            if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                                extraAddr += data.bname;
+                            }
+                            // 건물명이 있고, 공동주택일 경우 추가한다.
+                            if (data.buildingName !== '' && data.apartment === 'Y') {
+                                extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                            }
+                            // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                            if (extraAddr !== '') {
+                                extraAddr = ' (' + extraAddr + ')';
+                            }
+                            // 조합된 참고항목을 해당 필드에 넣는다.
+                            document.getElementById("itemReturnExtraAddress").value = extraAddr;
+
+                        } else {
+                            document.getElementById("itemReturnExtraAddress").value = '';
+                        }
+
+                        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                        document.getElementById('itemReturnZipcode').value = data.zonecode;
+                        document.getElementById("itemReturnAddress").value = addr;
+                        // 커서를 상세주소 필드로 이동한다.
+                        document.getElementById("itemReturnDetailAddress").focus();
+                    }
+                }).open();
+            }
+        </script>
+        <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    </div>
+</body>
+
+</html>

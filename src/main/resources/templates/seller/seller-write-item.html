@@ -8,7 +8,10 @@
 
 <body>
     <div layout:fragment="content">
+
         <div class="row">
+            <div th:replace="seller/seller-navbar :: seller-navbar"></div>
+
             <div class="col-3"></div>
             <div class="col-6">
                 <form class="needs-validation" novalidate method="post" th:action="@{/seller/write}"
@@ -20,10 +23,17 @@
                     </div>
 
                     <div class="mb-5">
-                        <label for="item" class="form-label">상품명 <strong class="text-info">(필수)</strong></label>
+                        <label for="itemName" class="form-label">상품명 <strong class="text-info">(필수)</strong></label>
                         <input th:field="*{name}" type="text" class="form-control" id="itemName"
                             aria-describedby="itemHelp" required>
                         <div id="itemHelp" class="form-text">상품명을 적어주세요.</div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="itemBrandName" class="form-label">브랜드명 <strong class="text-info">(필수)</strong></label>
+                        <input type="text" class="form-control" id="itemBrandName"
+                               aria-describedby="itemHelp" required>
+                        <div id="itemBrandNameHelp" class="form-text">상품의 브랜드명을 적어주세요.</div>
                     </div>
 
                     <input type="hidden" name="optionArray" id="optionArray">
@@ -49,7 +59,7 @@
                                         class="form-control">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="price" class="form-label">판매가 <strong
+                                    <label for="optionSalePrice" class="form-label">판매가 <strong
                                             class="text-info">(필수)</strong></label>
                                     <input min="10" type="number" class="form-control" id="optionSalePrice"
                                         aria-describedby="optionSalePriceHelp" required>
@@ -57,7 +67,7 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="price" class="form-label">정상가</label>
+                                    <label for="optionOriginalPrice" class="form-label">정상가</label>
                                     <input min="10" type="number" class="form-control" id="optionOriginalPrice"
                                         aria-describedby="optionOriginalPriceHelp">
                                     <div id="optionOriginalPriceHelp" class="form-text">상품이 할인 되기 전의 가격을 적어주세요 (최소
@@ -226,6 +236,7 @@
                 mainOptionTrue.isOptionMainItem = true;
 
                 let itemName = document.getElementById('itemName').value;
+                let itemBrandName = document.getElementById('itemBrandName').value;
                 let description = document.getElementById('description').value;
                 let mainImage = document.getElementById('mainImage').files[0];
                 let descriptionImage = document.getElementById('descriptionImage').files;
@@ -236,6 +247,7 @@
                 formData.append('descriptionImage', descriptionImage);
                 formData.append('apiWriteItemRequest', new Blob([JSON.stringify({
                     itemName,
+                    itemBrandName,
                     description,
                     optionArray
                 })], {
@@ -251,7 +263,7 @@
                     res.json()
                     .then((data) => {
                         alert('상품 등록이 완료되었습니다');
-                        window.location.replace('http://localhost:8080/item/details/' + data);
+                        window.location.replace(baseUrl + 'item/details/' + data);
                     })
                 }
                 const onFailure = res => {
@@ -304,9 +316,6 @@
                     return str;
                 }
             }
-            document.getElementById('optionArray').addEventListener('change', () => {
-
-            })
 
             let optionArray = new Array();
             let index = 0;
@@ -328,7 +337,7 @@
                     return false;
                 }
                 if (optionOriginalPrice) {
-                    if (optionSalePrice > optionOriginalPrice) {
+                    if (parseInt(optionSalePrice) > parseInt(optionOriginalPrice)) {
                         alert('판매 가격은 정상가격보다 낮거나 같아야 합니다');
                         return false;
                     }

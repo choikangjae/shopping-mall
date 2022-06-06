@@ -20,6 +20,10 @@ public class ApiWriteItemRequest {
     private String itemName;
 
     @NotBlank
+    @Size(max = 30, message = "브랜드명은 30글자 이내로 적어주세요")
+    private String itemBrandName;
+
+    @NotBlank
     @Size(max = 200, message = "설명은 200글자 이내로 적어주세요")
     private String description;
 

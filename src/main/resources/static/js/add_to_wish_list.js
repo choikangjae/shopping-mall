@@ -23,7 +23,7 @@ function addToWishList(itemId) {
                     }
                     const onFailure = res => {
                         if (confirm("로그인이 필요합니다")) {
-                            window.location.replace('http://localhost:8080/auth/login');
+                            window.location.replace(baseUrl + 'auth/login');
                         }
                         // return res.text().then(json => alert(json.message));
                     }
