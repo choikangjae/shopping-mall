@@ -45,7 +45,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //                .build();
 //        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 //    }
-
+    @ExceptionHandler(StockInvalidException.class)
+    public ResponseEntity<?> handleStockInvalidException(StockInvalidException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("STOCK_OVERLOADED")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
     @ExceptionHandler(OptionDuplicatedException.class)
     public ResponseEntity<?> handleOptionDuplicatedException(OptionDuplicatedException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()

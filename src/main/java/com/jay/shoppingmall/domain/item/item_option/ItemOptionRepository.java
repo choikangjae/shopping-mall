@@ -9,7 +9,7 @@ public interface ItemOptionRepository extends JpaRepository<ItemOption, Long> {
 
     List<ItemOption> findByItemId(Long id);
 
-    List<ItemOption> findAllByOption1(String option1);
+    List<ItemOption> findAllByOption1AndItemId(String option1, Long itemId);
 
     Optional<ItemOption> findByOption1AndOption2AndItemId(String option1, String option2, Long id);
 

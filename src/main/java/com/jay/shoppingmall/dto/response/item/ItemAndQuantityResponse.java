@@ -9,6 +9,8 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemAndQuantityResponse {
 
+    private Long cartId;
+
     private Long itemId;
 
     private String image;
@@ -23,9 +25,9 @@ public class ItemAndQuantityResponse {
 
     private Integer zzim;
 
-    private Long price;
-
-    private Long salePrice;
+    private Long priceNow;
 
     private Integer quantity;
+
+    private Boolean isSelected;
 }

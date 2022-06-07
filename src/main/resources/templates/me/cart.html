@@ -18,13 +18,10 @@
 
 
                             <h3 class="fw-normal mb-0 text-black">장바구니
-                                <span class="badge bg-primary rounded-pill">
-                                    <span id="totalQuantity" th:text="${totalQuantity}"></span>
-                                </span>
                             </h3>
+                            
                             <div>
-                                <p class="mb-0"><span class="text-muted">Sort by:</span> <a href="#!"
-                                        class="text-body">price <i class="fas fa-angle-down mt-1"></i></a></p>
+                                <button class="btn btn-primary">전체 선택하기</button>
                             </div>
                         </div>
                         <div class="alert alert-danger" role="alert" th:if="${message}">
@@ -35,29 +32,30 @@
                             </form>
                         </div>
 
-                        <div class="container text-center" th:if="${#lists.isEmpty(items)}">
+                        <div class="container text-center" th:if="${#maps.isEmpty(sellerResponseListMap)}">
                             <h3>장바구니가 비어있습니다</h3>
                             <a class="text-dark" th:href="@{/}"><i class="fas fa-home fa-4x"></i></a>
                         </div>
+                        <th:block th:each="map : ${sellerResponseListMap}" th:with="seller = ${map.key}">
+                            <!-- 판매자 정보 -->
+                            <span th:text="${seller.companyName}"></span>
+                            <span class="badge bg-primary rounded-pill">
+                                <span th:text="${seller.itemTotalQuantityPerSeller}" th:id="'sellerTotalQuantity' + ${seller.sellerId}"></span>
+                            </span>
 
-                        <th:block th:each="item : ${items}">
-                            <div class="card rounded-3 mb-2" th:id="${item.itemId}">
+                            <!-- 판매자 기준 아이템 목록  -->
+                            <div class="card rounded-3 mb-2" th:each="item : ${sellerResponseListMap.get(seller)}" th:id="'cart' + ${item.cartId}">
                                 <div class="card-body p-4">
                                     <div class="row d-flex justify-content-between align-items-center">
 
                                         <div class="col-md-2 col-lg-2 col-xl-2">
-                                            <input class="form-check-input" type="checkbox" value=""
-                                                   id="flexCheckDefault">
-
+                                            <input class="form-check-input text-white" type="checkbox" value=""
+                                                   th:id="'isSelected' + ${item.cartId}" th:onchange="|cartManipulation('${item.cartId}');|" th:checked="${item.isSelected}">
                                             <img class="bd-placeholder-img card-img-top" width="100%" height="100"
                                                  th:src="'data:image/jpeg;base64,'+${item.image}"
                                                  alt="..."/>
-<!--                                                                                <img-->
-                                            <!--                                            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"-->
-                                            <!--                                            class="img-fluid rounded-3" alt="Cotton T-shirt">-->
                                         </div>
                                         <div class="col-md-3 col-lg-3 col-xl-3">
-                                            <!--                                            <div th:id="${item.itemId}" th:text="${item.itemId}" hidden></div>-->
                                             <a th:href="@{'/item/details/' + ${item.itemId}}"
                                                 class="text-reset text-decoration-none">
                                                 <p class="lead fw-normal mb-2" th:text="${item.name}">이름</p>
@@ -71,116 +69,112 @@
                                         </div>
                                         <div class="col-2">
                                             <h5 class="mb-0" th:id="'eachPrice' + ${item.itemId}"
-                                                th:text="${#numbers.formatDecimal(item.price, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                                th:text="${#numbers.formatDecimal(item.priceNow, 0, 'DEFAULT', 0, 'DEFAULT')}">
                                                 개당 가격</h5>
                                             <h5>원 </h5>
                                         </div>
+
                                         <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
                                             <a class="btn btn-link px-2"
-                                                onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                                onclick="this.parentNode.querySelector('input[type=number]').stepDown();this.parentNode.querySelector('input[type=number]').dispatchEvent(new Event('change'))">
                                                 <i class="fas fa-minus"></i>
                                             </a>
-                                            <input th:id="'quantity' + ${item.itemId}" min="1" name="quantity"
+                                            <input th:id="'quantity' + ${item.cartId}" min="1" name="quantity"
                                                 th:value="${item.quantity}" type="number"
-                                                class="form-control form-control-sm" />
+                                                class="form-control form-control-sm" th:onchange="|cartManipulation('${item.cartId}');|"/>
                                             <a class="btn btn-link px-2"
-                                                onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                                onclick="this.parentNode.querySelector('input[type=number]').stepUp();this.parentNode.querySelector('input[type=number]').dispatchEvent(new Event('change'))">
                                                 <i class="fas fa-plus"></i>
                                             </a>
                                         </div>
                                         <div class="col-md-2 col-lg-2 col-xl-2">
-                                            <h5 class="mb-0" th:id="'multipliedPrice' + ${item.itemId}"
-                                                th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'DEFAULT', 0, 'DEFAULT')}">
+                                            <h5 class="mb-0" th:id="'multipliedPrice' + ${item.cartId}"
+                                                th:text="${#numbers.formatDecimal(item.priceNow * item.quantity, 0, 'DEFAULT', 0, 'DEFAULT')}">
                                                 합산 가격</h5>
                                             <h5>원 </h5>
                                         </div>
                                         <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                                            <a href="#!" th:id="'updateButton' + ${item.itemId}"
-                                                th:onclick="|updateItem('${item.itemId}', '${item.optionId}');|" class="text-success mr-2"><i
-                                                    class="fas fa-redo-alt fa-lg"></i></a>
+
                                             <a href="#!" th:id="'deleteButton' + ${item.itemId}"
-                                                th:onclick="|deleteItem('${item.itemId}');|" class="text-danger"><i
+                                                th:onclick="|deleteItem('${item.cartId}');|" class="text-danger"><i
                                                     class="fas fa-trash fa-lg"></i></a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- 판매자 기준 상품 가격 및 배송비 -->
+                            <div class="card mb-4">
+                                <div class="card-body p-4 d-flex flex-row">
+                                    <div class="col-1">
+                                    </div>
+                                    <div class="col-3">
+                                        <h5>상품가격 <br>
+                                            <span th:id="'itemTotalPricePerSeller' + ${seller.sellerId}" th:text="${#numbers.formatDecimal(seller.itemTotalPricePerSeller, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
+                                            원</h5>
+                                    </div>
+                                    <div class="col-1">
+                                        <h4><i class="fas fa-plus"></i></h4>
+                                    </div>
+                                    <div class="col-2">
+                                        <h5>배송비 <br> <span th:id="'shippingFee' + ${seller.sellerId}" th:text="${#numbers.formatDecimal(seller.shippingFee, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
+                                            원
+                                        </h5>
+                                    </div>
+                                    <div class="col-1">
+                                        <h4><i class="fas fa-equals"></i></h4>
+                                    </div>
+                                    <div class="col-3">
+                                        <h5>총 가격 <br> <span th:id="'itemTotalPricePerSellerWithShippingFee' + ${seller.sellerId}" th:text="${#numbers.formatDecimal(seller.itemTotalPricePerSeller + seller.shippingFee, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
+                                            원
+                                        </h5>
+                                            
+                                    </div>
+                                </div>
+                            </div>
+
                         </th:block>
 
-<!--                        <div class="card rounded-3 mb-4">-->
-<!--                            <div class="card-body p-4">-->
-<!--                                <div class="row d-flex justify-content-between align-items-center">-->
-<!--                                    <div class="col-md-2 col-lg-2 col-xl-2">-->
-<!--                                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"-->
-<!--                                            class="img-fluid rounded-3" alt="Cotton T-shirt">-->
-<!--                                    </div>-->
-<!--                                    <div class="col-md-3 col-lg-3 col-xl-3">-->
-<!--                                        <p class="lead fw-normal mb-2">Basic T-shirt</p>-->
-<!--                                        <p><span class="text-muted">Size: </span>M <span class="text-muted">Color:-->
-<!--                                            </span>Grey</p>-->
-<!--                                    </div>-->
-<!--                                    <div class="col-md-3 col-lg-3 col-xl-2 d-flex">-->
-<!--                                        <a class="btn btn-link px-2"-->
-<!--                                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-->
-<!--                                            <i class="fas fa-minus"></i>-->
-<!--                                        </a>-->
-
-<!--                                        <input id="form123" min="0" name="quantity" value="2" type="number"-->
-<!--                                            class="form-control form-control-sm" />-->
-
-<!--                                        <a class="btn btn-link px-2"-->
-<!--                                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">-->
-<!--                                            <i class="fas fa-plus"></i>-->
-<!--                                        </a>-->
-<!--                                    </div>-->
-<!--                                    <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">-->
-<!--                                        <h5 class="mb-0">$499.00</h5>-->
-<!--                                    </div>-->
-<!--                                    <div class="col-md-1 col-lg-1 col-xl-1 text-end">-->
-<!--                                        <a href="#!" class="text-danger"><i class="fas fa-trash fa-lg"></i></a>-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
+                        <!-- 전체 상품 총합 -->
+                        <span>전체</span>
+                        <span class="badge bg-primary rounded-pill">
+                            <span th:id="cartTotalQuantity"></span>
+                        </span>
                         <div class="card mb-4">
                             <div class="card-body p-4 d-flex flex-row">
                                 <div class="col-1">
                                 </div>
                                 <div class="col-3">
-                                    <h4>상품가격 <br><span id="totalProductPrice"
-                                            th:text="${#numbers.formatDecimal(totalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}">
-                                        </span> 원</h4>
+                                    <h4>상품가격 <br> <span id="cartTotalPrice">1</span>
+                                        원</h4>
                                 </div>
                                 <div class="col-1">
                                     <h4><i class="fas fa-plus"></i></h4>
                                 </div>
                                 <div class="col-2">
-                                    <h4>배송비 <br> <th:block th:if="${totalPrice} < 30000" th:text="'3,000'"></th:block>
-                                        <th:block th:unless="${totalPrice} < 30000" th:text="'0'"></th:block> 원
-                                    </h4>
+                                    <h4>배송비 <br> <span id="cartTotalShippingFee">1</span> 
+                                        원</h4>
                                 </div>
                                 <div class="col-1">
                                     <h4><i class="fas fa-equals"></i></h4>
                                 </div>
                                 <div class="col-3">
-                                    <h4>총 가격 <br> <span class="text-primary" id="totalPrice"
+                                    <h4>총 가격 <br> <span id="cartTotalPriceWithShippingFee">1</span>
+                                        원</h4>
+                                        <!-- <span class="text-primary" id="totalPrice"
                                             th:text="${#numbers.formatDecimal(totalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}">
-                                            <!-- <th:block th:if="${totalPrice} < 30000"
-                                                th:text="${#numbers.formatDecimal(totalPrice + 3000, 0, 'DEFAULT', 0, 'DEFAULT')}">
-                                            </th:block>
-                                            <th:block th:unless="${totalPrice} < 30000"
-                                                th:text="${#numbers.formatDecimal(totalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}">
-                                            </th:block> -->
-
-                                        </span> 원</h4>
+                                        </span> 원</h4> -->
                                 </div>
                             </div>
                         </div>
 
                         <div class="card">
                             <div class="card-body">
-                                <a type="button" th:href="@{/order/process}"
-                                    class="btn btn-warning btn-block btn-lg" id="order">주문하기</a>
+
+                                    <a type="button" th:href="@{/order/process}"
+                                    class="btn btn-warning btn-block btn-lg" id="orderAll">전체 주문하기</a>
+                                    <a type="button" th:href="@{/order/process}"
+                                    class="btn btn-warning btn-block btn-lg" id="orderSelected">선택 상품만 주문하기</a>
                             </div>
                         </div>
 
@@ -189,26 +183,114 @@
             </div>
         </section>
         <script>
-            document.getElementById('order').addEventListener('click', (e) => {
-                if (document.getElementById('totalQuantity').textContent == 0) {
-                    alert('장바구니가 비어있습니다')
-                    e.preventDefault();
-                }
-            })
-            function deleteItem(id) {
+            window.addEventListener('load', () => {
+                const onSuccess = res => {
+                    res.json()
+                        .then(data => {
 
-                const quantity = document.getElementById('quantity' + id).value;
-                let totalPrice = document.getElementById('totalPrice').textContent;
-                totalPrice = parseInt(totalPrice.replace(/,/g, ""));
-                let totalQuantity = document.getElementById('totalQuantity').textContent;
-                totalQuantity = parseInt(totalQuantity.replace(/,/g, ""));
+                            cartTotalPrice = data.cartTotalPrice;
+                            document.getElementById('cartTotalPrice').textContent = cartTotalPrice.toLocaleString();
+                            cartTotalShippingFee = data.cartTotalShippingFee;
+                            document.getElementById('cartTotalShippingFee').textContent = cartTotalShippingFee.toLocaleString();
+                            document.getElementById('cartTotalPriceWithShippingFee').textContent = 
+                            (parseInt(cartTotalPrice) + parseInt(cartTotalShippingFee)).toLocaleString();
+                            cartTotalQuantity = data.cartTotalQuantity;
+                            document.getElementById('cartTotalQuantity').textContent = cartTotalQuantity.toLocaleString();
+
+                        });
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                fetch(`/api/v1/cart/item/total`)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+
+            })
+
+            function cartManipulation(cartId) {
+
+                const cartQuantity = document.getElementById('quantity' + cartId).value;
+                const isSelected = document.getElementById('isSelected' + cartId).checked;
 
                 let data = {
                     method: 'POST',
                     body: JSON.stringify({
-                        id,
-                        quantity,
-                        totalPrice
+                        cartId,
+                        cartQuantity,
+                        isSelected,
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                const onSuccess = res => {
+                    res.json()
+                        .then(data => {
+                            document.getElementById('multipliedPrice' + cartId).textContent = data.cartManipulatedPrice.toLocaleString();
+                            let sellerId = data.cartPricePerSellerResponse.sellerId;
+
+                            itemTotalPricePerSeller = data.cartPricePerSellerResponse.itemTotalPricePerSeller;
+                            document.getElementById('itemTotalPricePerSeller' + sellerId).textContent = itemTotalPricePerSeller.toLocaleString();
+                            itemShippingFeePerSeller = data.cartPricePerSellerResponse.itemShippingFeePerSeller;
+                            document.getElementById('shippingFee' + sellerId).textContent = itemShippingFeePerSeller.toLocaleString();
+                            document.getElementById('itemTotalPricePerSellerWithShippingFee' + sellerId).textContent = 
+                            (parseInt(itemTotalPricePerSeller) + parseInt(itemShippingFeePerSeller)).toLocaleString();
+                            sellerTotalQuantity = data.cartPricePerSellerResponse.itemTotalQuantityPerSeller;
+                            document.getElementById('sellerTotalQuantity' + sellerId).textContent = sellerTotalQuantity.toLocaleString();
+
+
+                            cartTotalPrice = data.cartPriceTotalResponse.cartTotalPrice;
+                            document.getElementById('cartTotalPrice').textContent = cartTotalPrice.toLocaleString();
+                            cartTotalShippingFee = data.cartPriceTotalResponse.cartTotalShippingFee;
+                            document.getElementById('cartTotalShippingFee').textContent = cartTotalShippingFee.toLocaleString();
+                            document.getElementById('cartTotalPriceWithShippingFee').textContent = 
+                            (parseInt(cartTotalPrice) + parseInt(cartTotalShippingFee)).toLocaleString();
+                            cartTotalQuantity = data.cartPriceTotalResponse.cartTotalQuantity;
+                            document.getElementById('cartTotalQuantity').textContent = cartTotalQuantity.toLocaleString();
+
+                        });
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                fetch(`/api/v1/cart/item/price` , data)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+            }
+
+            document.getElementById('orderAll').addEventListener('click', (e) => {
+                if (document.getElementById('cartTotalQuantity').textContent == 0) {
+                    alert('선택된 상품이 없습니다')
+                    e.preventDefault();
+                }
+            })
+
+            function deleteItem(cartId) {
+
+                let data = {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        cartId,
                     }),
                     headers: {
                         'Content-Type': 'application/json'
@@ -217,11 +299,27 @@
                 const onSuccess = res => {
                     res.json()
                         .then(data => {
-                            document.getElementById('totalPrice').innerHTML = data.totalPrice.toLocaleString();
-                            document.getElementById('totalProductPrice').textContent = data.totalPrice.toLocaleString();
-                            document.getElementById('totalQuantity').textContent = data.totalQuantity.toLocaleString();
-                            document.getElementById('cartAmount').textContent = data.totalQuantity.toLocaleString();
-                            document.getElementById(id).remove();
+                            let sellerId = data.cartPricePerSellerResponse.sellerId;
+
+                            itemTotalPricePerSeller = data.cartPricePerSellerResponse.itemTotalPricePerSeller;
+                            document.getElementById('itemTotalPricePerSeller' + sellerId).textContent = itemTotalPricePerSeller.toLocaleString();
+                            itemShippingFeePerSeller = data.cartPricePerSellerResponse.itemShippingFeePerSeller;
+                            document.getElementById('shippingFee' + sellerId).textContent = itemShippingFeePerSeller.toLocaleString();
+                            document.getElementById('itemTotalPricePerSellerWithShippingFee' + sellerId).textContent = 
+                            (parseInt(itemTotalPricePerSeller) + parseInt(itemShippingFeePerSeller)).toLocaleString();
+                            sellerTotalQuantity = data.cartPricePerSellerResponse.itemTotalQuantityPerSeller;
+                            document.getElementById('sellerTotalQuantity' + sellerId).textContent = sellerTotalQuantity.toLocaleString();
+
+
+                            cartTotalPrice = data.cartPriceTotalResponse.cartTotalPrice;
+                            document.getElementById('cartTotalPrice').textContent = cartTotalPrice.toLocaleString();
+                            cartTotalShippingFee = data.cartPriceTotalResponse.cartTotalShippingFee;
+                            document.getElementById('cartTotalShippingFee').textContent = cartTotalShippingFee.toLocaleString();
+                            document.getElementById('cartTotalPriceWithShippingFee').textContent = 
+                            (parseInt(cartTotalPrice) + parseInt(cartTotalShippingFee)).toLocaleString();
+                            cartTotalQuantity = data.cartPriceTotalResponse.cartTotalQuantity;
+                            document.getElementById('cartTotalQuantity').textContent = cartTotalQuantity.toLocaleString();
+                            document.getElementById('cart' + cartId).remove();
                             alert('상품이 삭제되었습니다');
                         });
                 }
@@ -242,53 +340,54 @@
                     });
             }
 
-            function updateItem(itemId, optionId) {
+            // function updateItem(itemId, optionId) {
 
-                const quantity = document.getElementById('quantity' + itemId).value;
-                let totalPrice = document.getElementById('totalPrice').textContent;
-                totalPrice = parseInt(totalPrice.replace(/,/g, ""));
-                let totalQuantity = document.getElementById('totalQuantity').textContent;
-                totalQuantity = parseInt(totalQuantity.replace(/,/g, ""));
+            //     const quantity = document.getElementById('quantity' + itemId).value;
+            //     let totalPrice = document.getElementById('totalPrice').textContent;
+            //     totalPrice = parseInt(totalPrice.replace(/,/g, ""));
+            //     let totalQuantity = document.getElementById('totalQuantity').textContent;
+            //     totalQuantity = parseInt(totalQuantity.replace(/,/g, ""));
 
-                let data = {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        itemId,
-                        optionId,
-                        quantity,
-                        totalPrice,
-                        totalQuantity
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
-                const onSuccess = res => {
-                    res.json()
-                        .then(data => {
-                            document.getElementById('totalPrice').innerHTML = data.totalPrice.toLocaleString();
-                            document.getElementById('multipliedPrice' + id).innerHTML = data.multipliedPrice.toLocaleString();
-                            document.getElementById('totalProductPrice').textContent = data.totalPrice.toLocaleString();
-                            document.getElementById('totalQuantity').textContent = data.totalQuantity.toLocaleString();
-                            document.getElementById('cartAmount').textContent = data.totalQuantity.toLocaleString();
-                        });
-                };
-                const onFailure = res => {
-                    return res.json().then(json => alert(json.message));
-                };
+            //     let data = {
+            //         method: 'POST',
+            //         body: JSON.stringify({
+            //             itemId,
+            //             optionId,
+            //             quantity,
+            //             totalPrice,
+            //             totalQuantity
+            //         }),
+            //         headers: {
+            //             'Content-Type': 'application/json'
+            //         }
+            //     };
+            //     const onSuccess = res => {
+            //         res.json()
+            //             .then(data => {
+            //                 document.getElementById('totalPrice').innerHTML = data.totalPrice.toLocaleString();
+            //                 document.getElementById('multipliedPrice' + id).innerHTML = data.multipliedPrice.toLocaleString();
+            //                 document.getElementById('totalProductPrice').textContent = data.totalPrice.toLocaleString();
+            //                 document.getElementById('totalQuantity').textContent = data.totalQuantity.toLocaleString();
+            //                 document.getElementById('cartAmount').textContent = data.totalQuantity.toLocaleString();
+            //             });
+            //     };
+            //     const onFailure = res => {
+            //         return res.json().then(json => alert(json.message));
+            //     };
 
-                fetch(`/api/v1/cart/update`, data)
-                    .then(res => {
-                        if (!res.ok) {
-                            throw res;
-                        }
-                        return res
-                    })
-                    .then(onSuccess, onFailure)
-                    .catch(err => {
-                        alert(err.message);
-                    });
-            }
+            //     fetch(`/api/v1/cart/update`, data)
+            //         .then(res => {
+            //             if (!res.ok) {
+            //                 throw res;
+            //             }
+            //             return res
+            //         })
+            //         .then(onSuccess, onFailure)
+            //         .catch(err => {
+            //             alert(err.message);
+            //         });
+            // }
+        
         </script>
     </div>
     <!--End of Content-->

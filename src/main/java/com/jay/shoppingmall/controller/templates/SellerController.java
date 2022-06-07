@@ -1,11 +1,10 @@
 package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.common.CurrentUser;
-import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
-import com.jay.shoppingmall.dto.response.SellerDefaultSettingsResponse;
+import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
 import com.jay.shoppingmall.service.SellerService;

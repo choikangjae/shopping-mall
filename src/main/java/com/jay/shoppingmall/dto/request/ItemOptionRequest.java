@@ -13,4 +13,6 @@ public class ItemOptionRequest {
     private String option1;
 
     private String option2;
+
+    private Integer optionQuantity;
 }

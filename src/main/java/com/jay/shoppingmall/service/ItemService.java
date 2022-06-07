@@ -24,6 +24,7 @@ import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemDetailResponse;
 import com.jay.shoppingmall.dto.response.ZzimResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.StockInvalidException;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
 
@@ -142,7 +143,7 @@ public class ItemService {
         final List<String> itemOptions = itemOptionRepository.findByItemId(item.getId()).stream().map(ItemOption::getOption1).distinct().collect(Collectors.toList());
 
         for (String option1 : itemOptions) {
-            List<ItemOption> option2 = itemOptionRepository.findAllByOption1(option1);
+            List<ItemOption> option2 = itemOptionRepository.findAllByOption1AndItemId(option1, item.getId() );
             final List<String> option2list = option2.stream().map(ItemOption::getOption2).collect(Collectors.toList());
             optionMap.put(option1, option2list);
         }
@@ -224,15 +225,35 @@ public class ItemService {
                 .build();
     }
 
-    public ItemOptionResponse itemOptionChange(final ItemOptionRequest request, final User user) {
+    public ItemOptionResponse itemOptionAddToList(final ItemOptionRequest request, final User user) {
         final ItemOption itemOption = itemOptionRepository.findByOption1AndOption2AndItemId(request.getOption1(), request.getOption2(), request.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException("잘못된 상품 접근입니다"));
 
         return ItemOptionResponse.builder()
+                .itemId(itemOption.getItem().getId())
+                .itemOptionId(itemOption.getId())
                 .option1(itemOption.getOption1())
                 .option2(itemOption.getOption2())
                 .itemStock(itemOption.getItemStock().getStock())
+                .itemQuantity(1)
                 .itemPrice(itemOption.getItemPrice().getPriceNow())
+                .build();
+    }
+
+    public ItemOptionResponse itemOptionUpdate(final ItemOptionRequest request) {
+        final ItemOption itemOption = itemOptionRepository.findByOption1AndOption2AndItemId(request.getOption1(), request.getOption2(), request.getItemId())
+                .orElseThrow(() -> new ItemNotFoundException("잘못된 상품 접근입니다"));
+
+        if (itemOption.getItemStock().getStock() < request.getOptionQuantity()) {
+            throw new StockInvalidException("해당 상품의 재고는 " + itemOption.getItemStock().getStock() + " 개 입니다");
+        }
+        Long itemTotalPrice = request.getOptionQuantity() * itemOption.getItemPrice().getPriceNow();
+
+        return ItemOptionResponse.builder()
+                .option1(itemOption.getOption1())
+                .option2(itemOption.getOption2())
+                .itemQuantity(request.getOptionQuantity())
+                .itemPrice(itemTotalPrice)
                 .build();
     }
 }

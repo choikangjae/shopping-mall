@@ -12,9 +12,12 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     Optional<List<Cart>> findByUser(User user);
 
-    Cart findByUserAndItem(User user, Item item);
+    Optional<List<Cart>> findByUserAndIsSelectedTrue(User user);
+//    Cart findByUserAndItem(User user, Item item);
+//
+//    Optional<Cart> findByUserIdAndItemIdAndItemOptionId(Long userId, Long itemId, Long itemOptionId);
 
-    Cart findByUserAndItemAndItemOption(User user, Item item, ItemOption itemOption);
+    Optional<Cart> findByUserAndItemAndItemOption(User user, Item item, ItemOption itemOption);
 
     void deleteByItemId(Long id);
 }

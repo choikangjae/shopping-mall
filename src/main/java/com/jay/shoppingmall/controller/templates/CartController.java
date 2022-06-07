@@ -3,6 +3,7 @@ package com.jay.shoppingmall.controller.templates;
 import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
+import com.jay.shoppingmall.dto.response.seller.SellerResponse;
 import com.jay.shoppingmall.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,17 +25,8 @@ public class CartController {
         if (user == null) {
             return "/auth/login";
         }
-
-        final List<ItemAndQuantityResponse> itemAndQuantityResponses = cartService.showCartItemsList(user);
-        int totalPrice = 0;
-        int totalQuantity = 0;
-        for (ItemAndQuantityResponse response : itemAndQuantityResponses) {
-            totalPrice += response.getPrice() * response.getQuantity();
-            totalQuantity += response.getQuantity();
-        }
-        model.addAttribute("totalPrice", totalPrice);
-        model.addAttribute("totalQuantity", totalQuantity);
-        model.addAttribute("items", itemAndQuantityResponses);
+        final Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = cartService.showCartItemsList(user);
+        model.addAttribute("sellerResponseListMap", sellerResponseListMap);
         return "/me/cart";
     }
 
