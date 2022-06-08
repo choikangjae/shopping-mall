@@ -1,7 +1,7 @@
 package com.jay.shoppingmall.domain.item.item_price;
 
 import com.jay.shoppingmall.domain.item.item_price.model.ItemOnSale;
-import com.jay.shoppingmall.domain.item.item_price.price_history.PriceHistory;
+import com.jay.shoppingmall.domain.item.item_price.price_history.ItemPriceHistory;
 import lombok.*;
 
 import javax.persistence.*;
@@ -32,5 +32,5 @@ public class ItemPrice {
     private ItemOnSale itemOnSale;
 
     @OneToMany(mappedBy = "itemPrice")
-    private List<PriceHistory> priceHistories = new ArrayList<>();
+    private List<ItemPriceHistory> priceHistories = new ArrayList<>();
 }

@@ -1,11 +1,10 @@
 package com.jay.shoppingmall.domain.item.item_stock;
 
+import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistory;
+import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -19,4 +18,12 @@ public class ItemStock {
     private Long id;
 
     private Integer stock;
+
+    public Integer stockMinusQuantity(Integer quantity) {
+        if (quantity > stock) {
+            throw new ItemNotFoundException("주문량이 재고보다 많습니다");
+        }
+        this.stock -= quantity;
+        return stock;
+    }
 }

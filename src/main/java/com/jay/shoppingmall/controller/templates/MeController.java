@@ -1,12 +1,14 @@
 package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.common.CurrentUser;
+import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.request.PasswordRequest;
 import com.jay.shoppingmall.dto.response.SimpleOrderResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
+import com.jay.shoppingmall.service.ItemService;
 import com.jay.shoppingmall.service.MeService;
 import com.jay.shoppingmall.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class MeController {
 
     private final MeService meService;
     private final OrderService orderService;
+    private final ItemService itemService;
 
     @GetMapping
     public String me(@CurrentUser User user, Model model, Pageable pageable) {
@@ -60,7 +63,12 @@ public class MeController {
     }
 
     @GetMapping("/reconfirm")
-    public String reConfirm(PasswordRequest passwordRequest, @CurrentUser User user, Model model) {
+    public String reConfirm(PasswordRequest passwordRequest, @CurrentUser User user, Model model, RedirectAttributes redirectAttributes) {
+        if (!meService.userAgreeCheck(user)) {
+            redirectAttributes.addFlashAttribute("message", "필수 동의가 필요합니다");
+
+            return "redirect:/me/privacy";
+        }
         model.addAttribute("user", user);
         return "me/reconfirm";
     }
@@ -81,19 +89,58 @@ public class MeController {
         return "redirect:/me/update";
     }
     @GetMapping("/zzim")
-    public String showMeZzim(@CurrentUser User user, Model model) {
+    public String showMeZzim(@CurrentUser User user, Model model, Pageable pageable) {
         if (user == null) {
             return "redirect:/";
         }
-        List<ItemResponse> itemResponses = meService.getAllMeZzim(user);
+        PageDto itemResponses = itemService.getAllMeZzim(user, pageable);
         model.addAttribute("items", itemResponses);
         return "me/zzim";
     }
+
+    //TODO 기본 틀만 작성
     @GetMapping("/order/detail/{id}")
     public String showOrderDetail(@PathVariable("id") Long orderId, @CurrentUser User user) {
         orderService.showOrderDetail(orderId, user);
 
         return "/order/detail";
+    }
+    //TODO 기본 틀만 작성
+    @GetMapping("/orders")
+    public String showOrders(@CurrentUser User user, Pageable pageable, Model model) {
+        List<SimpleOrderResponse> simpleOrderResponses = orderService.showOrders(user, pageable);
+        if (!simpleOrderResponses.isEmpty()) {
+            model.addAttribute("orders", simpleOrderResponses);
+        }
+
+        return "/me/orders";
+    }
+    //TODO 기본 틀만 작성
+    @GetMapping("/cancel-item-list")
+    public String showCancels(@CurrentUser User user, Pageable pageable, Model model) {
+        List<SimpleOrderResponse> simpleOrderResponses = orderService.showOrders(user, pageable);
+        if (!simpleOrderResponses.isEmpty()) {
+            model.addAttribute("orders", simpleOrderResponses);
+        }
+
+        return "/me/cancel-item-list";
+    }
+    //TODO 기본 틀만 작성
+    @GetMapping("/reviews")
+    public String showReviews(@CurrentUser User user, Pageable pageable, Model model) {
+        List<SimpleOrderResponse> simpleOrderResponses = orderService.showOrders(user, pageable);
+        if (!simpleOrderResponses.isEmpty()) {
+            model.addAttribute("orders", simpleOrderResponses);
+        }
+
+        return "/me/reviews";
+    }
+    @GetMapping("/browse-history")
+    public String showBrowseHistoriesByUser(@CurrentUser User user, Model model, Pageable pageable) {
+        final PageDto browseHistories = itemService.getMyBrowseHistories(user, pageable);
+        model.addAttribute("items", browseHistories);
+
+        return "/me/browse-history";
     }
 
     @GetMapping("/delete")

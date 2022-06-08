@@ -3,55 +3,57 @@
       xmlns:th="http://www.thymeleaf.org"
       layout:decorate="~{layouts/layout.html}">
 <head>
-    <title>검색 결과</title>
+    <title>판매자 상품 조회</title>
 </head>
 
 <body>
 
 <div layout:fragment="content">
     <main>
+        <div th:replace="seller/seller-navbar :: seller-navbar"></div>
 
-        <section class="py-5 text-center container" th:if="${#lists.isEmpty(items)}">
+        <section class="py-5 text-center container" th:if="${#lists.isEmpty(items.content)}">
             <div class="row py-lg-5">
                 <div class="col-lg-6 col-md-8 mx-auto">
-                    <h3>검색 결과가 없습니다</h3>
+                    <h3>현재 판매 중인 상품이 없습니다</h3>
                 </div>
             </div>
         </section>
 
         <div class="album py-5 bg-light">
             <div class="container">
+                <div th:replace="fragments/itemCard :: itemCard"></div>
 
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-                    <div class="col" th:each="item : ${items}">
-                        <div class="card shadow-sm">
-                            <a th:href="@{/item/details/{id}(id = ${item.getId()})}" class="text-reset text-decoration-none">
-                                <img class="bd-placeholder-img card-img-top" width="100%" height="225" th:src="'data:image/jpeg;base64,'+${item.mainImage}"
-                                     alt="..."/>
-                            </a>
+<!--                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">-->
+<!--                    <div class="col" th:each="item : ${items}">-->
+<!--                        <div class="card shadow-sm">-->
+<!--                            <a th:href="@{/item/details/{id}(id = ${item.getId()})}" class="text-reset text-decoration-none">-->
+<!--                                <img class="bd-placeholder-img card-img-top" width="100%" height="225" th:src="'data:image/jpeg;base64,'+${item.mainImage}"-->
+<!--                                     alt="..."/>-->
+<!--                            </a>-->
 
-                            <div class="card-body">
-                                <p class="card-text">
-                                    <a th:href="@{/item/details/{id}(id = ${item.id})}" class="text-reset text-decoration-none"></a>
-                                <h5 class="fw-bolder" th:text="${item.getName()}">상품 이름</h5>
-                                </p>
-                                <h5 class="fw-bolder" th:text="${item.getPrice()} + ' 원'">상품 가격</h5>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button th:onclick="|addToWishList('${item.id}');|" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-heart"></i>
-                                            <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${item.id}" th:text="${#objects.nullSafe(item.zzim,'0')}"></span></span>
+<!--                            <div class="card-body">-->
+<!--                                <p class="card-text">-->
+<!--                                    <a th:href="@{/item/details/{id}(id = ${item.id})}" class="text-reset text-decoration-none"></a>-->
+<!--                                <h5 class="fw-bolder" th:text="${item.getName()}">상품 이름</h5>-->
+<!--                                </p>-->
+<!--                                <h5 class="fw-bolder" th:text="${item.getPrice()} + ' 원'">상품 가격</h5>-->
+<!--                                <div class="d-flex justify-content-between align-items-center">-->
+<!--                                    <div class="btn-group">-->
+<!--                                        <button th:onclick="|addToWishList('${item.id}');|" class="btn btn-sm btn-outline-secondary">-->
+<!--                                            <i class="fas fa-heart"></i>-->
+<!--                                            <span class="badge bg-primary rounded-pill"><span th:id="'zzim' + ${item.id}" th:text="${#objects.nullSafe(item.zzim,'0')}"></span></span>-->
 
-                                        </button>
-                                        <a href="/order/now" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-shopping-cart"></i> 바로구매
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!--                                        </button>-->
+<!--                                        <a href="/order/now" class="btn btn-sm btn-outline-secondary">-->
+<!--                                            <i class="fas fa-shopping-cart"></i> 바로구매-->
+<!--                                        </a>-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
         </div>
 

@@ -41,16 +41,8 @@ public class SellerApiController {
                                              @RequestParam("mainImage") MultipartFile file,
                                              @RequestParam(value = "descriptionImage", required = false) List<MultipartFile> files,
                                              @CurrentUser User user) {
-        System.out.println(apiWriteItemRequest.getDescription());
-        System.out.println(file.getOriginalFilename());
         final List<OptionValue> optionValues = objectMapper.convertValue(apiWriteItemRequest.getOptionArray(), new TypeReference<List<OptionValue>>() {
         });
-        for (OptionValue optionValue : optionValues) {
-            System.out.println(optionValue.getOption2());
-            System.out.println(optionValue.getOption1());
-            System.out.println(optionValue.getOptionStock());
-            System.out.println(optionValue.getIsOptionMainItem());
-        }
         Long itemId = sellerService.writeOptionItem(apiWriteItemRequest, optionValues, file, files, user);
 
         //TODO 상품 작성 이후 처리 과정 작성

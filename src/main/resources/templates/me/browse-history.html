@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       layout:decorate="~{layouts/layout.html}">
 <head>
-    <title>찜 목록</title>
+    <title>찜목록</title>
 </head>
 
 <body>
@@ -14,9 +14,11 @@
 
                 <section class="py-5 text-center container" th:if="${#lists.isEmpty(items.content)}">
                     <div class="row py-lg-5">
-                        <h3>찜 내역이 없습니다</h3>
+                        <h3>상품 조회 내역이 없습니다</h3>
                     </div>
                 </section>
+
+                <h5 class="text-center mt-3">최대 20개까지 조회 기록이 저장됩니다</h5>
                 <div th:replace="fragments/itemCard :: itemCard"></div>
             </div>
 </div>

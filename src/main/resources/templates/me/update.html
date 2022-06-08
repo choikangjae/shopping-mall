@@ -93,7 +93,7 @@
                         </div>
 
                         <div class="col-6">
-                            <label for="detailAddress" class="form-label">상세 주소</label>
+                            <label for="detailAddress" class="form-label">상세 주소 <strong class="text-info">(필수)</strong></label>
                             <input type="text" class="form-control" id="detailAddress" placeholder="상세 주소"
                                 th:value="${user.getAddress().getDetailAddress()}" required>
                             <div class="invalid-feedback">

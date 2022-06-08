@@ -17,6 +17,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Controller
 @RequiredArgsConstructor
 public class ItemDetailController {
@@ -31,7 +33,7 @@ public class ItemDetailController {
     )
     public String itemDetailByItemId(@PathVariable(name = "id",required = false) Long itemId,
                                      @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-                                     Model model, @CurrentUser User user) {
+                                     Model model, @CurrentUser User user, HttpServletRequest request) {
 
         ItemDetailResponse response = itemService.itemDetail(user, itemId);
         QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(itemId, user, pageable);

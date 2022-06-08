@@ -3,7 +3,7 @@ package com.jay.shoppingmall.dto.response.item;
 import com.jay.shoppingmall.dto.response.ReviewStarCalculationResponse;
 import lombok.*;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -11,13 +11,17 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemResponse {
 
-    private Long id;
+    private Long itemId;
 
     private String mainImage;
 
+    private String option1;
+
+    private String option2;
+
     private String name;
 
-//    private String brandName;
+    private String brandName;
 
     private Integer zzim;
 
@@ -29,5 +33,9 @@ public class ItemResponse {
 
     private ReviewStarCalculationResponse reviewStarCalculationResponse;
 
+    @Setter
+    private LocalDateTime dateAt;
+
+    @Setter
     private Boolean isZzimed;
 }

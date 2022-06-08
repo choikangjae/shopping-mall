@@ -34,13 +34,6 @@ public class Item extends BaseTimeEntity {
 
     private String description;
 
-    private Long price;
-
-    private Long salePrice;
-
-    @Setter
-    private Integer stock;
-
     @Setter
     private Integer zzim;
 
@@ -60,13 +53,6 @@ public class Item extends BaseTimeEntity {
 
     private LocalDateTime deletedDate;
 
-    public void stockMinusQuantity(Integer quantity) {
-        if (quantity > stock) {
-            throw new ItemNotFoundException("주문량이 재고보다 많습니다");
-        }
-        this.stock -= quantity;
-    }
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
@@ -80,13 +66,10 @@ public class Item extends BaseTimeEntity {
     }
 
     @Builder
-    public Item(String name, String brandName, String description, Long price, Long salePrice, Integer stock, Seller seller) {
+    public Item(String name, String brandName, String description, Seller seller) {
         this.name = name;
         this.brandName = brandName;
         this.description = description;
-        this.price = price;
-        this.salePrice = salePrice;
-        this.stock = stock;
         this.seller = seller;
     }
 }

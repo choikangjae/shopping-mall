@@ -11,10 +11,17 @@ import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
 import com.jay.shoppingmall.domain.item.item_price.ItemPriceRepository;
+import com.jay.shoppingmall.domain.item.item_price.price_history.ItemPriceHistory;
+import com.jay.shoppingmall.domain.item.item_price.price_history.ItemPriceHistoryRepository;
 import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
 import com.jay.shoppingmall.domain.item.item_stock.ItemStockRepository;
+import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistory;
+import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistoryRepository;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporaryRepository;
+import com.jay.shoppingmall.domain.order.order_item.OrderItem;
+import com.jay.shoppingmall.domain.order.order_item.OrderItemRepository;
+import com.jay.shoppingmall.domain.payment.model.ReceiverInfo;
 import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
@@ -24,6 +31,7 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.dto.request.*;
+import com.jay.shoppingmall.dto.response.seller.RecentOrdersForSellerResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
@@ -36,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -57,6 +66,9 @@ public class SellerService {
     private final ItemOptionRepository itemOptionRepository;
     private final ItemPriceRepository itemPriceRepository;
     private final ItemStockRepository itemStockRepository;
+    private final ItemStockHistoryRepository itemStockHistoryRepository;
+    private final ItemPriceHistoryRepository itemPriceHistoryRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public Page<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -64,10 +76,8 @@ public class SellerService {
 
         return itemRepository.findBySellerId(seller.getId(), pageable)
                 .map(item -> ItemResponse.builder()
-                        .id(item.getId())
+                        .itemId(item.getId())
                         .name(item.getName())
-//                        .priceNow(item.getPrice())
-//                    .salePrice(item.getSalePrice())
                         .zzim(item.getZzim())
                         .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
                         .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
@@ -84,13 +94,12 @@ public class SellerService {
         Item item = Item.builder()
                 .name(writeItemRequest.getName())
                 .description(writeItemRequest.getDescription())
-                .price(writeItemRequest.getOriginalPrice())
-                .stock(writeItemRequest.getStock())
+//                .price(writeItemRequest.getOriginalPrice())
+//                .stock(writeItemRequest.getStock())
                 .seller(seller)
                 .build();
 
         Image mainImage = fileHandler.parseFilesInfo(file, ImageRelation.ITEM_MAIN, item.getId());
-        mainImage.setIsMainImage(true);
         imageRepository.save(mainImage);
 
         //MultiPartFile은 input이 없을때 ''으로 들어오므로 아래와 같이 확인.
@@ -104,7 +113,7 @@ public class SellerService {
     }
 
     //상품명, 설명 Item // 사진, 부가사진, Image// 여러개의 옵션들과 가격 재고 ItemOption이 가격과 재고를 들고있음. 가격변동까지.
-    //상품이 삭제되더라도 Image의 썸네일은 남아있어 썸네일로 접근하면 됨.
+    //상품이 삭제되더라도 Image의 썸네일은 남아있어 썸네일로 접근하면 됨?
     public Long writeOptionItem(final ApiWriteItemRequest apiWriteItemRequest, final List<OptionValue> optionValues, final MultipartFile file, final List<MultipartFile> files, final User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
@@ -133,9 +142,25 @@ public class SellerService {
                     .priceNow(optionValue.getOptionSalePrice())
                     .originalPrice(optionValue.getOptionOriginalPrice() == null ? optionValue.getOptionSalePrice() : optionValue.getOptionOriginalPrice())
                     .build();
+            itemPriceRepository.save(itemPrice);
+            ItemPriceHistory itemPriceHistory = ItemPriceHistory.builder()
+                    .itemPrice(itemPrice)
+                    .price(itemPrice.getPriceNow())
+                    .priceUpdateDate(LocalDateTime.now())
+                    .build();
+            itemPriceHistoryRepository.save(itemPriceHistory);
+
             ItemStock itemStock = ItemStock.builder()
                     .stock(optionValue.getOptionStock())
                     .build();
+            itemStockRepository.save(itemStock);
+            ItemStockHistory itemStockHistory = ItemStockHistory.builder()
+                    .itemStock(itemStock)
+                    .stock(itemStock.getStock())
+                    .stockChangedDate(LocalDateTime.now())
+                    .build();
+            itemStockHistoryRepository.save(itemStockHistory);
+
             ItemOption itemOption = ItemOption.builder()
                     .option1(optionValue.getOption1())
                     .option2(optionValue.getOption2())
@@ -144,10 +169,7 @@ public class SellerService {
                     .itemPrice(itemPrice)
                     .item(item)
                     .build();
-
             itemOptionRepository.save(itemOption);
-            itemPriceRepository.save(itemPrice);
-            itemStockRepository.save(itemStock);
         }
         return savedItem.getId();
     }
@@ -248,6 +270,9 @@ public class SellerService {
     }
 
     public void sellerDefaultSettingSave(SellerDefaultSettingsRequest request, User user) {
+        if (sellerRepository.existsByCompanyName(request.getCompanyName())) {
+            throw new AlreadyExistsException("이미 사용 중인 회사명입니다");
+        }
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
@@ -308,5 +333,27 @@ public class SellerService {
                 .defaultDeliveryCompany(seller.getDefaultDeliveryCompany())
                 .returnShippingFeeDefault(seller.getReturnShippingFeeDefault())
                 .build();
+    }
+
+    public boolean sellerDefaultSettingCheck(final User user) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+        return seller.getCompanyName() != null;
+    }
+
+    public void getSellerRecentOrders(final User user, Pageable pageable) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+        Long itemOrderPriceAtPurchaseTotal = 0L;
+        final List<OrderItem> orderItems = orderItemRepository.findBySellerId(seller.getId(), pageable);
+        //전체 상품 가격, 상품 옵션과 개수, 개별 가격,남은 재고, 결제 정보, 받을 사람 주소 => 주문 상세 조회에서
+        //세부적인 내용만 내려보내기
+        for (OrderItem orderItem : orderItems) {
+            RecentOrdersForSellerResponse.builder().build();
+            orderItem.getQuantity();
+
+            itemOrderPriceAtPurchaseTotal += orderItem.getPriceAtPurchase();
+
+        }
     }
 }

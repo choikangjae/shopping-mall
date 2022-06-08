@@ -12,14 +12,13 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-//가격이 변동될 때마다 무조건 새로 생성.
 public class ItemStockHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Long stock;
+    private Integer stock;
 
     private LocalDateTime stockChangedDate;
 

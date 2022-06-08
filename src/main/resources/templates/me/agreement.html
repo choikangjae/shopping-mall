@@ -17,6 +17,11 @@
                 <h1>개인 정보 동의</h1>
             </div>
             <br>
+
+            <div class="alert alert-danger" role="alert" th:if="${message}">
+                <span class="mt-3" th:text="${message}"></span>
+            </div>
+
             <!--본문 들어갈 곳-->
             <h5>
                 <span th:text="${user.getEmail()}"></span> 님의 개인 정보 동의

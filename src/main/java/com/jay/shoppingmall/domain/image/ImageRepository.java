@@ -11,7 +11,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 //    Image findByItemId(Long id);
 
 //    Image findByItemIdAndIsMainImageTrue(Long id);
+    Image findByImageRelationAndId(ImageRelation imageRelation, Long id);
 
-    Image findByImageRelationAndForeignId(ImageRelation imageRelation, Long id);
-    List<Image> findAllByItemId(Long id);
+    Image findByImageRelationAndForeignId(ImageRelation imageRelation, Long foreignId);
+    List<Image> findAllByImageRelationAndForeignId(ImageRelation imageRelation, Long foreignId);
 }

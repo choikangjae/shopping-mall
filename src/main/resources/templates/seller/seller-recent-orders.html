@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{layouts/layout.html}">
+<head>
+    <title>최근 주문 확인</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <div th:replace="seller/seller-navbar :: seller-navbar"></div>
+
+        <table class="table" id="recentOrders">
+            <thead>
+            <tr>
+                최근 주문은 간단한 정보만
+                <th scope="col">결제시각</th>
+                <th scope="col">총액</th>
+                <th scope="col">상품 외 n건</th>
+                <th scope="col"></th>
+                <th scope="col">주문번호</th>
+                <th scope="col">결제금액</th>
+            </tr>
+            </thead>
+            <tbody>
+<!--            <tr th:each="order : ${orders}" style="cursor:pointer;" th:onclick="|goToOrderDetail('${order.id}');|">-->
+<!--                <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">주문날짜</td>-->
+<!--                <td style="width: 6rem;"><img class="bd-placeholder-img card-img-top img-fluid" width="100%"-->
+<!--                                              height="100%"-->
+<!--                                              th:src="'data:image/jpeg;base64,'+${order.mainImage}" alt="..."/></td>-->
+<!--                <td th:text="${order.name}">주문내역</td>-->
+<!--                <td th:text="${order.deliveryStatus}">배송상태</td>-->
+<!--                <td th:text="${order.merchantUid}">주문번호</td>-->
+<!--                <td th:text="${#numbers.formatDecimal(order.amount, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>-->
+<!--            </tr>-->
+            </tbody>
+        </table>
+
+    </div>
+</div>
+</body>
+</html>

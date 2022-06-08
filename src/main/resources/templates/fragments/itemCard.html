@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="itemCard">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mt-3">
+
+        <div class="col" th:each="item : ${items.getContent()}">
+            <span th:if="${item.dateAt != null}" th:inline="text">
+                [[${#temporals.format(item.dateAt, 'yyyy-MM-dd')}]]에 추가됨
+            </span>
+            <div class="card shadow-sm">
+                <a th:href="@{'/item/details/' + ${item.itemId}}" class="text-reset text-decoration-none">
+                    <img class="bd-placeholder-img card-img-top" width="100%" height="225"
+                         th:src="'data:image/jpeg;base64,'+${item.mainImage}"
+                         alt="..."/>
+                </a>
+                <div class="card-body">
+                    <p class="card-text">
+                        <a th:href="@{'/item/details/' + ${item.itemId}}"
+                           class="text-reset text-decoration-none"></a>
+                    <h5 class="fw-bolder" th:text="${item.name}">상품 이름</h5>
+                    </p>
+                    <del>
+                        <h6 class="fw-bolder text-muted"
+                            th:text="${#numbers.formatDecimal(item.originalPrice, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                            정상가</h6>
+                    </del>
+                    <strong>
+                                    <span class="fw-bolder text-warning"
+                                          th:text="${#numbers.formatDecimal(item.priceNow, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">판매가</span>
+                    </strong>
+                    <span class="fw-bolder" th:if="${item.originalPrice != item.priceNow}"
+                          th:text="'(' + ${((item.originalPrice-item.priceNow) * 100) / item.originalPrice} + '%)'">할인율</span>
+
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="btn-group">
+                            <button th:onclick="|addToWishList('${item.itemId}');|"
+                                    class="btn btn-sm btn-outline-secondary">
+                                <i th:classappend="${item.getIsZzimed == true ? 'text-danger':''}"
+                                   th:id="'heart' + ${item.itemId}" class="fas fa-heart"></i>
+                                <span class="badge bg-primary rounded-pill"><span
+                                        th:id="'zzim' + ${item.itemId}"
+                                        th:text="${#objects.nullSafe(item.zzim,'0')}"></span></span>
+                            </button>
+                            <a href="/order/now" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-shopping-cart"></i> 바로구매
+                            </a>
+                        </div>
+                        <div id="starTarget">
+                            <span class="fa fa-star text-warning"
+                                  th:if="${item.reviewStarCalculationResponse.fullStar != 0}"
+                                  th:each="star : ${#numbers.sequence(1, item.reviewStarCalculationResponse.fullStar)}"></span><span
+                                class="fa fa-star-half-alt text-warning"
+                                th:if="${item.reviewStarCalculationResponse.halfStar != 0}"
+                                th:each="star : ${#numbers.sequence(1, item.reviewStarCalculationResponse.halfStar)}"></span><span
+                                class="fa fa-star" th:if="${item.reviewStarCalculationResponse.emptyStar != 0}"
+                                th:each="star : ${#numbers.sequence(1, item.reviewStarCalculationResponse.emptyStar)}"></span>
+                            <span th:text="'(' + ${item.reviewStarCalculationResponse.reviewAverageRating} + ')'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" th:src="@{/js/add_to_wish_list.js}"></script>
+
+</div>
+</body>
+</html>

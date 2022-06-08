@@ -27,6 +27,7 @@ public class CartController {
         }
         final Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = cartService.showCartItemsList(user);
         model.addAttribute("sellerResponseListMap", sellerResponseListMap);
+        model.addAttribute("user", user);
         return "/me/cart";
     }
 
@@ -38,27 +39,6 @@ public class CartController {
             return "redirect:/auth/login";
         }
 
-//        try {
-//            cartService.addItemToCart(itemId, quantity, user);
-//        } catch (Exception e) {
-////            model.addAttribute("error", e.getMessage());
-//            return "redirect:/item/details/" + itemId;
-//        }
-
-//        redirectAttributes.addFlashAttribute("message", "장바구니에 상품이 추가되었습니다");
-
         return "redirect:/cart";
     }
-//    @PostMapping("/add")
-//    public String addToCart(@Valid @RequestBody CartRequest request, @CurrentUser User user) {
-//        System.out.println(user.getEmail());
-//        if (user == null) {
-////            throw new UserNotFoundException("로그인이 필요한 서비스입니다");
-//            return "redirect:/";
-//        }
-//
-//        cartService.addItemToCart(request.getId(), request.getQuantity(), user);
-//
-//        return "redirect:/cart";
-//    }
 }

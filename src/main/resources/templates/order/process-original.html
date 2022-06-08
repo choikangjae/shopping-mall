@@ -28,58 +28,39 @@
                     <h4 class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-primary">장바구니</span>
                         <span class="badge bg-primary rounded-pill"><span
-                            th:text="${cartPriceTotalResponse.cartTotalQuantity}"></span></span>
+                                th:text="${order.orderTotalCount}"></span></span>
                     </h4>
 
                     <ul class="list-group mb-3">
-                        <th:block th:each="map : ${sellerResponseListMap}" th:with="seller = ${map.key}">
-                            <!-- 판매자 정보 -->
-                            <div class="mb-2">
-                                <span th:text="${seller.companyName}"></span>
-                                <span class="badge bg-primary rounded-pill">
-                                    <span th:text="${seller.itemTotalQuantityPerSeller}" th:id="'sellerTotalQuantity' + ${seller.sellerId}"></span>
-                                </span>
-                            </div>
-                        <li class="list-group-item d-flex justify-content-between lh-sm mb-2"
-                            th:each="item : ${sellerResponseListMap.get(seller)}">
+                        <li class="list-group-item d-flex justify-content-between lh-sm"
+                            th:each="item : ${order.itemResponses}">
                             <div>
                                 <div>
-                                    <h6 th:text="${item.name}" class="my-0"></h6>
+                                    <h6 th:text="${item.getName()}" class="my-0"></h6>
                                     <small
-                                            th:text="${#numbers.formatDecimal(item.quantity, 0, 'DEFAULT', 0, 'DEFAULT')}"
+                                            th:text="${#numbers.formatDecimal(item.cartQuantity, 0, 'DEFAULT', 0, 'DEFAULT')}"
                                             class="text-muted">개수</small><small>
                                     개</small>
-                                    <small
-                                            th:text="${#numbers.formatDecimal(item.priceNow, 0, 'DEFAULT', 0, 'DEFAULT')}"
-                                            class="text-muted">개당 가격</small><small>
-                                    원</small>
                                 </div>
-                                <p><span class="text-muted">옵션1: </span>
-                                    <span th:text="${item.option1}"></span>
-                                    <span class="text-muted">옵션2:</span>
-                                    <span th:text="${item.option2}"></span>
-                                </p>
                                 <span class="text-success"
-                                      th:text="${#numbers.formatDecimal(item.priceNow * item.quantity, 0, 'DEFAULT', 0, 'DEFAULT')}">가격</span>
+                                      th:text="${#numbers.formatDecimal(item.priceNow * item.cartQuantity, 0, 'DEFAULT', 0, 'DEFAULT')}">가격</span>
                                 <span> 원</span>
                             </div>
                         </li>
-                        </th:block>
-
                         <li class="list-group-item d-flex justify-content-between">
-                            <h6>
+                            <h4>
                                 <span>배송비</span>
 
-                                <strong><span class="text-info" th:text="${#numbers.formatDecimal(cartPriceTotalResponse.cartTotalShippingFee, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
+                                <strong></span>
                                     원</strong>
-                            </h6>
+                            </h4>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <h4>
                                 <span>총합</span>
 
-                                <strong><span class="text-warning" th:text="${#numbers.formatDecimal(cartPriceTotalResponse.cartTotalPrice + cartPriceTotalResponse.cartTotalShippingFee, 0, 'DEFAULT', 0, 'DEFAULT')}"
-                                              ></span>
+                                <strong><span class="text-success"
+                                              th:text="${#numbers.formatDecimal(order.orderTotalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}"></span>
                                     원</strong>
                             </h4>
                         </li>

@@ -1,5 +1,7 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.browse_history.BrowseHistory;
+import com.jay.shoppingmall.domain.browse_history.BrowseHistoryRepository;
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
@@ -13,6 +15,8 @@ import com.jay.shoppingmall.domain.item.item_stock.ItemStockRepository;
 import com.jay.shoppingmall.domain.model.page.CustomPage;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.review.ReviewRepository;
+import com.jay.shoppingmall.domain.seller.Seller;
+import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.zzim.Zzim;
 import com.jay.shoppingmall.domain.zzim.ZzimRepository;
@@ -24,6 +28,7 @@ import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemDetailResponse;
 import com.jay.shoppingmall.dto.response.ZzimResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.StockInvalidException;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +39,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +50,7 @@ import java.util.stream.Collectors;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final SellerRepository sellerRepository;
     private final ImageRepository imageRepository;
     private final FileHandler fileHandler;
     private final ZzimRepository zzimRepository;
@@ -52,6 +59,7 @@ public class ItemService {
     private final ItemStockRepository itemStockRepository;
     private final ItemPriceRepository itemPriceRepository;
     private final ReviewRepository reviewRepository;
+    private final BrowseHistoryRepository browseHistoryRepository;
 
     public ReviewStarCalculationResponse reviewStarCalculation(Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
@@ -83,36 +91,11 @@ public class ItemService {
         final Page<Item> itemPage = itemRepository.findAll(pageable);
         CustomPage customPage = new CustomPage(itemPage);
 
-//        System.out.println("customPage.getNumber() = " + customPage.getNumber());
-//        System.out.println("customPage.getSize() = " + customPage.getSize());
-//        System.out.println("customPage.getTotalPages() = " + customPage.getTotalPages());
-//        System.out.println("customPage.getOffset() = " + customPage.getOffset());
-//        System.out.println("customPage.getTotalElements() = " + customPage.getTotalElements());
-
         List<Item> items = itemPage.getContent();
-        List<ItemResponse> itemResponses = new ArrayList<>();
-        for (Item item : items) {
-            final ReviewStarCalculationResponse reviewStarCalculationResponse = this.reviewStarCalculation(item.getId());
+        List<ItemResponse> itemResponses = getItemResponses(items);
 
-            ItemOption itemOption = itemOptionRepository.findByItemIdAndIsOptionMainItemTrue(item.getId());
-            if (itemOption != null) {
-                final ItemPrice itemPrice = itemOption.getItemPrice();
-                final Long priceNow = itemPrice.getIsOnSale() != null ? itemPrice.getItemOnSale().getOnSalePrice() : itemPrice.getPriceNow();
-                final Long originalPrice = itemPrice.getOriginalPrice();
+        setItemsZzimBoolean(user, itemResponses);
 
-                itemResponses.add(ItemResponse.builder()
-                        .id(item.getId())
-                        .name(item.getName())
-//                        .brandName(item.getBrandName())
-                        .priceNow(priceNow)
-                        .originalPrice(originalPrice)
-                        .zzim(item.getZzim())
-                        .reviewStarCalculationResponse(reviewStarCalculationResponse)
-                        .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, item.getId())))
-                        .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
-                        .build());
-            }
-        }
         return PageDto.builder()
                 .customPage(customPage)
                 .content(itemResponses)
@@ -129,6 +112,38 @@ public class ItemService {
 //                        .build());
     }
 
+    private void setItemsZzimBoolean(final User user, final List<ItemResponse> itemResponses) {
+        if (user != null)
+            for (ItemResponse itemResponse : itemResponses) {
+                itemResponse.setIsZzimed(zzimService.isZzimed(user.getId(), itemResponse.getItemId()));
+            }
+    }
+
+    private List<ItemResponse> getItemResponses(final List<Item> items) {
+        List<ItemResponse> itemResponses = new ArrayList<>();
+        for (Item item : items) {
+            final ReviewStarCalculationResponse reviewStarCalculationResponse = this.reviewStarCalculation(item.getId());
+
+            ItemOption itemOption = itemOptionRepository.findByItemIdAndIsOptionMainItemTrue(item.getId());
+            if (itemOption != null) {
+                final ItemPrice itemPrice = itemOption.getItemPrice();
+                final Long priceNow = itemPrice.getIsOnSale() != null ? itemPrice.getItemOnSale().getOnSalePrice() : itemPrice.getPriceNow();
+                final Long originalPrice = itemPrice.getOriginalPrice();
+
+                itemResponses.add(ItemResponse.builder()
+                        .itemId(item.getId())
+                        .name(item.getName())
+                        .priceNow(priceNow)
+                        .originalPrice(originalPrice)
+                        .zzim(item.getZzim())
+                        .reviewStarCalculationResponse(reviewStarCalculationResponse)
+                        .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, item.getId())))
+                        .build());
+            }
+        }
+        return itemResponses;
+    }
+
 
     public ItemDetailResponse itemDetail(User user, Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
@@ -137,20 +152,20 @@ public class ItemService {
 
         //대표 상품
         final ItemOption mainOptionItem = itemOptionRepository.findByItemIdAndIsOptionMainItemTrue(itemId);
-        List<ItemOption> optionItemAll = itemOptionRepository.findByItemId(itemId);
+//        List<ItemOption> optionItemAll = itemOptionRepository.findByItemId(itemId);
 
         Map<String, List<String>> optionMap = new HashMap<>();
         final List<String> itemOptions = itemOptionRepository.findByItemId(item.getId()).stream().map(ItemOption::getOption1).distinct().collect(Collectors.toList());
 
         for (String option1 : itemOptions) {
-            List<ItemOption> option2 = itemOptionRepository.findAllByOption1AndItemId(option1, item.getId() );
+            List<ItemOption> option2 = itemOptionRepository.findAllByOption1AndItemId(option1, item.getId());
             final List<String> option2list = option2.stream().map(ItemOption::getOption2).collect(Collectors.toList());
             optionMap.put(option1, option2list);
         }
 
         //이미지
         List<String> stringDescriptionImages = new ArrayList<>();
-        List<Image> descriptionImages = imageRepository.findAllByItemId(item.getId());
+        List<Image> descriptionImages = imageRepository.findAllByImageRelationAndForeignId(ImageRelation.ITEM_DESCRIPTION, item.getId());
         for (Image image : descriptionImages) {
             stringDescriptionImages.add(fileHandler.getStringImage(image));
         }
@@ -159,6 +174,31 @@ public class ItemService {
 
         //조회수
         item.viewCountUp();
+
+        //상품 조회 기록 저장/ 캐시 메모리로 전환 필요 ?
+        if (user != null) {
+            final List<BrowseHistory> browseHistories = browseHistoryRepository.findAllByUserIdOrderByBrowseAtDesc(user.getId());
+            final List<Long> itemIds = browseHistories.stream().map(BrowseHistory::getItem).map(Item::getId).collect(Collectors.toList());
+
+            if (browseHistories.size() >= 20) {
+                final BrowseHistory history = browseHistories.get(browseHistories.size() - 1);
+                browseHistoryRepository.delete(history);
+            }
+            if (itemIds.contains(itemId)) {
+                BrowseHistory history = browseHistoryRepository.findByItemId(itemId);
+                browseHistoryRepository.delete(history);
+            }
+
+            BrowseHistory browseHistory = BrowseHistory.builder()
+                    .item(item)
+                    .user(user)
+                    .browseAt(LocalDateTime.now())
+                    .build();
+
+            //기록 최대 20개
+            browseHistoryRepository.save(browseHistory);
+            browseHistoryRepository.save(browseHistory);
+        }
 
         return ItemDetailResponse.builder()
                 .id(item.getId())
@@ -178,19 +218,17 @@ public class ItemService {
                 .build();
     }
 
-    public Page<ItemResponse> searchItemsByKeyword(String keyword, Pageable pageable) {
+    public PageDto searchItemsByKeyword(String keyword, final User user, Pageable pageable) {
+        final Page<Item> itemPage = itemRepository.findByNameContaining(keyword, pageable)
+                .orElseThrow(() -> new ItemNotFoundException("키워드에 해당하는 상품이 없습니다"));
+        final List<ItemResponse> itemResponses = getItemResponses(itemPage.getContent());
+        setItemsZzimBoolean(user, itemResponses);
+        CustomPage customPage = new CustomPage(itemPage);
 
-        return itemRepository.findByNameContaining(keyword, pageable)
-                .map(items -> items.map(item -> ItemResponse.builder()
-                        .id(item.getId())
-                        .name(item.getName())
-                        .zzim(item.getZzim())
-                        .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, item.getId())))
-//                        .priceNow(item.getPrice())
-//                        .originalPrice(item.getSalePrice())
-                        .build()))
-                .orElseThrow(() -> new ItemNotFoundException("해당 키워드에 맞는 상품이 없습니다"));
-
+        return PageDto.builder()
+                .customPage(customPage)
+                .content(itemResponses)
+                .build();
     }
 
     public ZzimResponse itemZzim(final ItemZzimRequest request, final User user) {
@@ -255,5 +293,82 @@ public class ItemService {
                 .itemQuantity(request.getOptionQuantity())
                 .itemPrice(itemTotalPrice)
                 .build();
+    }
+
+    public PageDto getAllMeZzim(User user, Pageable pageable) {
+        Page<Zzim> zzims = zzimRepository.findByUser(user, pageable)
+                .orElseThrow(() -> new ItemNotFoundException("아이디에 상품이 없습니다"));
+        final List<Item> items = zzims.stream().map(Zzim::getItem).collect(Collectors.toList());
+        CustomPage customPage = new CustomPage(zzims);
+
+        final List<ItemResponse> itemResponses = getItemResponses(items);
+        setItemsZzimBoolean(user, itemResponses);
+        final List<ItemResponse> responses = itemResponses.stream().filter(ItemResponse::getIsZzimed).collect(Collectors.toList());
+
+//        for (Zzim zzim : zzims) {
+//            if (!zzim.getIsZzimed()) {
+//                continue;
+//            }
+//            Item item = itemRepository.findById(zzim.getItem().getId())
+//                    .orElseThrow(() -> new ItemNotFoundException("상품이 없습니다"));
+//
+//            itemResponses.add(ItemResponse.builder()
+//                    .itemId(item.getId())
+//                    .name(item.getName())
+//                    .zzim(item.getZzim())
+//                    .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
+//                    .priceNow(item.getPrice())
+//                    .originalPrice(item.getSalePrice())
+//                    .isZzimed(zzim.getIsZzimed())
+//                    .build());
+//        }
+
+
+        return PageDto.builder()
+                .content(responses)
+                .customPage(customPage)
+                .build();
+    }
+
+
+    public PageDto getMyBrowseHistories(final User user, Pageable pageable) {
+        final Page<BrowseHistory> browseHistoryPage = browseHistoryRepository.findAllByUserIdOrderByBrowseAtDesc(user.getId(), pageable);
+        CustomPage customPage = new CustomPage(browseHistoryPage);
+        final List<BrowseHistory> browseHistories = browseHistoryPage.getContent();
+
+        final List<Item> items = browseHistories.stream().map(BrowseHistory::getItem).collect(Collectors.toList());
+        final List<ItemResponse> itemResponses = getItemResponses(items);
+
+        //리팩토링하기.
+        for (ItemResponse itemResponse : itemResponses) {
+            for (BrowseHistory browseHistory : browseHistories) {
+                if (Objects.equals(itemResponse.getItemId(), browseHistory.getItem().getId())) {
+                    itemResponse.setDateAt(browseHistory.getBrowseAt());
+                }
+            }
+        }
+        setItemsZzimBoolean(user, itemResponses);
+
+        return PageDto.builder()
+                .content(itemResponses)
+                .customPage(customPage)
+                .build()
+                ;
+    }
+
+    public PageDto showItemsBySeller(final User user, final Pageable pageable) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자 권한이 없습니다"));
+
+        final Page<Item> itemPageBySeller = itemRepository.findBySellerId(seller.getId(), pageable);
+        CustomPage customPage = new CustomPage(itemPageBySeller);
+
+        final List<ItemResponse> itemResponses = getItemResponses(itemPageBySeller.getContent());
+
+        return PageDto.builder()
+                .content(itemResponses)
+                .customPage(customPage)
+                .build()
+                ;
     }
 }

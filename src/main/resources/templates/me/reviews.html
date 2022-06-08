@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org"
       layout:decorate="~{layouts/layout.html}">
 <head>
-    <title>마이 페이지</title>
+    <title>주문조회</title>
 </head>
 <body>
 <div layout:fragment="content">
@@ -12,24 +12,6 @@
         <br>
         <!--본문 들어갈 곳-->
         <div class="container position-relative">
-            <div th:if="${user.getAgree()?.getIsMandatoryAgree() == null}" class="card col-6 justify-content-center">
-                <div class="card-body">
-                    <div>
-                        <form action="/me/privacy" method="post">
-                            <h6 th:text="${user.getEmail() + '회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요'}"></h6>
-                            </br>
-                            <button type="submit" class="btn btn-success">개인정보 입력하러 가기</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <br>
-            <div>
-                <h5 th:if="${user.getName().getFirst() != null}"
-                    th:text="${user.getName().getFullName() + ' 님 안녕하세요!'}"></h5>
-                <h5 th:if="${user.getName().getFirst() == null}" th:text="${user.getEmail() + ' 님 안녕하세요!'}"></h5>
-            </div>
 
             <br>
             <label for="recentOrders">최근 주문 내역</label>

@@ -9,20 +9,30 @@ import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
+import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
+import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
+import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistory;
+import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistoryRepository;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.order.OrderRepository;
 import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.order.order_item.OrderItemRepository;
+import com.jay.shoppingmall.domain.order.order_item.order_delivery.OrderDelivery;
+import com.jay.shoppingmall.domain.order.order_item.order_delivery.OrderDeliveryRepository;
 import com.jay.shoppingmall.domain.payment.model.MerchantUidGenerator;
 import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.payment.PaymentRepository;
 import com.jay.shoppingmall.domain.payment.model.ReceiverInfo;
+import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
 import com.jay.shoppingmall.dto.response.PaymentResponse;
 import com.jay.shoppingmall.dto.response.PaymentResultResponse;
+import com.jay.shoppingmall.dto.response.cart.CartPricePerSellerResponse;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.PaymentFailedException;
@@ -37,7 +47,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -50,6 +62,11 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ImageRepository imageRepository;
+    private final ItemOptionRepository itemOptionRepository;
+    private final OrderDeliveryRepository orderDeliveryRepository;
+    private final ItemStockHistoryRepository itemStockHistoryRepository;
+
+    private final CartService cartService;
 
     public PaymentResultResponse paymentTotal(String imp_uid, final String merchant_uid, User user) throws IOException {
         String accessToken = getAccessToken();
@@ -67,37 +84,59 @@ public class PaymentService {
             throw new PaymentFailedException("결제 정보가 올바르지 않습니다.");
         }
 
+        //검증 완료
         paymentRecord.isValidatedTrue();
 
-        //장바구니 비우기 (선택 상품만 제거하는 기능 추가 예정)
-        final List<Cart> carts = cartRepository.findByUser(user)
+        //판매자에게 오더 알림 구현하기
+        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user)
                 .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
 
         Order order = Order.builder()
                 .user(user)
                 .payment(paymentRecord)
-                .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
                 .build();
         orderRepository.save(order);
 
+        //상품 주문 테이블로 정보 옮기고 장바구니 비우기
         for (Cart cart : carts) {
+            OrderDelivery orderDelivery = OrderDelivery.builder()
+                    .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
+                    .build();
+            orderDeliveryRepository.save(orderDelivery);
+
             //대표 사진 관리에 대한 주체를 OrderItem에게 넘김. 상품이 삭제될 수 있으므로.
-            final Long mainImageId = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,cart.getItem().getId()).getId();
+            //나중에 썸네일로 로직바꿀 것.
+            final Long mainImageId = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, cart.getItem().getId()).getId();
             OrderItem orderItem = OrderItem.builder()
                     .mainImageId(mainImageId)
                     .order(order)
+                    .priceAtPurchase(cart.getItemOption().getItemPrice().getPriceNow())
+                    .quantity(cart.getQuantity())
+                    .itemOption(cart.getItemOption())
                     .item(cart.getItem())
+                    .seller(cart.getItem().getSeller())
+                    .orderDelivery(orderDelivery)
                     .build();
+
             orderItemRepository.save(orderItem);
 
             cartRepository.delete(cart);
         }
 
-        //재고 관리하기
+        //재고 관리
         for (Cart cart : carts) {
-            cart.getItem().stockMinusQuantity(cart.getQuantity());
+            final ItemStock itemStock = cart.getItemOption().getItemStock();
+            final Integer stockMinusQuantity = itemStock.stockMinusQuantity(cart.getQuantity());
 
-            if (cart.getItem().getStock() == 0) {
+            //재고 변경 기록 저장
+            ItemStockHistory itemStockHistory = ItemStockHistory.builder()
+                    .itemStock(itemStock)
+                    .stock(stockMinusQuantity)
+                    .stockChangedDate(LocalDateTime.now())
+                    .build();
+            itemStockHistoryRepository.save(itemStockHistory);
+
+            if (cart.getItemOption().getItemStock().getStock() == 0) {
                 //품절일때 로직 작성
                 //seller에게 메시지 보내기
             }
@@ -119,19 +158,21 @@ public class PaymentService {
     }
 
     public PaymentResponse paymentRecordGenerateBeforePg(final PaymentRequest paymentRequest, final User user) {
-        List<Cart> carts = cartRepository.findByUser(user)
+        List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user)
                 .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
         String merchantUid = merchantUidGenerator.generateMerchantUid();
 
         long totalQuantity = carts.stream().mapToLong(Cart::getQuantity).sum();
-        String mostExpensiveOne = carts.stream().map(Cart::getItem).max(Comparator.comparingLong(Item::getPrice)).map(Item::getName)
+        Long mostExpensiveOnePriceId = carts.stream().map(Cart::getItemOption).map(ItemOption::getItemPrice).max(Comparator.comparingLong(ItemPrice::getPriceNow)).map(ItemPrice::getId)
                 .orElseThrow(()-> new ItemNotFoundException("상품이 존재하지 않습니다"));
+        String mostExpensiveOne = itemOptionRepository.findByItemPriceId(mostExpensiveOnePriceId).getItem().getName();
+
         String name = totalQuantity == 1 ? mostExpensiveOne : mostExpensiveOne + " 외 " + (totalQuantity - 1) + "건";
 
         long amount = 0;
 
         for (Cart cart : carts) {
-            amount += (long) cart.getItem().getPrice() * cart.getQuantity();
+            amount += (long) cart.getItemOption().getItemPrice().getPriceNow() * cart.getQuantity();
         }
         //유효성 검사 로직 더 작성할 것.
 

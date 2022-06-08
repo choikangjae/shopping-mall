@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.browse_history.BrowseHistoryRepository;
 import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
@@ -41,6 +42,7 @@ public class MeService {
     private final ItemRepository itemRepository;
     private final FileHandler fileHandler;
     private final ImageRepository imageRepository;
+    private final BrowseHistoryRepository browseHistoryRepository;
 
     public Boolean passwordCheck(String password, User user) {
 
@@ -131,29 +133,29 @@ public class MeService {
         userRepository.delete(user);
     }
 
-    public List<ItemResponse> getAllMeZzim(User user) {
-        List<Zzim> zzims = zzimRepository.findByUser(user).orElseThrow(() -> new ItemNotFoundException("아이디에 상품이 없습니다"));
-        List<ItemResponse> itemResponses = new ArrayList<>();
-
-        for (Zzim zzim : zzims) {
-            if (!zzim.getIsZzimed()) {
-                continue;
-            }
-            Item item = itemRepository.findById(zzim.getItem().getId())
-                    .orElseThrow(() -> new ItemNotFoundException("상품이 없습니다"));
-
-            itemResponses.add(ItemResponse.builder()
-                    .id(item.getId())
-                    .name(item.getName())
-                    .zzim(item.getZzim())
-                    .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
-                    .priceNow(item.getPrice())
-                    .originalPrice(item.getSalePrice())
-                            .isZzimed(zzim.getIsZzimed())
-                    .build());
-        }
-        return itemResponses;
-    }
+//    public List<ItemResponse> getAllMeZzim(User user) {
+//        List<Zzim> zzims = zzimRepository.findByUser(user).orElseThrow(() -> new ItemNotFoundException("아이디에 상품이 없습니다"));
+//        List<ItemResponse> itemResponses = new ArrayList<>();
+//
+//        for (Zzim zzim : zzims) {
+//            if (!zzim.getIsZzimed()) {
+//                continue;
+//            }
+//            Item item = itemRepository.findById(zzim.getItem().getId())
+//                    .orElseThrow(() -> new ItemNotFoundException("상품이 없습니다"));
+//
+//            itemResponses.add(ItemResponse.builder()
+//                    .itemId(item.getId())
+//                    .name(item.getName())
+//                    .zzim(item.getZzim())
+//                    .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
+//                    .priceNow(item.getPrice())
+//                    .originalPrice(item.getSalePrice())
+//                            .isZzimed(zzim.getIsZzimed())
+//                    .build());
+//        }
+//        return itemResponses;
+//    }
 
     public void duplicationCheck(final String phoneNumber) {
         final PhoneNumber splitPhoneNumber = splitPhoneNumber(phoneNumber);
@@ -164,4 +166,11 @@ public class MeService {
             throw new AlreadyExistsException("이미 해당 번호가 존재합니다");
         }
     }
+
+    public boolean userAgreeCheck(final User user) {
+        final User userTemp = userRepository.findById(user.getId())
+                .orElseThrow(() -> new UserNotFoundException("이용자가 아닙니다"));
+        return userTemp.getAgree().getIsMandatoryAgree() != null && userTemp.getAgree().getIsMandatoryAgree();
+    }
+
 }

@@ -36,6 +36,6 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "payment_id", referencedColumnName = "id", nullable = false)
     private Payment payment;
 
-    private DeliveryStatus deliveryStatus;
+//    private DeliveryStatus deliveryStatus;
 
 }

@@ -8,6 +8,7 @@ import com.jay.shoppingmall.dto.response.cart.CartPriceResponse;
 import com.jay.shoppingmall.dto.response.cart.CartPriceTotalResponse;
 import com.jay.shoppingmall.dto.response.cart.CartResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
+import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -70,5 +71,12 @@ public class CartApiController {
         return ResponseEntity.ok(cartPriceTotalResponse);
     }
     //TODO 카트 전체 선택 구현하기
+    @GetMapping("/select/{boolean}")
+    public ResponseEntity<?> getCartTotals(@PathVariable("boolean") String check, @CurrentUser User user) {
+        System.out.println("check = " + check);
 
+        final CartPriceResponse cartPriceResponse = cartService.cartSelect(check, user);
+
+        return ResponseEntity.ok(cartPriceResponse);
+    }
 }

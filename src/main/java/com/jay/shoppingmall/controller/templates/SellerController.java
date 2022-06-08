@@ -1,12 +1,14 @@
 package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.common.CurrentUser;
+import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
+import com.jay.shoppingmall.service.ItemService;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -28,6 +31,7 @@ import java.util.List;
 public class SellerController {
 
     private final SellerService sellerService;
+    private final ItemService itemService;
 
     @GetMapping
     public String sellerHome() {
@@ -41,11 +45,14 @@ public class SellerController {
         return "seller/seller-start";
     }
     @GetMapping("/write")
-    public String sellerWrite(WriteItemRequest writeItemRequest, Model model, @CurrentUser User user) {
-        if (user != null) {
+    public String sellerWrite(WriteItemRequest writeItemRequest, Model model, @CurrentUser User user, RedirectAttributes redirectAttributes) {
+        if (!sellerService.sellerDefaultSettingCheck(user)) {
+            redirectAttributes.addFlashAttribute("message", "판매자 기본 설정부터 작성해주세요");
+
+            return "redirect:/seller/settings";
+        }
             List<ItemTemporaryResponse> itemTemporaries = sellerService.retrieveItemTemporaries(user);
             model.addAttribute("itemTemporaries", itemTemporaries);
-        }
 
         return "seller/seller-write-item";
     }
@@ -100,7 +107,8 @@ public class SellerController {
     }
     @GetMapping("/items")
     public String sellerItems(@CurrentUser User user, Model model, Pageable pageable) {
-        Page<ItemResponse> itemResponses = sellerService.showItemsBySeller(user, pageable);
+//        Page<ItemResponse> itemResponses = sellerService.showItemsBySeller(user, pageable);
+        final PageDto itemResponses = itemService.showItemsBySeller(user, pageable);
 
         model.addAttribute("items", itemResponses);
 
@@ -114,9 +122,15 @@ public class SellerController {
     }
     @PostMapping("/update/item")
     public String updateItem(@CurrentUser User user, @RequestParam("id") Long itemId) {
-        sellerService.itemDelete(user, itemId);
+//        sellerService.itemDelete(user, itemId);
 
         return "redirect:/seller/items";
+    }
+    @GetMapping("/recent-orders")
+    public String getSellerRecentOrders(@CurrentUser User user, Pageable pageable) {
+        sellerService.getSellerRecentOrders(user, pageable);
+
+        return "seller/seller-recent-orders";
     }
 }
 

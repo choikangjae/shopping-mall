@@ -24,7 +24,7 @@
                     <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/items') ? 'active':''}" th:href="@{/seller/items}" class="nav-link">상품 목록 보기</a>
                 </li>
                 <li class="nav-item">
-                    <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/statistics') ? 'active':''}" th:href="@{/seller/statistics}" class="nav-link">최근 주문 확인</a>
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/recent-orders') ? 'active':''}" th:href="@{/seller/recent-orders}" class="nav-link">최근 주문 확인</a>
                 </li>
              </ul>
         </div>

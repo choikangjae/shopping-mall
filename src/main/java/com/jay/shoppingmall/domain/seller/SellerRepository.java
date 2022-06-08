@@ -8,5 +8,7 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
 
     Optional<Seller> findByUserIdAndIsActivatedTrue(Long userId);
 
+    boolean existsByCompanyName(String companyName);
+
 //    Optional<Seller> findByItemId(Long itemId);
 }

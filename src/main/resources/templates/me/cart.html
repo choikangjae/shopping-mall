@@ -21,15 +21,15 @@
                             </h3>
                             
                             <div>
-                                <button class="btn btn-primary">전체 선택하기</button>
+                                <button id="selectCartAll" class="btn btn-primary">전체 선택</button>
                             </div>
                         </div>
                         <div class="alert alert-danger" role="alert" th:if="${message}">
-                            <span th:text="${message}"></span>
-                            <form action="/me/privacy" method="post">
-                                </br>
-                                <button type="submit" class="btn btn-primary">개인정보 입력하러 가기</button>
-                            </form>
+                            <span classe="mt-3" th:text="${message}"></span>
+                            <!-- <form action="/me/update" method="post">
+                                </br> -->
+                                <button type="button" id="goToUserUpdate" onclick="goToUserUpdate()" class="btn btn-primary">개인정보 입력하러 가기</button>
+                            <!-- </form> -->
                         </div>
 
                         <div class="container text-center" th:if="${#maps.isEmpty(sellerResponseListMap)}">
@@ -49,23 +49,28 @@
                                     <div class="row d-flex justify-content-between align-items-center">
 
                                         <div class="col-md-2 col-lg-2 col-xl-2">
-                                            <input class="form-check-input text-white" type="checkbox" value=""
+                                            <input class="form-check-input isSelected" name="isSelected" type="checkbox" value=""
                                                    th:id="'isSelected' + ${item.cartId}" th:onchange="|cartManipulation('${item.cartId}');|" th:checked="${item.isSelected}">
+
+                                            <a th:href="@{'/item/details/' + ${item.itemId}}" class="text-reset text-decoration-none">
                                             <img class="bd-placeholder-img card-img-top" width="100%" height="100"
                                                  th:src="'data:image/jpeg;base64,'+${item.image}"
                                                  alt="..."/>
+                                            </a>
+                                                 
                                         </div>
                                         <div class="col-md-3 col-lg-3 col-xl-3">
                                             <a th:href="@{'/item/details/' + ${item.itemId}}"
                                                 class="text-reset text-decoration-none">
                                                 <p class="lead fw-normal mb-2" th:text="${item.name}">이름</p>
-                                            </a>
+                                            
                                             <input type="hidden" th:value="${item.optionId}">
                                             <p><span class="text-muted">옵션1: </span>
                                                 <span th:text="${item.option1}"></span>
                                                 <span class="text-muted">옵션2:</span>
                                                 <span th:text="${item.option2}"></span>
                                             </p>
+                                            </a>
                                         </div>
                                         <div class="col-2">
                                             <h5 class="mb-0" th:id="'eachPrice' + ${item.itemId}"
@@ -135,8 +140,8 @@
 
                         </th:block>
 
-                        <!-- 전체 상품 총합 -->
-                        <span>전체</span>
+                        <!-- 선택 상품 총합 -->
+                        <span>선택 상품</span>
                         <span class="badge bg-primary rounded-pill">
                             <span th:id="cartTotalQuantity"></span>
                         </span>
@@ -172,9 +177,7 @@
                             <div class="card-body">
 
                                     <a type="button" th:href="@{/order/process}"
-                                    class="btn btn-warning btn-block btn-lg" id="orderAll">전체 주문하기</a>
-                                    <a type="button" th:href="@{/order/process}"
-                                    class="btn btn-warning btn-block btn-lg" id="orderSelected">선택 상품만 주문하기</a>
+                                    class="btn btn-warning btn-block btn-lg" id="checkOut">주문하기</a>
                             </div>
                         </div>
 
@@ -183,7 +186,20 @@
             </div>
         </section>
         <script>
+
+            function goToUserUpdate() {
+                let agreeCheck = '[[${user.getAgree().getIsMandatoryAgree()}]]';
+                if (!agreeCheck) {
+                    window.location.replace(baseUrl + 'me/privacy');
+                } else {
+                    window.location.replace(baseUrl + 'me/update');
+                }
+            }
+
+
             window.addEventListener('load', () => {
+                selectCartCheck();
+
                 const onSuccess = res => {
                     res.json()
                         .then(data => {
@@ -217,6 +233,100 @@
 
             })
 
+            function selectCartCheck() {
+                let booleanArray = document.getElementsByClassName('isSelected');
+                let isAllSelected = true;
+                for (let i = 0; i < booleanArray.length; i++) {
+                    if (!booleanArray[i].checked) {
+                        isAllSelected = false;
+                        break;
+                    }
+                }
+                if (isAllSelected) {
+                    document.getElementById('selectCartAll').textContent = '전체 선택 해제';
+                } else {
+                    document.getElementById('selectCartAll').textContent = '전체 선택';
+                }
+            }
+
+            document.getElementById('selectCartAll').addEventListener('click', () => {
+
+
+                const onSuccess = res => {
+                    res.json()
+                        .then(data => {
+                            let cartPricePerSellerResponseArray = data.cartPricePerSellerResponses;
+                            for (let i = 0; i < cartPricePerSellerResponseArray.length; i++) {
+                                let itemPerSeller = cartPricePerSellerResponseArray[i];
+
+                                let sellerId = itemPerSeller.sellerId;
+
+                                itemTotalPricePerSeller = itemPerSeller.itemTotalPricePerSeller;
+                                document.getElementById('itemTotalPricePerSeller' + sellerId).textContent = itemTotalPricePerSeller.toLocaleString();
+                                itemShippingFeePerSeller = itemPerSeller.itemShippingFeePerSeller;
+                                document.getElementById('shippingFee' + sellerId).textContent = itemShippingFeePerSeller.toLocaleString();
+                                document.getElementById('itemTotalPricePerSellerWithShippingFee' + sellerId).textContent = 
+                                (parseInt(itemTotalPricePerSeller) + parseInt(itemShippingFeePerSeller)).toLocaleString();
+                                sellerTotalQuantity = itemPerSeller.itemTotalQuantityPerSeller;
+                                document.getElementById('sellerTotalQuantity' + sellerId).textContent = sellerTotalQuantity.toLocaleString();
+                            }
+
+                            cartTotalPrice = data.cartPriceTotalResponse.cartTotalPrice;
+                            document.getElementById('cartTotalPrice').textContent = cartTotalPrice.toLocaleString();
+                            cartTotalShippingFee = data.cartPriceTotalResponse.cartTotalShippingFee;
+                            document.getElementById('cartTotalShippingFee').textContent = cartTotalShippingFee.toLocaleString();
+                            document.getElementById('cartTotalPriceWithShippingFee').textContent = 
+                            (parseInt(cartTotalPrice) + parseInt(cartTotalShippingFee)).toLocaleString();
+                            cartTotalQuantity = data.cartPriceTotalResponse.cartTotalQuantity;
+                            document.getElementById('cartTotalQuantity').textContent = cartTotalQuantity.toLocaleString();
+
+                            if (document.getElementById('selectCartAll').textContent == '전체 선택') {
+                                document.getElementById('selectCartAll').textContent = '전체 선택 해제';
+                                let booleanArray = document.getElementsByClassName('isSelected');
+                                    for (let i = 0; i < booleanArray.length; i++) {
+                                        booleanArray[i].checked = true;
+                                    }
+                            } else {
+                                document.getElementById('selectCartAll').textContent = '전체 선택';
+                                let booleanArray = document.getElementsByClassName('isSelected');
+                                    for (let i = 0; i < booleanArray.length; i++) {
+                                        booleanArray[i].checked = false;
+                                    }
+                            }
+                        });
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                if (document.getElementById('selectCartAll').textContent == '전체 선택') {
+                    fetch(`/api/v1/cart/select/` + 'true')
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+                } else {
+                    fetch(`/api/v1/cart/select/` + 'false')
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+                }
+                console.log(response);
+            })
+            
             function cartManipulation(cartId) {
 
                 const cartQuantity = document.getElementById('quantity' + cartId).value;
@@ -278,7 +388,7 @@
                     });
             }
 
-            document.getElementById('orderAll').addEventListener('click', (e) => {
+            document.getElementById('checkOut').addEventListener('click', (e) => {
                 if (document.getElementById('cartTotalQuantity').textContent == 0) {
                     alert('선택된 상품이 없습니다')
                     e.preventDefault();
@@ -338,56 +448,7 @@
                     .catch(err => {
                         alert(err.message);
                     });
-            }
-
-            // function updateItem(itemId, optionId) {
-
-            //     const quantity = document.getElementById('quantity' + itemId).value;
-            //     let totalPrice = document.getElementById('totalPrice').textContent;
-            //     totalPrice = parseInt(totalPrice.replace(/,/g, ""));
-            //     let totalQuantity = document.getElementById('totalQuantity').textContent;
-            //     totalQuantity = parseInt(totalQuantity.replace(/,/g, ""));
-
-            //     let data = {
-            //         method: 'POST',
-            //         body: JSON.stringify({
-            //             itemId,
-            //             optionId,
-            //             quantity,
-            //             totalPrice,
-            //             totalQuantity
-            //         }),
-            //         headers: {
-            //             'Content-Type': 'application/json'
-            //         }
-            //     };
-            //     const onSuccess = res => {
-            //         res.json()
-            //             .then(data => {
-            //                 document.getElementById('totalPrice').innerHTML = data.totalPrice.toLocaleString();
-            //                 document.getElementById('multipliedPrice' + id).innerHTML = data.multipliedPrice.toLocaleString();
-            //                 document.getElementById('totalProductPrice').textContent = data.totalPrice.toLocaleString();
-            //                 document.getElementById('totalQuantity').textContent = data.totalQuantity.toLocaleString();
-            //                 document.getElementById('cartAmount').textContent = data.totalQuantity.toLocaleString();
-            //             });
-            //     };
-            //     const onFailure = res => {
-            //         return res.json().then(json => alert(json.message));
-            //     };
-
-            //     fetch(`/api/v1/cart/update`, data)
-            //         .then(res => {
-            //             if (!res.ok) {
-            //                 throw res;
-            //             }
-            //             return res
-            //         })
-            //         .then(onSuccess, onFailure)
-            //         .catch(err => {
-            //             alert(err.message);
-            //         });
-            // }
-        
+            }        
         </script>
     </div>
     <!--End of Content-->

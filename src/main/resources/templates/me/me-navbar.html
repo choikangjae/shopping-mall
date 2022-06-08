@@ -30,6 +30,9 @@
                     <a type="button" th:classappend="${#request.requestURI.startsWith('/me/reviews') ? 'active':''}" th:href="@{/me/reviews}" class="nav-link">나의 리뷰</a>
                 </li>
                 <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/me/browse-history') ? 'active':''}" th:href="@{/me/browse-history}" class="nav-link">상품 조회 내역</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" th:classappend="${#request.requestURI.startsWith('/me/delete') ? 'active':''}" th:href="@{/me/delete}">회원탈퇴</a>
                 </li>
 

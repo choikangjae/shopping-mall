@@ -1,5 +1,8 @@
 package com.jay.shoppingmall.controller.templates;
 
+import com.jay.shoppingmall.common.CurrentUser;
+import com.jay.shoppingmall.domain.model.page.PageDto;
+import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +24,11 @@ public class SearchController {
     private final ItemService itemService;
 
     @GetMapping
-    public String searchByKeyword(@RequestParam(value = "q", required = false) String keyword, Model model, Pageable pageable) {
+    public String searchByKeyword(@RequestParam(value = "q", required = false) String keyword, Model model, Pageable pageable, @CurrentUser User user) {
         if (keyword == null || keyword.equals("")) {
             return "redirect:/";
         }
-        final Page<ItemResponse> itemResponses = itemService.searchItemsByKeyword(keyword, pageable);
+        final PageDto itemResponses = itemService.searchItemsByKeyword(keyword, user, pageable);
         model.addAttribute("items", itemResponses);
         model.addAttribute("result", keyword);
         return "/item/search-result";

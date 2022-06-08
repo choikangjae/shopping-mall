@@ -103,6 +103,9 @@ public class CartService {
             sellerResponse.setShippingFee(shippingFeeCheck(seller.getId(), itemTotalPricePerSeller));
             sellerResponse.updateTotal(itemTotalPricePerSeller, itemTotalQuantityPerSeller);
 
+//            if (itemTotalPricePerSeller == 0) {
+//                sellerResponse.setShippingFee(0);
+//            }
             sellerResponseListMap.put(sellerResponse, itemAndQuantityResponses);
         }
         return sellerResponseListMap;
@@ -211,6 +214,7 @@ public class CartService {
     public CartPriceResponse changeQuantity(final CartManipulationRequest request, final User user) {
         final Cart cart = cartRepository.findById(request.getCartId())
                 .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
+
         cart.setIsSelected(request.getIsSelected());
 
         final long cartManipulatedPrice = cart.manipulateQuantity(request.getCartQuantity()) * cart.getItemOption().getItemPrice().getPriceNow();
@@ -220,6 +224,22 @@ public class CartService {
         return CartPriceResponse.builder()
                 .cartManipulatedPrice(cartManipulatedPrice)
                 .cartPricePerSellerResponse(cartPricePerSellerResponse)
+                .cartPriceTotalResponse(cartPriceTotalResponse)
+                .build();
+    }
+    public CartPriceResponse cartSelect(final String check, final User user) {
+        List<Cart> carts = cartRepository.findByUser(user)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
+        List<CartPricePerSellerResponse> cartPricePerSellerResponses = new ArrayList<>();
+
+        for (Cart cart : carts) {
+            cart.setIsSelected(check.equals("true"));
+            cartPricePerSellerResponses.add(cartPricePerSeller(user, cart.getItem().getSeller()));
+        }
+        final CartPriceTotalResponse cartPriceTotalResponse = cartPriceTotal(user);
+
+        return CartPriceResponse.builder()
+                .cartPricePerSellerResponses(cartPricePerSellerResponses)
                 .cartPriceTotalResponse(cartPriceTotalResponse)
                 .build();
     }
@@ -284,5 +304,4 @@ public class CartService {
             return seller.getShippingFeeDefault();
         }
     }
-
 }
