@@ -5,6 +5,7 @@ import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
+import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
@@ -127,9 +128,10 @@ public class SellerController {
         return "redirect:/seller/items";
     }
     @GetMapping("/recent-orders")
-    public String getSellerRecentOrders(@CurrentUser User user, Pageable pageable) {
-        sellerService.getSellerRecentOrders(user, pageable);
+    public String getSellerRecentOrders(@CurrentUser User user, Pageable pageable, Model model) {
+        final List<RecentPaymentPerSellerResponse> recentOrders = sellerService.getSellerRecentOrders(user, pageable);
 
+        model.addAttribute("recentOrders", recentOrders);
         return "seller/seller-recent-orders";
     }
 }

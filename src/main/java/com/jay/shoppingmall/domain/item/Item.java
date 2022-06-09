@@ -45,8 +45,8 @@ public class Item extends BaseTimeEntity {
     @JoinColumn(name = "image_id")
     private Image image;
 
-    @OneToMany(mappedBy = "item")
-    private List<ItemOption> itemOptions = new ArrayList<>();
+//    @OneToMany(mappedBy = "item")
+//    private List<ItemOption> itemOptions = new ArrayList<>();
 
     @Column(columnDefinition = "boolean default 0")
     private Boolean isDeleted = false;

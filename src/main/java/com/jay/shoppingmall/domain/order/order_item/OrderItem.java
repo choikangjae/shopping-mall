@@ -6,6 +6,7 @@ import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.order.order_item.order_delivery.OrderDelivery;
+import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.seller.Seller;
 import lombok.*;
 

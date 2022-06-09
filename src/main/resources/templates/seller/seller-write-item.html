@@ -24,15 +24,15 @@
 
                     <div class="mb-5">
                         <label for="itemName" class="form-label">상품명 <strong class="text-info">(필수)</strong></label>
-                        <input th:field="*{name}" type="text" class="form-control" id="itemName"
+                        <input th:field="*{itemName}" type="text" class="form-control" id="itemName"
                             aria-describedby="itemHelp" required>
                         <div id="itemHelp" class="form-text">상품명을 적어주세요.</div>
                     </div>
 
                     <div class="mb-5">
-                        <label for="itemBrandName" class="form-label">브랜드명 <strong class="text-info">(필수)</strong></label>
-                        <input type="text" class="form-control" id="itemBrandName"
-                               aria-describedby="itemHelp" required>
+                        <label for="itemBrandName" class="form-label">브랜드명 <strong
+                                class="text-info">(필수)</strong></label>
+                        <input type="text" class="form-control" id="itemBrandName" aria-describedby="itemHelp" required>
                         <div id="itemBrandNameHelp" class="form-text">상품의 브랜드명을 적어주세요.</div>
                     </div>
 
@@ -221,74 +221,160 @@
             </div>
         </div>
         <script>
+            let semaphore = 1;
+            document.getElementById('oneItemSubmit').addEventListener('click', (e) => {
+                e.preventDefault();
+
+                semaphore = semaphore - 1;
+
+                if (semaphore == 0) {
+
+                    let salePrice = document.getElementById('salePrice').value;
+                    let originalPrice = document.getElementById('originalPrice').value;
+                    let stock = document.getElementById('stock').value;
+                    let itemName = document.getElementById('itemName').value;
+                    let itemBrandName = document.getElementById('itemBrandName').value;
+                    let description = document.getElementById('description').value;
+                    let mainImage = document.getElementById('mainImage').files[0];
+
+                    let descriptionImageLength = document.getElementById('descriptionImage').files.length;
+                    if (descriptionImageLength > 5) {
+                        alert('상품 이미지는 최대 5개까지만 가능합니다');
+                        return false;
+                    }
+
+                    let formData = new FormData();
+
+                    for (let i = 0; i < descriptionImageLength; i++) {
+                        formData.append("descriptionImage", document.getElementById('descriptionImage').files[i]);
+                    }
+
+                    formData.append('mainImage', mainImage);
+                    formData.append('writeItemRequest', new Blob([JSON.stringify({
+                        itemName,
+                        itemBrandName,
+                        description,
+                        salePrice,
+                        originalPrice,
+                        stock
+                    })], {
+                        type: "application/json"
+                    }));
+
+                    let data = {
+                        method: 'POST',
+                        body: formData
+                    };
+
+                    const onSuccess = res => {
+                        res.json()
+                            .then((data) => {
+                                alert('상품 등록이 완료되었습니다');
+                                window.location.replace(baseUrl + 'item/details/' + data);
+                            })
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
+                    fetch(`/api/v1/seller/write-no-option`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            alert(err.message);
+                        });
+                }
+                semaphore = semaphore + 1;
+            })
+
             document.getElementById('optionItemSubmit').addEventListener('click', (e) => {
                 e.preventDefault();
 
-                //대표로 선택된 상품의 세부 옵션.
-                let option2Value = document.querySelector('.border-primary').firstElementChild.firstElementChild.nextElementSibling.firstElementChild.textContent;
+                semaphore = semaphore - 1;
 
-                let mainOptionTrue = optionArray.find(el => 
-                    el.option2 === option2Value);
-                // if (!mainOptionTrue) {
-                //     alert('대표 상품을 선택해주세요');
-                //     return false;
-                // }
-                mainOptionTrue.isOptionMainItem = true;
+                if (semaphore == 0) {
 
-                let itemName = document.getElementById('itemName').value;
-                let itemBrandName = document.getElementById('itemBrandName').value;
-                let description = document.getElementById('description').value;
-                let mainImage = document.getElementById('mainImage').files[0];
-                let descriptionImage = document.getElementById('descriptionImage').files;
+                    //대표로 선택된 상품의 세부 옵션.
+                    let option2Value = document.querySelector('.border-primary').firstElementChild.firstElementChild.nextElementSibling.firstElementChild.textContent;
 
-                let formData = new FormData();
+                    let mainOptionTrue = optionArray.find(el =>
+                        el.option2 === option2Value);
+                    // if (!mainOptionTrue) {
+                    //     alert('대표 상품을 선택해주세요');
+                    //     return false;
+                    // }
+                    mainOptionTrue.isOptionMainItem = true;
 
-                formData.append('mainImage', mainImage);
-                formData.append('descriptionImage', descriptionImage);
-                formData.append('apiWriteItemRequest', new Blob([JSON.stringify({
-                    itemName,
-                    itemBrandName,
-                    description,
-                    optionArray
-                })], {
-                    type: "application/json"
-                }));
+                    let itemName = document.getElementById('itemName').value;
+                    let itemBrandName = document.getElementById('itemBrandName').value;
+                    let description = document.getElementById('description').value;
+                    let mainImage = document.getElementById('mainImage').files[0];
 
-                let data = {
-                    method: 'POST',
-                    body: formData
-                };
+                    let descriptionImageLength = document.getElementById('descriptionImage').files.length;
+                    if (descriptionImageLength > 5) {
+                        alert('상품 이미지는 최대 5개까지만 가능합니다');
+                        return false;
+                    }
 
-                const onSuccess = res => {
-                    res.json()
-                    .then((data) => {
-                        alert('상품 등록이 완료되었습니다');
-                        window.location.replace(baseUrl + 'item/details/' + data);
-                    })
+                    let formData = new FormData();
+
+                    for (var i = 0; i < descriptionImageLength; i++) {
+                        formData.append("descriptionImage", document.getElementById('descriptionImage').files[i]);
+                    }
+
+                    formData.append('mainImage', mainImage);
+                    formData.append('apiWriteItemRequest', new Blob([JSON.stringify({
+                        itemName,
+                        itemBrandName,
+                        description,
+                        optionArray
+                    })], {
+                        type: "application/json"
+                    }));
+
+                    let data = {
+                        method: 'POST',
+                        body: formData
+                    };
+
+                    const onSuccess = res => {
+                        res.json()
+                            .then((data) => {
+                                alert('상품 등록이 완료되었습니다');
+                                window.location.replace(baseUrl + 'item/details/' + data);
+                            })
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
+                    fetch(`/api/v1/seller/write`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            alert(err.message);
+                        });
                 }
-                const onFailure = res => {
-                    return res.json().then(json => alert(json.message));
-                }
-
-                fetch(`/api/v1/seller/write`, data)
-                    .then(res => {
-                        if (!res.ok) {
-                            throw res;
-                        }
-                        return res
-                    })
-                    .then(onSuccess, onFailure)
-                    .catch(err => {
-                        alert(err.message);
-                    });
+                semaphore = semaphore + 1;
             })
 
             function removeOption() {
                 document.getElementById(this.id).parentNode.parentNode.parentNode.parentNode.removeChild(document.getElementById(this.id).parentNode.parentNode.parentNode);
-               
+
                 let number = optionArray.findIndex(el => {
-                    el.identifier == this.id});
-                optionArray.splice(number,1);
+                    el.identifier == this.id
+                });
+                optionArray.splice(number, 1);
                 document.getElementById('optionArray').value = optionArray;
             }
 
@@ -320,7 +406,7 @@
             let optionArray = new Array();
             let index = 0;
             document.getElementById('optionAddButton').addEventListener('click', () => {
-                
+
                 let option1 = document.getElementById('option1').value.trim();
                 let option2 = document.getElementById('option2').value.trim();
                 let optionSalePrice = document.getElementById('optionSalePrice').value.trim();
@@ -330,7 +416,7 @@
 
                 option1 = regExp(option1);
                 option2 = regExp(option2);
-                
+
 
                 if (optionArray.find(el => el.option2 === option2)) {
                     alert('세부 옵션은 중복될 수 없습니다');
@@ -371,7 +457,7 @@
                 document.getElementById('optionValueStock' + index).textContent = optionStock;
                 document.getElementById('optionRemove' + index).onclick = removeOption;
                 document.getElementById('optionMainItem' + index).onclick = optionMainItemToggle;
-                
+
                 if (!optionArray.length) {
                     document.getElementById('optionMainItem' + index).classList.toggle("border");
                     document.getElementById('optionMainItem' + index).classList.toggle("border-2");
@@ -408,7 +494,7 @@
             }
 
             function optionMainItemToggle() {
-                
+
                 let el = document.querySelector('.border-primary');
                 if (el) {
                     el.firstElementChild.firstElementChild.checked = false;

@@ -109,5 +109,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
-
+    @ExceptionHandler(NotValidException.class)
+    public ResponseEntity<?> handleNotValidException(NotValidException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("NOT_VALID")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
 }

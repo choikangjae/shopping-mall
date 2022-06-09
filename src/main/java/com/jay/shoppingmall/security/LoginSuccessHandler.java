@@ -3,6 +3,7 @@ package com.jay.shoppingmall.security;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,6 +29,7 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@Slf4j
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private String username;
     private String defaultUrl;
@@ -41,7 +43,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(final HttpServletRequest request,
                                         final HttpServletResponse response,
                                         final Authentication authentication) throws IOException, ServletException {
-
 //        String requestUsername = request.getParameter(username);
         clearAuthenticationExceptions(request);
         resultRedirectStrategy(request, response, authentication);

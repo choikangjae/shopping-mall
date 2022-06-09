@@ -8,6 +8,7 @@ import com.jay.shoppingmall.dto.response.cart.CartPriceResponse;
 import com.jay.shoppingmall.dto.response.cart.CartPriceTotalResponse;
 import com.jay.shoppingmall.dto.response.cart.CartResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
+import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.CartService;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +45,11 @@ public class CartApiController {
             HttpSession session,
             @CurrentUser User user) {
 
-        @SuppressWarnings("unchecked")
+//        @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
+        if (itemOptions == null) {
+            throw new ItemNotFoundException("옵션을 선택해주세요");
+        }
         cartService.addItemOptionsToCart(itemOptions, user);
 
         return ResponseEntity.ok().body(null);
@@ -70,7 +74,6 @@ public class CartApiController {
 
         return ResponseEntity.ok(cartPriceTotalResponse);
     }
-    //TODO 카트 전체 선택 구현하기
     @GetMapping("/select/{boolean}")
     public ResponseEntity<?> getCartTotals(@PathVariable("boolean") String check, @CurrentUser User user) {
         System.out.println("check = " + check);

@@ -21,7 +21,9 @@ import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporaryRepository;
 import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.order.order_item.OrderItemRepository;
-import com.jay.shoppingmall.domain.payment.model.ReceiverInfo;
+import com.jay.shoppingmall.domain.payment.Payment;
+import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
+import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
@@ -31,7 +33,9 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.dto.request.*;
-import com.jay.shoppingmall.dto.response.seller.RecentOrdersForSellerResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentPerSellerResponse;
+import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
+import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerSimpleResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
@@ -45,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -69,6 +74,9 @@ public class SellerService {
     private final ItemStockHistoryRepository itemStockHistoryRepository;
     private final ItemPriceHistoryRepository itemPriceHistoryRepository;
     private final OrderItemRepository orderItemRepository;
+    private final PaymentPerSellerRepository paymentPerSellerRepository;
+
+    private final PaymentService paymentService;
 
     public Page<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -79,45 +87,61 @@ public class SellerService {
                         .itemId(item.getId())
                         .name(item.getName())
                         .zzim(item.getZzim())
-                        .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
+                        .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, item.getId())))
                         .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
                         .build());
 
     }
 
     public Long writeItem(WriteItemRequest writeItemRequest, final MultipartFile file, final List<MultipartFile> files, final User user) {
-        User userForId = userRepository.findById(user.getId())
-                        .orElseThrow(() -> new UserNotFoundException("유저가 없습니다"));
-        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(userForId.getId())
-                        .orElseThrow(() -> new SellerNotFoundException("판매자 자격이 없습니다"));
+        final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
         Item item = Item.builder()
-                .name(writeItemRequest.getName())
+                .name(writeItemRequest.getItemName())
                 .description(writeItemRequest.getDescription())
-//                .price(writeItemRequest.getOriginalPrice())
-//                .stock(writeItemRequest.getStock())
+                .brandName(writeItemRequest.getItemBrandName())
                 .seller(seller)
                 .build();
+        final Long savedItem = itemRepository.save(item).getId();
 
         Image mainImage = fileHandler.parseFilesInfo(file, ImageRelation.ITEM_MAIN, item.getId());
         imageRepository.save(mainImage);
 
         //MultiPartFile은 input이 없을때 ''으로 들어오므로 아래와 같이 확인.
-        if (!files.get(0).isEmpty()) {
+//        if (!files.get(0).isEmpty()) {
+//            for (MultipartFile multipartFile : files) {
+//                imageRepository.save(fileHandler.parseFilesInfo(multipartFile, ImageRelation.ITEM_DESCRIPTION, item.getId()));
+//            }
+//        }
+        if (files != null) {
             for (MultipartFile multipartFile : files) {
                 imageRepository.save(fileHandler.parseFilesInfo(multipartFile, ImageRelation.ITEM_DESCRIPTION, item.getId()));
             }
         }
 
-        return itemRepository.save(item).getId();
+        ItemPrice itemPrice = getItemPrice(writeItemRequest.getSalePrice(), writeItemRequest.getOriginalPrice());
+
+        ItemStock itemStock = getItemStock(writeItemRequest.getStock());
+
+        ItemOption itemOption = ItemOption.builder()
+                .option1("옵션없음")
+                .option2("옵션없음")
+                .isOptionMainItem(true)
+                .itemStock(itemStock)
+                .itemPrice(itemPrice)
+                .item(item)
+                .build();
+        itemOptionRepository.save(itemOption);
+
+        return savedItem;
     }
 
-    //상품명, 설명 Item // 사진, 부가사진, Image// 여러개의 옵션들과 가격 재고 ItemOption이 가격과 재고를 들고있음. 가격변동까지.
     //상품이 삭제되더라도 Image의 썸네일은 남아있어 썸네일로 접근하면 됨?
     public Long writeOptionItem(final ApiWriteItemRequest apiWriteItemRequest, final List<OptionValue> optionValues, final MultipartFile file, final List<MultipartFile> files, final User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
-        
+
         Item item = Item.builder()
                 .description(apiWriteItemRequest.getDescription())
                 .brandName(apiWriteItemRequest.getItemBrandName())
@@ -138,28 +162,13 @@ public class SellerService {
         }
 
         for (OptionValue optionValue : optionValues) {
-            ItemPrice itemPrice = ItemPrice.builder()
-                    .priceNow(optionValue.getOptionSalePrice())
-                    .originalPrice(optionValue.getOptionOriginalPrice() == null ? optionValue.getOptionSalePrice() : optionValue.getOptionOriginalPrice())
-                    .build();
-            itemPriceRepository.save(itemPrice);
-            ItemPriceHistory itemPriceHistory = ItemPriceHistory.builder()
-                    .itemPrice(itemPrice)
-                    .price(itemPrice.getPriceNow())
-                    .priceUpdateDate(LocalDateTime.now())
-                    .build();
-            itemPriceHistoryRepository.save(itemPriceHistory);
+            final Long salePrice = optionValue.getOptionSalePrice();
+            final Long optionOriginalPrice = optionValue.getOptionOriginalPrice();
+            final Integer optionStock = optionValue.getOptionStock();
 
-            ItemStock itemStock = ItemStock.builder()
-                    .stock(optionValue.getOptionStock())
-                    .build();
-            itemStockRepository.save(itemStock);
-            ItemStockHistory itemStockHistory = ItemStockHistory.builder()
-                    .itemStock(itemStock)
-                    .stock(itemStock.getStock())
-                    .stockChangedDate(LocalDateTime.now())
-                    .build();
-            itemStockHistoryRepository.save(itemStockHistory);
+            ItemPrice itemPrice = getItemPrice(salePrice, optionOriginalPrice);
+
+            ItemStock itemStock = getItemStock(optionStock);
 
             ItemOption itemOption = ItemOption.builder()
                     .option1(optionValue.getOption1())
@@ -172,6 +181,35 @@ public class SellerService {
             itemOptionRepository.save(itemOption);
         }
         return savedItem.getId();
+    }
+
+    private ItemStock getItemStock(final Integer stock) {
+        ItemStock itemStock = ItemStock.builder()
+                .stock(stock)
+                .build();
+        itemStockRepository.save(itemStock);
+        ItemStockHistory itemStockHistory = ItemStockHistory.builder()
+                .itemStock(itemStock)
+                .stock(itemStock.getStock())
+                .stockChangedDate(LocalDateTime.now())
+                .build();
+        itemStockHistoryRepository.save(itemStockHistory);
+        return itemStock;
+    }
+
+    private ItemPrice getItemPrice(final Long salePrice, final Long originalPrice) {
+        ItemPrice itemPrice = ItemPrice.builder()
+                .priceNow(salePrice)
+                .originalPrice(originalPrice == null ? salePrice : originalPrice)
+                .build();
+        itemPriceRepository.save(itemPrice);
+        ItemPriceHistory itemPriceHistory = ItemPriceHistory.builder()
+                .itemPrice(itemPrice)
+                .price(itemPrice.getPriceNow())
+                .priceUpdateDate(LocalDateTime.now())
+                .build();
+        itemPriceHistoryRepository.save(itemPriceHistory);
+        return itemPrice;
     }
 
 
@@ -219,10 +257,10 @@ public class SellerService {
 
     public void temporarySave(final WriteItemRequest writeItemRequest, final User user) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
-                        .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
         ItemTemporary itemTemporary = ItemTemporary.builder()
-                .name(writeItemRequest.getName())
+                .name(writeItemRequest.getItemName())
                 .description(writeItemRequest.getDescription())
                 .price(writeItemRequest.getOriginalPrice())
                 .salePrice(writeItemRequest.getSalePrice())
@@ -246,6 +284,7 @@ public class SellerService {
                         .salePrice(itemTemporary.getSalePrice())
                         .build()).collect(Collectors.toList());
     }
+
     public Boolean sellerCheck(final Long itemId, final User user) {
         if (user == null) {
             return false;
@@ -283,7 +322,7 @@ public class SellerService {
                 .zipcode(request.getItemReleaseZipcode())
                 .build();
 
-        if (Objects.equals(request.getItemReturnAddress(), "") || Objects.equals(request.getItemReturnDetailAddress(), "") || Objects.equals(request.getItemReturnZipcode(), "") ) {
+        if (Objects.equals(request.getItemReturnAddress(), "") || Objects.equals(request.getItemReturnDetailAddress(), "") || Objects.equals(request.getItemReturnZipcode(), "")) {
             seller.sellerDefaultUpdate(
                     request.getCompanyName(),
                     itemReleaseAddress,
@@ -341,19 +380,42 @@ public class SellerService {
         return seller.getCompanyName() != null;
     }
 
-    public void getSellerRecentOrders(final User user, Pageable pageable) {
+    //전체 상품 가격, 상품 옵션과 개수, 개별 가격,남은 재고, 결제 정보, 받을 사람 주소 => 주문 상세 조회에서
+    //세부적인 내용만 내려보내기
+    public List<RecentPaymentPerSellerResponse> getSellerRecentOrders(final User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
-        Long itemOrderPriceAtPurchaseTotal = 0L;
-        final List<OrderItem> orderItems = orderItemRepository.findBySellerId(seller.getId(), pageable);
-        //전체 상품 가격, 상품 옵션과 개수, 개별 가격,남은 재고, 결제 정보, 받을 사람 주소 => 주문 상세 조회에서
-        //세부적인 내용만 내려보내기
-        for (OrderItem orderItem : orderItems) {
-            RecentOrdersForSellerResponse.builder().build();
-            orderItem.getQuantity();
 
-            itemOrderPriceAtPurchaseTotal += orderItem.getPriceAtPurchase();
+        final List<PaymentPerSeller> recent20BySeller = paymentPerSellerRepository.findTop20BySellerId(seller.getId());
 
+        List<RecentPaymentPerSellerResponse> recentPaymentPerSellerResponses = new ArrayList<>();
+        //최종 주문 상품 목록을 어디서 조회해야 할까 ??
+        for (PaymentPerSeller paymentPerSeller : recent20BySeller) {
+            final PaymentPerSellerResponse paymentPerSellerResponse = PaymentPerSellerResponse.builder()
+                    .paymentPerSellerId(paymentPerSeller.getId())
+                    .itemShippingFeePerSeller(paymentPerSeller.getItemShippingFeePerSeller())
+                    .itemTotalQuantityPerSeller(paymentPerSeller.getItemTotalQuantityPerSeller())
+                    .itemTotalPricePerSeller(paymentPerSeller.getItemTotalPricePerSeller())
+                    .build();
+            final Payment payment = paymentPerSeller.getPayment();
+
+//            final List<OrderItem> orderItems = paymentPerSeller.getOrder().getOrderItems();
+//            final List<String> itemNames = orderItems.stream().map(OrderItem::getItem).map(Item::getName).collect(Collectors.toList());
+
+            RecentPaymentPerSellerSimpleResponse recentPaymentPerSellerSimpleResponse = RecentPaymentPerSellerSimpleResponse.builder()
+                    .orderDate(paymentPerSeller.getOrder().getCreatedDate())
+                    .pg(payment.getPg())
+                    .payMethod(payment.getPayMethod())
+                    .merchantUid(payment.getMerchantUid())
+//                    .name(itemNames.get(0))
+                    .build();
+
+            RecentPaymentPerSellerResponse recentPaymentPerSellerResponse = RecentPaymentPerSellerResponse.builder()
+                    .recentPaymentPerSellerSimpleResponse(recentPaymentPerSellerSimpleResponse)
+                    .paymentPerSellerResponse(paymentPerSellerResponse)
+                    .build();
+            recentPaymentPerSellerResponses.add(recentPaymentPerSellerResponse);
         }
+        return recentPaymentPerSellerResponses;
     }
 }

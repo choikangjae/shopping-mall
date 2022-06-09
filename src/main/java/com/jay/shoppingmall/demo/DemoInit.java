@@ -5,6 +5,10 @@ import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
+import com.jay.shoppingmall.domain.user.model.Address;
+import com.jay.shoppingmall.domain.user.model.Agree;
+import com.jay.shoppingmall.domain.user.model.Name;
+import com.jay.shoppingmall.domain.user.model.PhoneNumber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -24,53 +28,103 @@ public class DemoInit {
         if (userRepository.findByEmail("demo@user").isPresent()) {
             return false;
 
-//            User user = userRepository.findByEmail("demo@user").get();
-//            userRepository.delete(user);
         }
-        if (userRepository.findByEmail("demo@seller").isPresent()) {
+        if (userRepository.findByEmail("demo@seller").isPresent() || userRepository.findByEmail("demo@seller2").isPresent()) {
             return false;
-
-//            User seller = userRepository.findByEmail("demo@seller").get();
-//            final Seller seller1 = sellerRepository.findByUserIdAndIsActivatedTrue(seller.getId()).get();
-//            sellerRepository.delete(seller1);
-//            userRepository.delete(seller);
 
         }
         if (userRepository.findByEmail("demo@admin").isPresent()) {
             return false;
-//
-//            User admin = userRepository.findByEmail("demo@admin").get();
-//            userRepository.delete(admin);
 
         }
+//        final Agree agree = Agree.builder().isMarketingAgree(true).isMandatoryAgree(true).build();
+//        PhoneNumber phoneNumber = PhoneNumber.builder()
+//                .first("010")
+//                .middle("1234")
+//                .last("1234")
+//                .build();
+//        Name name = Name.builder()
+//                .last("홍")
+//                .first("길동")
+//                .build();
 
         User user = User.builder()
                 .email("demo@user")
                 .password(passwordEncoder.encode("password123"))
                 .role(Role.ROLE_USER)
+//                .address(address)
+//                .name(name)
+//                .phoneNumber(phoneNumber)
+//                .agree(agree)
                 .build();
         User seller = User.builder()
                 .email("demo@seller")
                 .password(passwordEncoder.encode("password123"))
                 .role(Role.ROLE_SELLER)
+//                .address(address)
+//                .name(name)
+//                .phoneNumber(phoneNumber)
+//                .agree(agree)
+                .build();
+        User seller2 = User.builder()
+                .email("demo@seller2")
+                .password(passwordEncoder.encode("password123"))
+                .role(Role.ROLE_SELLER)
+//                .address(address)
+//                .name(name)
+//                .phoneNumber(phoneNumber)
+//                .agree(agree)
                 .build();
         User admin = User.builder()
                 .email("demo@admin")
                 .password(passwordEncoder.encode("specialPassWorD123"))
                 .role(Role.ROLE_ADMIN)
+//                .address(address)
+//                .name(name)
+//                .phoneNumber(phoneNumber)
+//                .agree(agree)
                 .build();
 
         userRepository.save(user);
         userRepository.save(admin);
-        userRepository.saveAndFlush(seller);
+        userRepository.save(seller);
+        userRepository.save(seller2);
+        Address address = Address
+                .builder()
+                .address("경기 성남시 분당구 경부고속도로 409")
+                .detailAddress("집")
+                .zipcode("13473")
+                .build();
 
         Seller seller1 = Seller.builder()
                 .userId(seller.getId())
+                .companyName("판매자 계정1")
+                .defaultDeliveryCompany("CJ")
+                .shippingFeeDefault(2000)
+                .shippingFeeFreePolicy(50000)
+                .returnShippingFeeDefault(2000)
+                .itemReleaseAddress(address)
+                .itemReturnAddress(address)
+                .isSellerAgree(true)
+                .isActivated(true)
+                .isLawAgree(true)
+                .build();
+
+        Seller seller3 = Seller.builder()
+                .userId(seller2.getId())
+                .companyName("판매자 계정2")
+                .defaultDeliveryCompany("대한통운")
+                .shippingFeeDefault(3000)
+                .shippingFeeFreePolicy(30000)
+                .returnShippingFeeDefault(3000)
+                .itemReleaseAddress(address)
+                .itemReturnAddress(address)
                 .isSellerAgree(true)
                 .isActivated(true)
                 .isLawAgree(true)
                 .build();
         sellerRepository.save(seller1);
+        sellerRepository.save(seller3);
         return true;
     }
 }

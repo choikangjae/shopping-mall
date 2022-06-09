@@ -14,6 +14,8 @@ import java.util.Optional;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+//@Builder
+//@AllArgsConstructor
 @Where(clause = "is_deleted = 0")
 public class User extends BaseTimeEntity {
 
@@ -56,7 +58,7 @@ public class User extends BaseTimeEntity {
     }
 
     @Builder
-    public User(String email, String password, Agree agree, Role role) {
+    public User(String email, String password, Role role) {
         this.email = email;
         this.password = password;
         this.role = role;

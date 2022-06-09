@@ -4,11 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
-import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
-import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
@@ -26,13 +24,14 @@ import com.jay.shoppingmall.domain.payment.model.MerchantUidGenerator;
 import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.payment.PaymentRepository;
 import com.jay.shoppingmall.domain.payment.model.ReceiverInfo;
+import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
+import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
-import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
-import com.jay.shoppingmall.dto.response.PaymentResponse;
-import com.jay.shoppingmall.dto.response.PaymentResultResponse;
 import com.jay.shoppingmall.dto.response.cart.CartPricePerSellerResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.PaymentFailedException;
@@ -65,10 +64,11 @@ public class PaymentService {
     private final ItemOptionRepository itemOptionRepository;
     private final OrderDeliveryRepository orderDeliveryRepository;
     private final ItemStockHistoryRepository itemStockHistoryRepository;
+    private final PaymentPerSellerRepository paymentPerSellerRepository;
 
     private final CartService cartService;
 
-    public PaymentResultResponse paymentTotal(String imp_uid, final String merchant_uid, User user) throws IOException {
+    public PaymentDetailResponse paymentTotal(String imp_uid, final String merchant_uid, User user) throws IOException {
         String accessToken = getAccessToken();
 
         System.out.println("token : " + accessToken);
@@ -87,17 +87,36 @@ public class PaymentService {
         //검증 완료
         paymentRecord.isValidatedTrue();
 
-        //판매자에게 오더 알림 구현하기
-        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user)
-                .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
-
         Order order = Order.builder()
                 .user(user)
                 .payment(paymentRecord)
                 .build();
         orderRepository.save(order);
 
+        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user)
+                .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
+
+        final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
+        //판매자별 개별 결제 정보 저장
+        for (Seller seller : sellers) {
+            final CartPricePerSellerResponse cartPricePerSellerResponse = cartService.cartPricePerSeller(user, seller);
+
+            PaymentPerSeller paymentPerSeller = PaymentPerSeller
+                    .builder()
+                    .itemTotalPricePerSeller(cartPricePerSellerResponse.getItemTotalPricePerSeller())
+                    .itemTotalQuantityPerSeller(cartPricePerSellerResponse.getItemTotalQuantityPerSeller())
+                    .itemShippingFeePerSeller(cartPricePerSellerResponse.getItemShippingFeePerSeller())
+                    .seller(seller)
+                    .payment(paymentRecord)
+                    .order(order)
+                    .build();
+
+            paymentPerSellerRepository.save(paymentPerSeller);
+        }
+
+
         //상품 주문 테이블로 정보 옮기고 장바구니 비우기
+        //TODO 상품의 배송 정보는 paymentPerSeller에서 ??
         for (Cart cart : carts) {
             OrderDelivery orderDelivery = OrderDelivery.builder()
                     .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
@@ -143,9 +162,9 @@ public class PaymentService {
         }
 
         //model로 paymentRecord 돌려주기.
-        PaymentResultResponse paymentResultResponse = PaymentResultResponse.builder()
-                .pg(paymentRecord.getPg())
-                .payMethod(paymentRecord.getPayMethod())
+        return PaymentDetailResponse.builder()
+                .pg(paymentRecord.getPg().getName())
+                .payMethod(paymentRecord.getPayMethod().getName())
                 .amount(paymentRecord.getAmount())
                 .buyerAddr(paymentRecord.getBuyerAddr())
                 .buyerEmail(paymentRecord.getBuyerEmail())
@@ -154,7 +173,6 @@ public class PaymentService {
                 .buyerTel(paymentRecord.getBuyerTel())
                 .merchantUid(paymentRecord.getMerchantUid())
                 .build();
-        return paymentResultResponse;
     }
 
     public PaymentResponse paymentRecordGenerateBeforePg(final PaymentRequest paymentRequest, final User user) {
@@ -166,14 +184,21 @@ public class PaymentService {
         Long mostExpensiveOnePriceId = carts.stream().map(Cart::getItemOption).map(ItemOption::getItemPrice).max(Comparator.comparingLong(ItemPrice::getPriceNow)).map(ItemPrice::getId)
                 .orElseThrow(()-> new ItemNotFoundException("상품이 존재하지 않습니다"));
         String mostExpensiveOne = itemOptionRepository.findByItemPriceId(mostExpensiveOnePriceId).getItem().getName();
-
         String name = totalQuantity == 1 ? mostExpensiveOne : mostExpensiveOne + " 외 " + (totalQuantity - 1) + "건";
 
-        long amount = 0;
+        long cartPriceTotal = 0;
+        int shippingFeeTotal = 0;
 
-        for (Cart cart : carts) {
-            amount += (long) cart.getItemOption().getItemPrice().getPriceNow() * cart.getQuantity();
+        final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
+        for (Seller seller : sellers) {
+            final CartPricePerSellerResponse cartPricePerSellerResponse = cartService.cartPricePerSeller(user, seller);
+            cartPriceTotal += cartPricePerSellerResponse.getItemTotalPricePerSeller();
+            shippingFeeTotal += cartPricePerSellerResponse.getItemShippingFeePerSeller();
         }
+        long amount = cartPriceTotal + shippingFeeTotal;
+//        for (Cart cart : carts) {
+//            amount += (long) cart.getItemOption().getItemPrice().getPriceNow() * cart.getQuantity();
+//        }
         //유효성 검사 로직 더 작성할 것.
 
         ReceiverInfo receiverInfo = ReceiverInfo.builder()

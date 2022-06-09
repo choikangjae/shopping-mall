@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.dto.response;
+package com.jay.shoppingmall.dto.response.order.payment;
 
 import lombok.*;
 

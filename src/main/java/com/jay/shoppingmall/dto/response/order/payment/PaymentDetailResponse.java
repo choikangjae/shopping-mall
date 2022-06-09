@@ -1,29 +1,36 @@
-package com.jay.shoppingmall.dto.response;
+package com.jay.shoppingmall.dto.response.order.payment;
 
+import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.payment.model.PayMethod;
 import com.jay.shoppingmall.domain.payment.model.Pg;
 import lombok.*;
+
+import javax.validation.constraints.NotEmpty;
 
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PaymentResultResponse {
+public class PaymentDetailResponse {
 
     private Long id;
 
     private Long userId;
 
-    private Pg pg;
+    private String pg;
 
-    private PayMethod payMethod;
+    private String payMethod;
 
     private String merchantUid;
 
     private String name;
 
     private Long amount;
+
+    private Integer paymentTotalShippingFee;
+
+    private Long paymentTotalPrice;
 
     private String buyerEmail;
 
@@ -34,5 +41,17 @@ public class PaymentResultResponse {
     private String buyerAddr;
 
     private String buyerPostcode;
+
+
+    private String receiverAddress;
+
+    private String receiverEmail;
+
+    private String receiverName;
+
+    private String receiverPostcode;
+
+    private String receiverPhoneNumber;
+
 
 }

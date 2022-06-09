@@ -31,6 +31,7 @@ import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.StockInvalidException;
 import com.jay.shoppingmall.service.handler.FileHandler;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import lombok.ToString;
@@ -45,8 +46,8 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
-@ToString
+@AllArgsConstructor
+//@ToString
 public class ItemService {
 
     private final ItemRepository itemRepository;
@@ -127,7 +128,7 @@ public class ItemService {
             ItemOption itemOption = itemOptionRepository.findByItemIdAndIsOptionMainItemTrue(item.getId());
             if (itemOption != null) {
                 final ItemPrice itemPrice = itemOption.getItemPrice();
-                final Long priceNow = itemPrice.getIsOnSale() != null ? itemPrice.getItemOnSale().getOnSalePrice() : itemPrice.getPriceNow();
+                final Long priceNow = itemPrice.getIsOnSale() ? itemPrice.getItemOnSale().getOnSalePrice() : itemPrice.getPriceNow();
                 final Long originalPrice = itemPrice.getOriginalPrice();
 
                 itemResponses.add(ItemResponse.builder()
@@ -184,9 +185,10 @@ public class ItemService {
                 final BrowseHistory history = browseHistories.get(browseHistories.size() - 1);
                 browseHistoryRepository.delete(history);
             }
-            if (itemIds.contains(itemId)) {
-                BrowseHistory history = browseHistoryRepository.findByItemId(itemId);
-                browseHistoryRepository.delete(history);
+            for (BrowseHistory browseHistory : browseHistories) {
+                if (Objects.equals(browseHistory.getItem().getId(), itemId)) {
+                    browseHistoryRepository.delete(browseHistory);
+                }
             }
 
             BrowseHistory browseHistory = BrowseHistory.builder()

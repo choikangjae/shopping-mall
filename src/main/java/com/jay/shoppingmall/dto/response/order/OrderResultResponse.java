@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.dto.response;
+package com.jay.shoppingmall.dto.response.order;
 
 import com.jay.shoppingmall.domain.payment.model.Pg;
 import com.jay.shoppingmall.dto.response.cart.CartOrderResponse;

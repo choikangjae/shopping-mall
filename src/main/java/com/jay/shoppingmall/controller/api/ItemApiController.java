@@ -1,13 +1,11 @@
 package com.jay.shoppingmall.controller.api;
 
 import com.jay.shoppingmall.common.CurrentUser;
-import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.ItemOptionRequest;
 import com.jay.shoppingmall.dto.request.ItemZzimRequest;
 import com.jay.shoppingmall.dto.response.ZzimResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
-import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.exception.exceptions.OptionDuplicatedException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.ItemService;
@@ -20,8 +18,6 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -52,6 +48,7 @@ public class ItemApiController {
             itemOptionResponses.add(itemOptionResponse);
             session.setAttribute("itemOptions", itemOptionResponses);
         } else {
+//            @SuppressWarnings("unchecked")
             final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
             for (ItemOptionResponse optionResponse : itemOptions) {
                 if (optionResponse.getOption2().equals(itemOptionResponse.getOption2()) && optionResponse.getOption1().equals(itemOptionResponse.getOption1())) {
@@ -70,6 +67,7 @@ public class ItemApiController {
         final String option1 = request.getOption1();
         final String option2 = request.getOption2();
 
+//        @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
         if (!itemOptions.isEmpty()) {
             itemOptions.removeIf(itemOptionResponse -> option1.equals(itemOptionResponse.getOption1()) && option2.equals(itemOptionResponse.getOption2()));
@@ -83,6 +81,7 @@ public class ItemApiController {
     @PostMapping("/option/update")
     public ResponseEntity<?> updateOption(@Valid @RequestBody ItemOptionRequest request, HttpSession session) {
 
+//        @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
         final ItemOptionResponse itemOptionResponse = itemService.itemOptionUpdate(request);
 
@@ -111,6 +110,7 @@ public class ItemApiController {
     }
 
     private void setItemTotals(final HttpSession session) {
+//        @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
 
         final long itemTotalPrice = itemOptions.stream().mapToLong(ItemOptionResponse::getItemPrice).sum();

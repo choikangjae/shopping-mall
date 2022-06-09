@@ -48,6 +48,17 @@ public class DemoController {
         return "redirect:/";
     }
 
+    @PostMapping("/demo/login/seller2")
+    public String demoLogin4(HttpSession session) {
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                "demo@seller2", "password123"));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        session.setAttribute("demo", "password123");
+        return "redirect:/";
+    }
+
     @PostMapping("/demo/login/admin")
     public String demoLogin3() {
         Authentication authentication =

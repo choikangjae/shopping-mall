@@ -6,7 +6,7 @@
 
         <div class="col" th:each="item : ${items.getContent()}">
             <span th:if="${item.dateAt != null}" th:inline="text">
-                [[${#temporals.format(item.dateAt, 'yyyy-MM-dd')}]]에 추가됨
+                [[${#temporals.format(item.dateAt, 'yyyy-MM-dd HH:mm')}]]에 추가됨
             </span>
             <div class="card shadow-sm">
                 <a th:href="@{'/item/details/' + ${item.itemId}}" class="text-reset text-decoration-none">
@@ -29,7 +29,7 @@
                                     <span class="fw-bolder text-warning"
                                           th:text="${#numbers.formatDecimal(item.priceNow, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">판매가</span>
                     </strong>
-                    <span class="fw-bolder" th:if="${item.originalPrice != item.priceNow}"
+                    <span class="fw-bolder" th:if="${item.originalPrice != null}"
                           th:text="'(' + ${((item.originalPrice-item.priceNow) * 100) / item.originalPrice} + '%)'">할인율</span>
 
                     <div class="d-flex justify-content-between align-items-center mt-2">

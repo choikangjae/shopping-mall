@@ -4,8 +4,8 @@ import com.google.common.base.Splitter;
 import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
-import com.jay.shoppingmall.dto.response.PaymentResponse;
-import com.jay.shoppingmall.dto.response.PaymentResultResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -51,9 +51,9 @@ public class PaymentApiController {
         System.out.println(queryParameters.get("merchant_uid"));
 
         //flash로 보내기? session? 그냥 내리기? redirect 되면서 값을 뿌려주는 방법?
-        PaymentResultResponse paymentResultResponse = paymentService.paymentTotal(imp_uid, merchant_uid, user);
+        PaymentDetailResponse paymentDetailResponse = paymentService.paymentTotal(imp_uid, merchant_uid, user);
 
-        return ResponseEntity.ok(paymentResultResponse);
+        return ResponseEntity.ok(paymentDetailResponse);
     }
 
 }

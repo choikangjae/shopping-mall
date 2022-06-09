@@ -2,6 +2,7 @@ package com.jay.shoppingmall.domain.order;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.user.User;
@@ -17,7 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Table(name = "orders")
-//Payment, Delivery Status, OrderItemList. receiver,
 public class Order extends BaseTimeEntity {
 
     @Id
@@ -28,9 +28,9 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "order_item_id", referencedColumnName = "id", nullable = false)
-//    private OrderItem orderItem;
+//    //TODO 변경할것
+//    @OneToMany(mappedBy = "orders")
+//    private List<OrderItem> orderItems = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", referencedColumnName = "id", nullable = false)

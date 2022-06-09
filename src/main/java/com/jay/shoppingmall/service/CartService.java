@@ -12,11 +12,9 @@ import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.CartManipulationRequest;
-import com.jay.shoppingmall.dto.request.CartRequest;
 import com.jay.shoppingmall.dto.response.cart.CartPricePerSellerResponse;
 import com.jay.shoppingmall.dto.response.cart.CartPriceResponse;
 import com.jay.shoppingmall.dto.response.cart.CartPriceTotalResponse;
-import com.jay.shoppingmall.dto.response.cart.CartResponse;
 import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerResponse;
@@ -34,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -196,18 +193,18 @@ public class CartService {
                 .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
 
         final List<Cart> cartList = carts.stream().filter(cart -> cart.getItem().getSeller().equals(seller)).collect(Collectors.toList());
-        long itemTotalPricePerSeller = 0;
-        int itemTotalQuantityPerSeller = 0;
+        long cartTotalPricePerSeller = 0;
+        int cartTotalQuantityPerSeller = 0;
 
         for (Cart cart : cartList) {
-            itemTotalPricePerSeller += cart.getItemOption().getItemPrice().getPriceNow() * cart.getQuantity();
-            itemTotalQuantityPerSeller += cart.getQuantity();
+            cartTotalPricePerSeller += cart.getItemOption().getItemPrice().getPriceNow() * cart.getQuantity();
+            cartTotalQuantityPerSeller += cart.getQuantity();
         }
         return CartPricePerSellerResponse.builder()
                 .sellerId(seller.getId())
-                .itemTotalPricePerSeller(itemTotalPricePerSeller)
-                .itemTotalQuantityPerSeller(itemTotalQuantityPerSeller)
-                .itemShippingFeePerSeller(shippingFeeCheck(seller.getId(), itemTotalPricePerSeller))
+                .itemTotalPricePerSeller(cartTotalPricePerSeller)
+                .itemTotalQuantityPerSeller(cartTotalQuantityPerSeller)
+                .itemShippingFeePerSeller(shippingFeeCheck(seller.getId(), cartTotalPricePerSeller))
                 .build();
     }
 

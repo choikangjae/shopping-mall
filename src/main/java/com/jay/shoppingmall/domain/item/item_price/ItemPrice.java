@@ -26,11 +26,13 @@ public class ItemPrice {
     private Long priceNow;
 
     @Column(columnDefinition = "boolean default 0")
+    @Builder.Default
     private Boolean isOnSale = false;
 
     @Embedded
     private ItemOnSale itemOnSale;
 
-    @OneToMany(mappedBy = "itemPrice")
-    private List<ItemPriceHistory> priceHistories = new ArrayList<>();
+//    @OneToMany(mappedBy = "itemPrice")
+//    @Builder.Default
+//    private List<ItemPriceHistory> priceHistories = new ArrayList<>();
 }

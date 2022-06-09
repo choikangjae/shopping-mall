@@ -8,7 +8,9 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.ApiWriteItemRequest;
 import com.jay.shoppingmall.dto.request.SellerAgreeRequest;
 import com.jay.shoppingmall.dto.request.SellerDefaultSettingsRequest;
+import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
+import com.jay.shoppingmall.exception.exceptions.NotValidException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
@@ -37,15 +39,47 @@ public class SellerApiController {
     private final ObjectMapper objectMapper;
 
     @PostMapping(value = "/write", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> sellerItemWrite(@Valid @RequestPart ApiWriteItemRequest apiWriteItemRequest,
+    public ResponseEntity<?> sellerOptionItemWrite(@Valid @RequestPart ApiWriteItemRequest apiWriteItemRequest,
                                              @RequestParam("mainImage") MultipartFile file,
                                              @RequestParam(value = "descriptionImage", required = false) List<MultipartFile> files,
                                              @CurrentUser User user) {
+        if (apiWriteItemRequest.getDescription().length() > 200) {
+            throw new NotValidException("설명은 200글자까지만 작성해주세요");
+        }
+        if (file.isEmpty()) {
+            throw new NotValidException("대표 사진을 첨부해주세요");
+        }
+        if ((file.getSize() / (1024 * 1024)) >= 5) {
+            throw new NotValidException("대표 사진 용량은 5MB를 넘을 수 없습니다");
+        }
+        if (files != null && files.size() > 5) {
+            throw new NotValidException("상품에 대한 사진은 5장까지만 업로드가 가능합니다");
+        }
         final List<OptionValue> optionValues = objectMapper.convertValue(apiWriteItemRequest.getOptionArray(), new TypeReference<List<OptionValue>>() {
         });
         Long itemId = sellerService.writeOptionItem(apiWriteItemRequest, optionValues, file, files, user);
 
-        //TODO 상품 작성 이후 처리 과정 작성
+        return ResponseEntity.ok(itemId);
+    }
+    @PostMapping(value = "/write-no-option", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<?> sellerOneItemWrite(@Valid @RequestPart WriteItemRequest writeItemRequest,
+                                             @RequestParam("mainImage") MultipartFile file,
+                                             @RequestParam(value = "descriptionImage", required = false) List<MultipartFile> files,
+                                             @CurrentUser User user) {
+        if (writeItemRequest.getDescription().length() > 200) {
+            throw new NotValidException("설명은 200글자까지만 작성해주세요");
+        }
+        if (file.isEmpty()) {
+            throw new NotValidException("대표 사진을 첨부해주세요");
+        }
+        if ((file.getSize() / (1024 * 1024)) >= 5) {
+            throw new NotValidException("대표 사진 용량은 5MB를 넘을 수 없습니다");
+        }
+//        if (files != null && files.size() > 5) {
+//            throw new NotValidException("상품에 대한 사진은 5장까지만 업로드가 가능합니다");
+//        }
+        Long itemId = sellerService.writeItem(writeItemRequest, file, files, user);
+
         return ResponseEntity.ok(itemId);
     }
 

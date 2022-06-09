@@ -6,14 +6,15 @@ import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.request.PasswordRequest;
-import com.jay.shoppingmall.dto.response.SimpleOrderResponse;
-import com.jay.shoppingmall.dto.response.item.ItemResponse;
+import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
+import com.jay.shoppingmall.dto.response.order.SimpleOrderResponse;
 import com.jay.shoppingmall.service.ItemService;
 import com.jay.shoppingmall.service.MeService;
 import com.jay.shoppingmall.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,7 +37,7 @@ public class MeController {
     private final ItemService itemService;
 
     @GetMapping
-    public String me(@CurrentUser User user, Model model, Pageable pageable) {
+    public String me(@CurrentUser User user, Model model, @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 
         List<SimpleOrderResponse> simpleOrderResponses = orderService.showOrders(user, pageable);
         if (!simpleOrderResponses.isEmpty()) {
@@ -64,11 +65,11 @@ public class MeController {
 
     @GetMapping("/reconfirm")
     public String reConfirm(PasswordRequest passwordRequest, @CurrentUser User user, Model model, RedirectAttributes redirectAttributes) {
-        if (!meService.userAgreeCheck(user)) {
-            redirectAttributes.addFlashAttribute("message", "필수 동의가 필요합니다");
-
-            return "redirect:/me/privacy";
-        }
+//        if (!meService.userAgreeCheck(user)) {
+//            redirectAttributes.addFlashAttribute("message", "필수 동의가 필요합니다");
+//
+//            return "redirect:/me/privacy";
+//        }
         model.addAttribute("user", user);
         return "me/reconfirm";
     }
@@ -98,11 +99,11 @@ public class MeController {
         return "me/zzim";
     }
 
-    //TODO 기본 틀만 작성
     @GetMapping("/order/detail/{id}")
-    public String showOrderDetail(@PathVariable("id") Long orderId, @CurrentUser User user) {
-        orderService.showOrderDetail(orderId, user);
+    public String showOrderDetail(@PathVariable("id") Long orderId, Model model, @CurrentUser User user) {
+        final OrderDetailResponse orderDetailResponse = orderService.showOrderDetail(orderId, user);
 
+        model.addAttribute("orderDetailResponse", orderDetailResponse);
         return "/order/detail";
     }
     //TODO 기본 틀만 작성

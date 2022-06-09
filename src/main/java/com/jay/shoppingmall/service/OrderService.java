@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.cart.CartRepository;
+import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.ItemRepository;
@@ -13,9 +14,17 @@ import com.jay.shoppingmall.domain.order.order_item.OrderItemRepository;
 import com.jay.shoppingmall.domain.order.order_item.order_delivery.OrderDelivery;
 import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.payment.PaymentRepository;
+import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
+import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.response.SimpleOrderResponse;
+//import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
+import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
+import com.jay.shoppingmall.dto.response.order.OrderItemCommonResponse;
+import com.jay.shoppingmall.dto.response.order.OrderItemResponse;
+import com.jay.shoppingmall.dto.response.order.SimpleOrderResponse;
 import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
@@ -25,6 +34,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,17 +54,86 @@ public class OrderService {
     private final ImageRepository imageRepository;
     private final OrderItemRepository orderItemRepository;
     private final ItemOptionRepository itemOptionRepository;
+    private final PaymentPerSellerRepository paymentPerSellerRepository;
 
     public Map<SellerResponse, List<ItemAndQuantityResponse>> orderProcess(User user) {
-        final Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = cartService.showCartItemsList(user);
+        final Map<SellerResponse, List<ItemAndQuantityResponse>> responseListMapBySeller = cartService.showCartItemsList(user);
 
-        for (SellerResponse sellerResponse : sellerResponseListMap.keySet()) {
-            final List<ItemAndQuantityResponse> itemAndQuantityResponses = sellerResponseListMap.get(sellerResponse);
+        for (SellerResponse sellerResponse : responseListMapBySeller.keySet()) {
+            final List<ItemAndQuantityResponse> itemAndQuantityResponses = responseListMapBySeller.get(sellerResponse);
             final List<ItemAndQuantityResponse> selectedCarts = itemAndQuantityResponses.stream().filter(ItemAndQuantityResponse::getIsSelected).collect(Collectors.toList());
 
-            sellerResponseListMap.put(sellerResponse, selectedCarts);
+            responseListMapBySeller.put(sellerResponse, selectedCarts);
         }
-        return sellerResponseListMap;
+        return responseListMapBySeller;
+    }
+
+    public OrderDetailResponse showOrderDetail(final Long orderId, final User user) {
+        final Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("해당하는 주문이 없습니다"));
+        LocalDateTime orderDate = order.getCreatedDate();
+        //상품조회
+        final List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+
+        List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+        for (OrderItem orderItem : orderItems) {
+
+            orderItem.getOrderDelivery().getDeliveryStatus();
+            final Image image = imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, orderItem.getMainImageId());
+            final String mainImage = fileHandler.getStringImage(image);
+
+            final OrderItemResponse orderItemResponse = OrderItemResponse.builder()
+                    .orderDate(orderDate)
+                    .itemName(orderItem.getItem().getName())
+                    .mainImage(mainImage)
+                    .sellerCompanyName(orderItem.getSeller().getCompanyName())
+                    .orderItemId(orderItem.getId())
+                    .itemPrice(orderItem.getPriceAtPurchase())
+                    .quantity(orderItem.getQuantity())
+                    .build();
+            orderItemResponses.add(orderItemResponse);
+        }
+
+        //판매자별 분리된 결제 정보 조회
+        final List<PaymentPerSeller> paymentPerSellers = paymentPerSellerRepository.findByPayment(order.getPayment());
+        List<PaymentPerSellerResponse> paymentPerSellerResponses = new ArrayList<>();
+
+        long paymentTotalPrice = 0L;
+        int paymentTotalShippingFee = 0;
+        for (PaymentPerSeller paymentPerSeller : paymentPerSellers) {
+            final PaymentPerSellerResponse paymentPerSellerResponse = PaymentPerSellerResponse.builder()
+                    .paymentPerSellerId(paymentPerSeller.getId())
+                    .itemTotalPricePerSeller(paymentPerSeller.getItemTotalPricePerSeller())
+                    .itemTotalQuantityPerSeller(paymentPerSeller.getItemTotalQuantityPerSeller())
+                    .itemShippingFeePerSeller(paymentPerSeller.getItemShippingFeePerSeller())
+                    .build();
+            paymentTotalPrice += paymentPerSeller.getItemTotalPricePerSeller();
+            paymentTotalShippingFee += paymentPerSeller.getItemShippingFeePerSeller();
+
+            paymentPerSellerResponses.add(paymentPerSellerResponse);
+        }
+        final Payment payment = order.getPayment();
+
+        PaymentDetailResponse paymentDetailResponse = PaymentDetailResponse.builder()
+                .pg(payment.getPg().getName())
+                .payMethod(payment.getPayMethod().getName())
+                .paymentTotalPrice(paymentTotalPrice)
+                .paymentTotalShippingFee(paymentTotalShippingFee)
+                .buyerName(payment.getBuyerName())
+                .buyerAddr("(" + payment.getBuyerPostcode() + ") " + payment.getBuyerAddr())
+                .buyerEmail(payment.getBuyerEmail())
+                .buyerTel(payment.getBuyerTel())
+                .receiverName(payment.getReceiverInfo().getReceiverName())
+                .receiverAddress("(" + payment.getReceiverInfo().getReceiverPostcode() + ") " + payment.getReceiverInfo().getReceiverAddress())
+                .receiverEmail(payment.getReceiverInfo().getReceiverEmail())
+                .receiverPhoneNumber(payment.getReceiverInfo().getReceiverPhoneNumber())
+                .build();
+
+        return OrderDetailResponse.builder()
+                .orderItemResponses(orderItemResponses)
+                .paymentDetailResponse(paymentDetailResponse)
+                .paymentPerSellerResponses(paymentPerSellerResponses)
+                .build();
     }
 
 //    public CartOrderResponse orderProcess(User user) {
@@ -93,8 +172,8 @@ public class OrderService {
 //                .build();
 //    }
 
-    //QNA 고치기
     public List<SimpleOrderResponse> showOrders(User user, Pageable pageable) {
+
         final Page<Order> orders = orderRepository.findByUserId(user.getId(), pageable)
                 .orElseThrow(() -> new OrderNotFoundException("주문 정보 찾을 수 없음"));
         //todo pageable 처리 나중에 할것
@@ -131,14 +210,8 @@ public class OrderService {
         return simpleOrderResponses;
     }
 
-    public void showOrderDetail(final Long orderId, final User user) {
 
-    }
 
-    /**
-     * seller_id를 기준으로 item을 검색해서 총 비용을 확인하고 그 비용이 seller shippingfee에 부합하는지 확인은 따로하고.
-     *
-     */
 //    public OrderResultResponse doOrderPaymentProcess(PaymentRequest paymentRequest, User user) {
 //        CartOrderResponse cartOrderResponse= orderProcess(user);
 

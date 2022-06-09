@@ -1,13 +1,17 @@
 package com.jay.shoppingmall.domain.payment;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.payment.model.PayMethod;
 import com.jay.shoppingmall.domain.payment.model.Pg;
 import com.jay.shoppingmall.domain.payment.model.ReceiverInfo;
+import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
 import com.jay.shoppingmall.domain.user.User;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -54,6 +58,10 @@ public class Payment extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "payment")
+    @Builder.Default
+    private List<PaymentPerSeller> paymentPerSellers = new ArrayList<>();
 
     public void isValidatedTrue() {
         this.isValidated = true;
