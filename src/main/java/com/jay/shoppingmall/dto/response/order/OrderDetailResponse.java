@@ -17,4 +17,6 @@ public class OrderDetailResponse {
     private PaymentDetailResponse paymentDetailResponse;
 
     private List<PaymentPerSellerResponse> paymentPerSellerResponses;
+
+    private PaymentPerSellerResponse paymentPerSellerResponse;
 }

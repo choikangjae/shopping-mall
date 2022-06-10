@@ -5,6 +5,7 @@ import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
+import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
@@ -134,5 +135,13 @@ public class SellerController {
         model.addAttribute("recentOrders", recentOrders);
         return "seller/seller-recent-orders";
     }
+    @GetMapping("/order/{id}")
+    public String showSellerOrderDetail(@PathVariable("id") Long orderId, Model model, @CurrentUser User user) {
+        final OrderDetailResponse orderDetailResponse = sellerService.treatOrders(orderId, user);
+
+        model.addAttribute("orderDetailResponse", orderDetailResponse);
+        return "/seller/order-detail";
+    }
+
 }
 

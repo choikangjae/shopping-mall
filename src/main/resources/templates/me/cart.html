@@ -26,10 +26,10 @@
                         </div>
                         <div class="alert alert-danger" role="alert" th:if="${message}">
                             <span class="mt-3" th:text="${message}"></span>
-                            <!-- <form action="/me/update" method="post">
-                                </br> -->
+<!--                            <form action="/me/update" method="get">-->
+<!--                                <br>-->
                                 <button type="button" id="goToUserUpdate" onclick="goToUserUpdate()" class="btn btn-primary">개인정보 입력하러 가기</button>
-                            <!-- </form> -->
+<!--                            </form>-->
                         </div>
 
                         <div class="container text-center" th:if="${#maps.isEmpty(sellerResponseListMap)}">
@@ -146,28 +146,28 @@
                         <!-- 선택 상품 총합 -->
                         <span>선택 상품</span>
                         <span class="badge bg-primary rounded-pill">
-                            <span th:id="cartTotalQuantity"></span>
+                            <span th:id="cartTotalQuantity">0</span>
                         </span>
                         <div class="card mb-4">
                             <div class="card-body p-4 d-flex flex-row">
                                 <div class="col-1">
                                 </div>
                                 <div class="col-3">
-                                    <h4>상품가격 <br> <span id="cartTotalPrice">1</span>
+                                    <h4>상품가격 <br> <span id="cartTotalPrice"></span>
                                         원</h4>
                                 </div>
                                 <div class="col-1">
                                     <h4><i class="fas fa-plus"></i></h4>
                                 </div>
                                 <div class="col-2">
-                                    <h4>배송비 <br> <span id="cartTotalShippingFee">1</span> 
+                                    <h4>배송비 <br> <span id="cartTotalShippingFee"></span>
                                         원</h4>
                                 </div>
                                 <div class="col-1">
                                     <h4><i class="fas fa-equals"></i></h4>
                                 </div>
                                 <div class="col-3">
-                                    <h4>총 가격 <br> <span id="cartTotalPriceWithShippingFee">1</span>
+                                    <h4>총 가격 <br> <span class="text-warning" id="cartTotalPriceWithShippingFee"></span>
                                         원</h4>
                                         <!-- <span class="text-primary" id="totalPrice"
                                             th:text="${#numbers.formatDecimal(totalPrice, 0, 'DEFAULT', 0, 'DEFAULT')}">
@@ -392,7 +392,7 @@
             }
 
             document.getElementById('checkOut').addEventListener('click', (e) => {
-                if (document.getElementById('cartTotalQuantity').textContent == 0) {
+                if (!document.getElementById('cartTotalPriceWithShippingFee').textContent) {
                     alert('선택된 상품이 없습니다')
                     e.preventDefault();
                 }

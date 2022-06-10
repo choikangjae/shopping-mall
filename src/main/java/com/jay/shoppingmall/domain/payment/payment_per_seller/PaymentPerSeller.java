@@ -1,11 +1,14 @@
 package com.jay.shoppingmall.domain.payment.payment_per_seller;
 
 import com.jay.shoppingmall.domain.order.Order;
+import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.seller.Seller;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -21,6 +24,10 @@ public class PaymentPerSeller {
     private Integer itemTotalQuantityPerSeller;
 
     private Integer itemShippingFeePerSeller;
+
+//    @OneToMany(mappedBy = "paymentPerSeller")
+//    @Builder.Default
+//    private List<OrderItem> orderItems = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", nullable = false)
@@ -41,6 +48,7 @@ public class PaymentPerSeller {
         this.itemShippingFeePerSeller = itemShippingFeePerSeller;
         this.seller = seller;
         this.order = order;
+//        this.orderItems = orderItems;
         paymentPerSeller(payment);
     }
 

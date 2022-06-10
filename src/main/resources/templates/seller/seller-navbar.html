@@ -26,6 +26,10 @@
                 <li class="nav-item">
                     <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/recent-orders') ? 'active':''}" th:href="@{/seller/recent-orders}" class="nav-link">최근 주문 확인</a>
                 </li>
+                <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/seller/delivery-status') ? 'active':''}" th:href="@{/seller/delivery-status}" class="nav-link">배송상태 조정(데모)</a>
+                </li>
+
              </ul>
         </div>
     </div>

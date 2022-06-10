@@ -23,4 +23,10 @@ public class OrderItemResponse {
     private Integer quantity;
 
     private Long itemPrice;
+
+    private String deliveryStatus;
+
+    private Boolean isTrackingStarted;
+
+    private String trackingNumber;
 }

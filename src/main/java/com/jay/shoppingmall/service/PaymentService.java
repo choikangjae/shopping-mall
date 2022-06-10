@@ -98,7 +98,9 @@ public class PaymentService {
 
         final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
         //판매자별 개별 결제 정보 저장
+
         for (Seller seller : sellers) {
+
             final CartPricePerSellerResponse cartPricePerSellerResponse = cartService.cartPricePerSeller(user, seller);
 
             PaymentPerSeller paymentPerSeller = PaymentPerSeller
@@ -109,6 +111,7 @@ public class PaymentService {
                     .seller(seller)
                     .payment(paymentRecord)
                     .order(order)
+//                    .orderItems(orderItemsPerSeller)
                     .build();
 
             paymentPerSellerRepository.save(paymentPerSeller);

@@ -10,4 +10,6 @@ public interface PaymentPerSellerRepository extends JpaRepository<PaymentPerSell
     List<PaymentPerSeller> findByPayment(Payment payment);
 
     List<PaymentPerSeller> findTop20BySellerId(Long sellerId);
+
+    PaymentPerSeller findByOrderIdAndSellerId(Long orderId, Long sellerId);
 }

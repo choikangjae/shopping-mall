@@ -12,13 +12,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RecentPaymentPerSellerSimpleResponse {
-    private Pg pg;
 
-    private PayMethod payMethod;
+    private Long orderId;
+
+    private String pg;
+
+    private String payMethod;
 
     private String merchantUid;
 
     private String name;
+
+    private String mainImage;
 
     private LocalDateTime orderDate;
 }

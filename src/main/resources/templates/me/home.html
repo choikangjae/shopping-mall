@@ -15,9 +15,9 @@
             <div th:if="${user.getAgree()?.getIsMandatoryAgree() == null}" class="card col-6 justify-content-center">
                 <div class="card-body">
                     <div>
-                        <form action="/me/privacy" method="post">
+                        <form action="/me/privacy" method="get">
                             <h6 th:text="${user.getEmail() + '회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요'}"></h6>
-                            </br>
+                            <br>
                             <button type="submit" class="btn btn-success">개인정보 입력하러 가기</button>
                         </form>
                     </div>

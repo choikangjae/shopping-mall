@@ -20,9 +20,14 @@
                         </div>
 
 
-                        <div class="col-12">
+                        <div class="col-sm-6">
                             <label for="companyName" class="form-label">판매자 회사명 <strong class="text-info">(필수)</strong></label>
                             <input type="text" class="form-control" id="companyName" th:value="${response.companyName}">
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="contactNumber" class="form-label">기본 연락처 <strong class="text-info">(필수)</strong></label>
+                            <input type="text" class="form-control" id="contactNumber" th:value="${response.contactNumber}">
                         </div>
 
                         <div class="col-sm-6">
@@ -144,6 +149,7 @@
                 e.preventDefault();
 
                 let companyName = document.getElementById('companyName').value;
+                let contactNumber = document.getElementById('contactNumber').value;
                 let shippingFeeDefault = document.getElementById('shippingFeeDefault').value;
                 let shippingFeeFreePolicy = document.getElementById('shippingFeeFreePolicy').value;
                 let defaultDeliveryCompany = document.getElementById('defaultDeliveryCompany').value;
@@ -163,6 +169,7 @@
                         method: 'POST',
                         body: JSON.stringify({
                             companyName,
+                            contactNumber,
                             shippingFeeDefault,
                             shippingFeeFreePolicy,
                             defaultDeliveryCompany,

@@ -19,6 +19,9 @@ import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockH
 import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistoryRepository;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporaryRepository;
+import com.jay.shoppingmall.domain.order.DeliveryStatus;
+import com.jay.shoppingmall.domain.order.Order;
+import com.jay.shoppingmall.domain.order.OrderRepository;
 import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.order.order_item.OrderItemRepository;
 import com.jay.shoppingmall.domain.payment.Payment;
@@ -33,6 +36,9 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.dto.request.*;
+import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
+import com.jay.shoppingmall.dto.response.order.OrderItemResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerSimpleResponse;
@@ -50,6 +56,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -75,6 +82,7 @@ public class SellerService {
     private final ItemPriceHistoryRepository itemPriceHistoryRepository;
     private final OrderItemRepository orderItemRepository;
     private final PaymentPerSellerRepository paymentPerSellerRepository;
+    private final OrderRepository orderRepository;
 
     private final PaymentService paymentService;
 
@@ -109,11 +117,6 @@ public class SellerService {
         imageRepository.save(mainImage);
 
         //MultiPartFile은 input이 없을때 ''으로 들어오므로 아래와 같이 확인.
-//        if (!files.get(0).isEmpty()) {
-//            for (MultipartFile multipartFile : files) {
-//                imageRepository.save(fileHandler.parseFilesInfo(multipartFile, ImageRelation.ITEM_DESCRIPTION, item.getId()));
-//            }
-//        }
         if (files != null) {
             for (MultipartFile multipartFile : files) {
                 imageRepository.save(fileHandler.parseFilesInfo(multipartFile, ImageRelation.ITEM_DESCRIPTION, item.getId()));
@@ -309,11 +312,13 @@ public class SellerService {
     }
 
     public void sellerDefaultSettingSave(SellerDefaultSettingsRequest request, User user) {
-        if (sellerRepository.existsByCompanyName(request.getCompanyName())) {
-            throw new AlreadyExistsException("이미 사용 중인 회사명입니다");
-        }
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        if (sellerRepository.existsByCompanyName(request.getCompanyName())) {
+            if (!seller.getCompanyName().equals(request.getCompanyName()))
+                throw new AlreadyExistsException("이미 사용 중인 회사명입니다");
+        }
 
         final Address itemReleaseAddress = Address.builder()
                 .address(request.getItemReleaseAddress())
@@ -325,6 +330,7 @@ public class SellerService {
         if (Objects.equals(request.getItemReturnAddress(), "") || Objects.equals(request.getItemReturnDetailAddress(), "") || Objects.equals(request.getItemReturnZipcode(), "")) {
             seller.sellerDefaultUpdate(
                     request.getCompanyName(),
+                    request.getContactNumber(),
                     itemReleaseAddress,
                     itemReleaseAddress,
                     request.getShippingFeeDefault(),
@@ -341,6 +347,7 @@ public class SellerService {
 
             seller.sellerDefaultUpdate(
                     request.getCompanyName(),
+                    request.getContactNumber(),
                     itemReleaseAddress,
                     itemReturnAddress,
                     request.getShippingFeeDefault(),
@@ -356,6 +363,7 @@ public class SellerService {
 
         return SellerDefaultSettingsResponse.builder()
                 .companyName(seller.getCompanyName())
+                .contactNumber(seller.getContactNumber())
                 .shippingFeeDefault(seller.getShippingFeeDefault())
                 .shippingFeeFreePolicy(seller.getShippingFeeFreePolicy())
 
@@ -389,25 +397,32 @@ public class SellerService {
         final List<PaymentPerSeller> recent20BySeller = paymentPerSellerRepository.findTop20BySellerId(seller.getId());
 
         List<RecentPaymentPerSellerResponse> recentPaymentPerSellerResponses = new ArrayList<>();
-        //최종 주문 상품 목록을 어디서 조회해야 할까 ??
         for (PaymentPerSeller paymentPerSeller : recent20BySeller) {
+            final Integer itemTotalQuantityPerSeller = paymentPerSeller.getItemTotalQuantityPerSeller();
+
             final PaymentPerSellerResponse paymentPerSellerResponse = PaymentPerSellerResponse.builder()
                     .paymentPerSellerId(paymentPerSeller.getId())
                     .itemShippingFeePerSeller(paymentPerSeller.getItemShippingFeePerSeller())
-                    .itemTotalQuantityPerSeller(paymentPerSeller.getItemTotalQuantityPerSeller())
+                    .itemTotalQuantityPerSeller(itemTotalQuantityPerSeller)
                     .itemTotalPricePerSeller(paymentPerSeller.getItemTotalPricePerSeller())
                     .build();
             final Payment payment = paymentPerSeller.getPayment();
 
-//            final List<OrderItem> orderItems = paymentPerSeller.getOrder().getOrderItems();
-//            final List<String> itemNames = orderItems.stream().map(OrderItem::getItem).map(Item::getName).collect(Collectors.toList());
+            final List<OrderItem> orderItems = orderItemRepository.findByOrderIdAndSellerId(paymentPerSeller.getOrder().getId(), seller.getId());
+            final OrderItem mostExpensiveOneAtOrder = orderItems.stream().max(Comparator.comparingLong(OrderItem::getPriceAtPurchase))
+                    .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
+            String mainImage = fileHandler.getStringImage(imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, mostExpensiveOneAtOrder.getMainImageId()));
+            String mostExpensiveOne = mostExpensiveOneAtOrder.getItem().getName();
+            String name = itemTotalQuantityPerSeller == 1 ? mostExpensiveOne : mostExpensiveOne + " 외 " + (itemTotalQuantityPerSeller - 1) + "건";
 
             RecentPaymentPerSellerSimpleResponse recentPaymentPerSellerSimpleResponse = RecentPaymentPerSellerSimpleResponse.builder()
+                    .orderId(paymentPerSeller.getOrder().getId())
                     .orderDate(paymentPerSeller.getOrder().getCreatedDate())
-                    .pg(payment.getPg())
-                    .payMethod(payment.getPayMethod())
+                    .pg(payment.getPg().getName())
+                    .payMethod(payment.getPayMethod().getName())
                     .merchantUid(payment.getMerchantUid())
-//                    .name(itemNames.get(0))
+                    .mainImage(mainImage)
+                    .name(name)
                     .build();
 
             RecentPaymentPerSellerResponse recentPaymentPerSellerResponse = RecentPaymentPerSellerResponse.builder()
@@ -418,4 +433,75 @@ public class SellerService {
         }
         return recentPaymentPerSellerResponses;
     }
+
+    public OrderDetailResponse treatOrders(final Long orderId, final User user) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+        final Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("해당하는 주문이 없습니다"));
+        Boolean isAllItemTrackingNumberIssued = true;
+
+        LocalDateTime orderDate = order.getCreatedDate();
+        //상품조회
+        final List<OrderItem> orderItems = orderItemRepository.findByOrderIdAndSellerId(orderId, seller.getId());
+
+        List<OrderItemResponse> orderItemResponses = new ArrayList<>();
+        for (OrderItem orderItem : orderItems) {
+            boolean isTrackingStarted = false;
+
+            final DeliveryStatus deliveryStatus = orderItem.getOrderDelivery().getDeliveryStatus();
+
+            if (!deliveryStatus.equals(DeliveryStatus.PAYMENT_DONE)) {
+                isTrackingStarted = true;
+            } else {
+                isAllItemTrackingNumberIssued = false;
+            }
+            final Image image = imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, orderItem.getMainImageId());
+            final String mainImage = fileHandler.getStringImage(image);
+
+            OrderItemResponse orderItemResponse = OrderItemResponse.builder()
+                    .orderItemId(orderItem.getId())
+                    .orderDate(orderDate)
+                    .itemName(orderItem.getItem().getName())
+                    .mainImage(mainImage)
+                    .sellerCompanyName(orderItem.getSeller().getCompanyName())
+                    .orderItemId(orderItem.getId())
+                    .itemPrice(orderItem.getPriceAtPurchase())
+                    .quantity(orderItem.getQuantity())
+                    .deliveryStatus(deliveryStatus.getValue())
+                    .isTrackingStarted(isTrackingStarted)
+                    .build();
+
+            orderItemResponses.add(orderItemResponse);
+        }
+
+        final PaymentPerSeller paymentPerSeller = paymentPerSellerRepository.findByOrderIdAndSellerId(orderId, seller.getId());
+
+        final Payment payment = order.getPayment();
+
+        PaymentDetailResponse paymentDetailResponse = PaymentDetailResponse.builder()
+                .pg(payment.getPg().getName())
+                .payMethod(payment.getPayMethod().getName())
+
+                .paymentTotalPrice(paymentPerSeller.getItemTotalPricePerSeller())
+                .paymentTotalShippingFee(paymentPerSeller.getItemShippingFeePerSeller())
+
+                .buyerName(payment.getBuyerName())
+                .buyerAddr("(" + payment.getBuyerPostcode() + ") " + payment.getBuyerAddr())
+                .buyerEmail(payment.getBuyerEmail())
+                .buyerTel(payment.getBuyerTel())
+
+                .receiverName(payment.getReceiverInfo().getReceiverName())
+                .receiverAddress("(" + payment.getReceiverInfo().getReceiverPostcode() + ") " + payment.getReceiverInfo().getReceiverAddress())
+                .receiverEmail(payment.getReceiverInfo().getReceiverEmail())
+                .receiverPhoneNumber(payment.getReceiverInfo().getReceiverPhoneNumber())
+                .isAllItemTrackingNumberIssued(isAllItemTrackingNumberIssued)
+                .build();
+
+        return OrderDetailResponse.builder()
+                .orderItemResponses(orderItemResponses)
+                .paymentDetailResponse(paymentDetailResponse)
+                .build();
+    }
+
 }

@@ -54,6 +54,10 @@ public class OrderController {
         }
 
         final Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = orderService.orderProcess(user);
+        if (sellerResponseListMap.isEmpty()) {
+            return "redirect:/cart";
+        }
+
         final CartPriceTotalResponse cartPriceTotalResponse = cartService.cartPriceTotal(user);
 
         model.addAttribute("user", user);

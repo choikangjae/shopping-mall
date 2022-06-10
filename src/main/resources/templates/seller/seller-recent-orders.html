@@ -13,28 +13,47 @@
         <table class="table" id="recentOrders">
             <thead>
             <tr>
-                최근 주문은 간단한 정보만
                 <th scope="col">결제시각</th>
-                <th scope="col">상품 외 n건</th>
+                <th scope="col"></th>
+                <th scope="col">상품명</th>
                 <th scope="col">결제수단</th>
                 <th scope="col">주문번호</th>
-                <th scope="col">결제금액</th>
+                <th scope="col">가격</th>
+                <th scope="col">배송비</th>
+                <th scope="col">총 결제액</th>
             </tr>
             </thead>
             <tbody>
-                <!-- th:onclick="|goToOrderDetail('${order.id}');|" -->
-                <tr th:each="recentOrder : ${recentOrders}" th:with="paymentDetail = ${recentOrder.recentPaymentPerSellerSimpleResponse}" 
-                th:with="paymentPrice = ${recentOrder.paymentPerSellerResponse}" style="cursor:pointer;">
-                    <td th:text="${#temporals.format(paymentDetail.orderDate, 'yyyy-MM-dd')}">주문날짜</td>
+                <tr th:each="recentOrder : ${recentOrders}" th:with="paymentDetail = ${recentOrder.recentPaymentPerSellerSimpleResponse}"
+                    th:onclick="|goToOrderDetail('${paymentDetail.orderId}');|" style="cursor:pointer;">
+                    <td th:text="${#temporals.format(paymentDetail.orderDate, 'yyyy-MM-dd HH:mm')}">주문날짜</td>
+                    <td style="width: 6rem;"><img class="bd-placeholder-img card-img-top img-fluid" width="100%"
+                        height="100%"
+                        th:src="'data:image/jpeg;base64,'+${paymentDetail.mainImage}" alt="..."/></td>
                     <td th:text="${paymentDetail.name}">상품명</td>
-                    <td th:text="${paymentDetail.payMethod}">결제수단</td>
+                    <td>
+                        <span th:inline="text">
+                            [[${paymentDetail.payMethod}]]
+                        </span>
+                        <br>
+                        <span th:inline="text">
+                            ([[${paymentDetail.pg}]])
+                        </span>
+                    </td>
                     <td th:text="${paymentDetail.merchantUid}">주문번호</td>
-                    <td th:text="${#numbers.formatDecimal(paymentPrice.itemTotalPricePerSeller, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
+                    <td th:text="${#numbers.formatDecimal(recentOrder.paymentPerSellerResponse.itemTotalPricePerSeller, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
+                    <td th:text="${#numbers.formatDecimal(recentOrder.paymentPerSellerResponse.itemShippingFeePerSeller, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
+                    <td th:text="${#numbers.formatDecimal(recentOrder.paymentPerSellerResponse.itemTotalPricePerSeller + recentOrder.paymentPerSellerResponse.itemShippingFeePerSeller, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
                 </tr>
             </tbody>
         </table>
 
     </div>
+    <script>
+        function goToOrderDetail(orderId) {
+            window.location.href="/seller/order/" + orderId;
+        }
+    </script>
 </div>
 </body>
 </html>

@@ -6,8 +6,11 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ZzimResponse {
-    private Integer zzimPerItem;
+public class VirtualDeliveryResponseForAnonymous {
 
-    private Boolean isZzimed;
+    private String trackingNumber;
+
+    private String senderName;
+
+    private String receiverName;
 }

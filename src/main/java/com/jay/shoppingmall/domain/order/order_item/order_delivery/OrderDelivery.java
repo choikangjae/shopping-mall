@@ -22,4 +22,9 @@ public class OrderDelivery {
     private LocalDateTime deliveryStartDate;
 
     private LocalDateTime deliveryUpdateDate;
+
+    public void deliveryStart() {
+        this.deliveryStatus = DeliveryStatus.DELIVERING;
+        this.deliveryStartDate = LocalDateTime.now();
+    }
 }

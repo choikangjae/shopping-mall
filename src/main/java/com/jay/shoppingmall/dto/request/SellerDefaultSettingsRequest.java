@@ -13,6 +13,10 @@ public class SellerDefaultSettingsRequest {
     @NotBlank
     private String companyName;
 
+    @Setter
+    @NotBlank
+    private String contactNumber;
+
     @NotNull
     private Integer shippingFeeDefault;
 

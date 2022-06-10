@@ -4,6 +4,7 @@ import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.controller.common.UpdateValidator;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.*;
+import com.jay.shoppingmall.dto.response.TrackPackageResponse;
 import com.jay.shoppingmall.exception.ErrorResponse;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import com.jay.shoppingmall.exception.exceptions.NotValidException;
@@ -11,9 +12,11 @@ import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.AuthService;
 import com.jay.shoppingmall.service.MeService;
+import com.jay.shoppingmall.service.VirtualDeliveryService;
 import com.jay.shoppingmall.service.common.SessionUpdater;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1")
+//@PreAuthorize("hasRole('USER')")
 public class MeApiController {
 
     private final MeService meService;
@@ -33,6 +37,7 @@ public class MeApiController {
     private final UpdateValidator updateValidator;
     private final AuthService authService;
     private final SessionUpdater sessionUpdater;
+    private final VirtualDeliveryService virtualDeliveryService;
 
     @PostMapping("/privacy/agree")
     public ResponseEntity<?> agreeCheck(@Valid @RequestBody AgreeRequest agreeRequest, @CurrentUser User user, HttpServletRequest request) {
@@ -110,5 +115,11 @@ public class MeApiController {
         meService.duplicationCheck(phoneNumber);
 
         return ResponseEntity.ok(null);
+    }
+    @GetMapping("/track-package/{trackingNumber}")
+    public ResponseEntity<?> trackMyPackages(@PathVariable("trackingNumber") String trackingNumber, @CurrentUser User user) {
+        final TrackPackageResponse trackPackageResponse = virtualDeliveryService.trackMyPackages(trackingNumber, user);
+
+        return ResponseEntity.ok(trackPackageResponse);
     }
 }

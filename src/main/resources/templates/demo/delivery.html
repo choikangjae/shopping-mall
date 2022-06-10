@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+    layout:decorate="~{layouts/layout.html}">
+
+<head>
+    <title>최근 주문 확인</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container">
+            <div th:replace="seller/seller-navbar :: seller-navbar"></div>
+
+            <table class="table" id="recentOrders">
+                <thead>
+                    <tr>
+                        <th scope="col">orderItemId</th>
+                        <th scope="col">상품명</th>
+                        <th scope="col">가격</th>
+                        <th scope="col">개수</th>
+                        <th scope="col">배송상태</th>
+                        <th scope="col">배송 상태 변경하기</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="orderItemResponse : ${orderItemResponses}">
+                        <td th:text="${orderItemResponse.orderItemId}">상품명</td>
+                        <td th:text="${orderItemResponse.itemName}">상품명</td>
+                        <td th:text="${orderItemResponse.itemPrice}">가격</td>
+                        <td th:text="${orderItemResponse.quantity}">개수</td>
+                        <td th:text="${orderItemResponse.deliveryStatus}">배송상태</td>
+                        <td>
+                            <button th:id="'deliveryDone' + ${orderItemResponse.orderItemId}" th:onclick="deliveryDone([[${orderItemResponse.orderItemId}]])"
+                            >
+                                배송 완료로 변경
+                            </button>
+                            <input th:value="${orderItemResponse.orderItemId}">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <script>
+            function deliveryDone(orderItemId) {
+                if (!confirm('배송 완료로 변경합니다')) {
+                    return false;
+                }
+
+                console.log('document' + document.getElementById('deliveryDone' + orderItemId).nextElementSibling.value);
+
+                let data = {
+                    method: 'POST',
+                    body:
+                        JSON.stringify({
+                            orderItemId
+                        }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                const onSuccess = res => {
+                    then(() => {
+                        window.location.reload();
+                    })
+                }
+                const onFailure = res => {
+                    return res.json()
+                        .then(json => {
+                            alert(json.message);
+                        })
+                }
+
+                fetch(`/seller/delivery-status`, data)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        console.log(err.message);
+                    });
+
+            }
+
+        </script>
+    </div>
+</body>
+
+</html>

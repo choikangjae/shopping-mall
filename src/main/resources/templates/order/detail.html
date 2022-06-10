@@ -1,83 +1,141 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layouts/layout.html}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+    layout:decorate="~{layouts/layout.html}">
+
 <head>
     <title>주문조회</title>
 </head>
+
 <body>
-<div layout:fragment="content">
-    <div class="container">
-        <div th:replace="me/me-navbar :: me-navbar"></div>
-        <br>
-        <!--본문 들어갈 곳-->
-        <div class="container position-relative">
+    <div layout:fragment="content">
+        <div class="container">
+            <div th:replace="me/me-navbar :: me-navbar"></div>
             <br>
-            <label for="itemDetail">상품 정보</label>
-            <table class="table" id="itemDetail">
-                <thead>
-                <tr>
-                    <th scope="col">주문일</th>
-                    <th scope="col">판매자</th>
-                    <th scope="col"></th>
-                    <th scope="col">상품명</th>
-                    <th scope="col">개수</th>
-                    <th scope="col">개당 가격</th>
-<!--                    <th scope="col">배송비</th>-->
-                    <th scope="col">진행 정보</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="orderItem : ${orderDetailResponse.orderItemResponses}">
-                        <td th:text="${#temporals.format(orderItem.orderDate, 'yyyy-MM-dd HH:mm')}">주문날짜</td>
-                        <td th:text="${orderItem.sellerCompanyName}">판매자</td>
+            <!--본문 들어갈 곳-->
+            <div class="container position-relative">
+                <br>
+                <label for="itemDetail">상품 정보</label>
+                <table class="table" id="itemDetail">
+                    <thead>
+                        <tr>
+                            <th scope="col">주문일</th>
+                            <th scope="col">판매자</th>
+                            <th scope="col"></th>
+                            <th scope="col">상품명</th>
+                            <th scope="col">개수</th>
+                            <th scope="col">개당 가격</th>
+                            <th scope="col">진행 정보</th>
+                        </tr>
+                    </thead>
+                    <!-- Modal -->
+                    <div class="modal fade" id="trackingPackage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">배송 조회</h5>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <div>
+                                  <div>
+                                      <h5><strong>운송장 </strong><span id="packageTrackingNumber"></span></h5> 
+                                  </div>
+                                  <br>
 
-                        <td style="width: 6rem;"><img class="bd-placeholder-img card-img-top img-fluid" width="100%"
-                                                      height="100%"
-                                                      th:src="'data:image/jpeg;base64,'+${orderItem.mainImage}" alt="..."/></td>
-                        <td th:text="${orderItem.itemName}">주문내역</td>
-                        <td th:text="${orderItem.quantity}">개수</td>
-                        <td th:text="${#numbers.formatDecimal(orderItem.itemPrice, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">개당 가격</td>
-<!--                        <td th:text="${orderItem.quantity}">배송비</td>-->
-                        <td th:text="${orderItem.quantity}">진행 정보</td>
-                    </tr>
-                </tbody>
-            </table>
+                                  <div>
+                                      
+                                  </div>
+                                  <div>
+                                    <h5><strong>상품명 </strong><span id="packageName"></span></h5> 
+                                </div>
+                                <br>
+                                <div>
+                                    <h5><strong>받는분 성함 </strong><span id="receiverName"></span></h5> 
+                                </div>
+                                <br>
+                                <div>
+                                    <h5><strong>우편번호 </strong><span id="receiverPostcode"></span></h5> 
+                                </div>
+                                <br>
+                                <div>
+                                    <h5><strong>받는분 주소 </strong><span id="receiverAddress"></span></h5> 
+                                </div>
+                                <br>
+                                <div>
+                                    <h5><strong>받는분 연락처 </strong><span id="receiverPhoneNumber"></span></h5> 
+                                </div>
+                                
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
 
-            <label for="paymentDetail">결제 정보</label>
-            <table class="table" id="paymentDetail">
-                <thead>
-                <tr>
-                    <th scope="col">결제사</th>
-                    <th scope="col">결제 방법</th>
-                    <th scope="col">상품가격</th>
-                    <th scope="col">배송가격</th>
-                    <th scope="col">총액</th>
-                </tr>
-                </thead>
-                <tbody>
-                    <tr th:with="paymentDetail = ${orderDetailResponse.paymentDetailResponse}">
-                        <td th:text="${paymentDetail.pg}">결제사</td>
-                        <td th:text="${paymentDetail.payMethod}">결제 방법</td>
-                        <td th:text="${#numbers.formatDecimal(paymentDetail.paymentTotalPrice, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">상품가격</td>
-                        <td th:text="${#numbers.formatDecimal(paymentDetail.paymentTotalShippingFee, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">배송가격</td>
-                        <td th:text="${#numbers.formatDecimal(paymentDetail.paymentTotalPrice + paymentDetail.paymentTotalShippingFee, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">총액</td>
-                    </tr>
-                </tbody>
-            </table>
+                    <tbody>
+                        <tr th:each="orderItem : ${orderDetailResponse.orderItemResponses}">
+                            <td th:text="${#temporals.format(orderItem.orderDate, 'yyyy-MM-dd HH:mm')}">주문날짜</td>
+                            <td th:text="${orderItem.sellerCompanyName}">판매자</td>
+
+                            <td style="width: 6rem;"><img class="bd-placeholder-img card-img-top img-fluid" width="100%"
+                                    height="100%" th:src="'data:image/jpeg;base64,'+${orderItem.mainImage}" alt="..." />
+                            </td>
+                            <td th:text="${orderItem.itemName}">주문내역</td>
+                            <td th:text="${orderItem.quantity}">개수</td>
+                            <td
+                                th:text="${#numbers.formatDecimal(orderItem.itemPrice, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                                개당 가격</td>
+                            <td th:inline="text">[[${orderItem.deliveryStatus}]]<br>
+                                <span th:if="${orderItem.isTrackingStarted == true}">
+                                    <button type="button" th:onclick="retrievePackageData([[${orderItem.trackingNumber}]])" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#trackingPackage">
+                                        배송 조회
+                                      </button>
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <label for="paymentDetail">결제 정보</label>
+                <table class="table" id="paymentDetail">
+                    <thead>
+                        <tr>
+                            <th scope="col">결제사</th>
+                            <th scope="col">결제 방법</th>
+                            <th scope="col">상품가격</th>
+                            <th scope="col">배송가격</th>
+                            <th scope="col">총액</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:with="paymentDetail = ${orderDetailResponse.paymentDetailResponse}">
+                            <td th:text="${paymentDetail.pg}">결제사</td>
+                            <td th:text="${paymentDetail.payMethod}">결제 방법</td>
+                            <td
+                                th:text="${#numbers.formatDecimal(paymentDetail.paymentTotalPrice, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                                상품가격</td>
+                            <td
+                                th:text="${#numbers.formatDecimal(paymentDetail.paymentTotalShippingFee, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                                배송가격</td>
+                            <td
+                                th:text="${#numbers.formatDecimal(paymentDetail.paymentTotalPrice + paymentDetail.paymentTotalShippingFee, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                                총액</td>
+                        </tr>
+                    </tbody>
+                </table>
 
 
-            <label for="buyerDetail">구매자 정보</label>
-            <table class="table" id="buyerDetail">
-                <thead>
-                <tr>
-                    <th scope="col">성명</th>
-                    <th scope="col">주소</th>
-                    <th scope="col">이메일</th>
-                    <th scope="col">전화번호</th>
-                </tr>
-                </thead>
-                <tbody>
+                <label for="buyerDetail">구매자 정보</label>
+                <table class="table" id="buyerDetail">
+                    <thead>
+                        <tr>
+                            <th scope="col">성명</th>
+                            <th scope="col">주소</th>
+                            <th scope="col">이메일</th>
+                            <th scope="col">전화번호</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <tbody>
                         <tr th:with="buyerDetail = ${orderDetailResponse.paymentDetailResponse}">
                             <td th:text="${buyerDetail.buyerName}">성명</td>
@@ -86,20 +144,20 @@
                             <td th:text="${buyerDetail.buyerTel}">전화번호</td>
                         </tr>
                     </tbody>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
 
-            <label for="receiverDetail">수취자 정보</label>
-            <table class="table" id="receiverDetail">
-                <thead>
-                <tr>
-                    <th scope="col">성명</th>
-                    <th scope="col">주소</th>
-                    <th scope="col">이메일</th>
-                    <th scope="col">전화번호</th>
-                </tr>
-                </thead>
-                <tbody>
+                <label for="receiverDetail">수취자 정보</label>
+                <table class="table" id="receiverDetail">
+                    <thead>
+                        <tr>
+                            <th scope="col">성명</th>
+                            <th scope="col">주소</th>
+                            <th scope="col">이메일</th>
+                            <th scope="col">전화번호</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <tbody>
                         <tr th:with="receiverDetail = ${orderDetailResponse.paymentDetailResponse}">
                             <td th:text="${receiverDetail.receiverName}">성명</td>
@@ -108,20 +166,61 @@
                             <td th:text="${receiverDetail.receiverPhoneNumber}">전화번호</td>
                         </tr>
                     </tbody>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
 
 
-            취소환불정보(있을시)
+                취소환불정보(있을시)
+            </div>
         </div>
+        <script>
+
+            function retrievePackageData(trackingNumber) {
+                const onSuccess = res => {
+                    res.json()
+                        .then(data => {
+
+                            virtualDeliveryResponse = data.virtualDeliveryResponse;
+
+                            document.getElementById('packageTrackingNumber').textContent = virtualDeliveryResponse.trackingNumber;
+                            document.getElementById('packageName').textContent = virtualDeliveryResponse.packageName;
+                            document.getElementById('receiverName').textContent = virtualDeliveryResponse.receiverName;
+                            document.getElementById('receiverAddress').textContent = virtualDeliveryResponse.receiverAddress;
+                            document.getElementById('receiverPhoneNumber').textContent = virtualDeliveryResponse.receiverPhoneNumber;
+                            document.getElementById('receiverPostcode').textContent = virtualDeliveryResponse.receiverPostcode;
+
+                        });
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                fetch(`/api/v1/track-package/` + trackingNumber)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+
+            }
+            // document.getElementById('example').addEventListener('click', () => {
+            //     // let trackingNumber = this.nextElementSibling.value;
+            //     alert( document.getElementById('example').nextElementSibling.value);
+
+            // })
+
+            function goToOrderDetail(id) {
+                window.location.href = "/me/order/detail/" + id;
+            }
+
+
+        </script>
     </div>
-    <script>
-        function goToOrderDetail(id) {
-            window.location.href="/me/order/detail/" + id;
-        }
-
-
-    </script>
-</div>
 </body>
+
 </html>

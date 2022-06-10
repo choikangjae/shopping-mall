@@ -13,6 +13,7 @@ public class SellerDefaultSettingsResponse {
     private Long userId;
 
     private String companyName;
+    private String contactNumber;
 
     private String itemReleaseZipcode;
     private String itemReleaseAddress;

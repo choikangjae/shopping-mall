@@ -48,7 +48,15 @@ public class MeController {
         return "me/home";
     }
 
-    @PostMapping("/privacy")
+//    @PostMapping("/privacy")
+//    public String showPersonalInformationAgreementForm(@CurrentUser User user, Model model) {
+//        if (user == null) {
+//            return "redirect:/";
+//        }
+//        model.addAttribute("user", user);
+//        return "me/agreement";
+//    }
+    @GetMapping("/privacy")
     public String showPersonalInformationAgreementForm(@CurrentUser User user, Model model) {
         if (user == null) {
             return "redirect:/";

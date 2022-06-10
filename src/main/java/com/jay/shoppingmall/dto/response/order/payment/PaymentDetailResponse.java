@@ -42,7 +42,6 @@ public class PaymentDetailResponse {
 
     private String buyerPostcode;
 
-
     private String receiverAddress;
 
     private String receiverEmail;
@@ -53,5 +52,6 @@ public class PaymentDetailResponse {
 
     private String receiverPhoneNumber;
 
+    private Boolean isAllItemTrackingNumberIssued;
 
 }

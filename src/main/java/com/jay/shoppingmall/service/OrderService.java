@@ -18,6 +18,8 @@ import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
 import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.user.User;
 //import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
+import com.jay.shoppingmall.domain.virtual_delivery_company.VirtualDeliveryCompany;
+import com.jay.shoppingmall.domain.virtual_delivery_company.VirtualDeliveryCompanyRepository;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.OrderItemCommonResponse;
 import com.jay.shoppingmall.dto.response.order.OrderItemResponse;
@@ -45,6 +47,7 @@ public class OrderService {
 
     private final PaymentService paymentService;
     private final CartService cartService;
+    private final VirtualDeliveryCompanyRepository virtualDeliveryCompanyRepository;
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
@@ -69,20 +72,35 @@ public class OrderService {
     }
 
     public OrderDetailResponse showOrderDetail(final Long orderId, final User user) {
+
         final Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("해당하는 주문이 없습니다"));
+
+        if (!Objects.equals(user.getId(), order.getUser().getId())) {
+            throw new NotValidException("잘못된 접근입니다");
+        }
         LocalDateTime orderDate = order.getCreatedDate();
+
         //상품조회
         final List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
 
         List<OrderItemResponse> orderItemResponses = new ArrayList<>();
         for (OrderItem orderItem : orderItems) {
 
-            orderItem.getOrderDelivery().getDeliveryStatus();
+            boolean isTrackingStarted = false;
+            String trackingNumber = "";
+            final DeliveryStatus deliveryStatus = orderItem.getOrderDelivery().getDeliveryStatus();
+            if (deliveryStatus.equals(DeliveryStatus.DELIVERING) || deliveryStatus.equals(DeliveryStatus.SHIPPED) || deliveryStatus.equals(DeliveryStatus.DELIVERED)) {
+
+                trackingNumber = virtualDeliveryCompanyRepository.findByOrderItemId(orderItem.getId())
+                        .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다")).getTrackingNumber();
+                isTrackingStarted = true;
+            }
+
             final Image image = imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, orderItem.getMainImageId());
             final String mainImage = fileHandler.getStringImage(image);
 
-            final OrderItemResponse orderItemResponse = OrderItemResponse.builder()
+            OrderItemResponse orderItemResponse = OrderItemResponse.builder()
                     .orderDate(orderDate)
                     .itemName(orderItem.getItem().getName())
                     .mainImage(mainImage)
@@ -90,6 +108,9 @@ public class OrderService {
                     .orderItemId(orderItem.getId())
                     .itemPrice(orderItem.getPriceAtPurchase())
                     .quantity(orderItem.getQuantity())
+                    .deliveryStatus(deliveryStatus.getValue())
+                    .trackingNumber(trackingNumber)
+                    .isTrackingStarted(isTrackingStarted)
                     .build();
             orderItemResponses.add(orderItemResponse);
         }

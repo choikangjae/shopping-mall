@@ -21,6 +21,8 @@ public class Seller {
 
     private String companyName;
 
+    private String contactNumber;
+
     @AttributeOverrides({
             @AttributeOverride(name = "zipcode", column = @Column(name = "item_release_zipcode")),
             @AttributeOverride(name = "address", column = @Column(name = "item_release_address")),
@@ -53,8 +55,9 @@ public class Seller {
 
     private Boolean isActivated;
 
-    public void sellerDefaultUpdate(final String companyName, final Address itemReleaseAddress, final Address itemReturnAddress, final Integer shippingFeeDefault, final Integer returnShippingFeeDefault, final Integer shippingFeeFreePolicy, final String defaultDeliveryCompany) {
+    public void sellerDefaultUpdate(final String companyName, final String contactNumber, final Address itemReleaseAddress, final Address itemReturnAddress, final Integer shippingFeeDefault, final Integer returnShippingFeeDefault, final Integer shippingFeeFreePolicy, final String defaultDeliveryCompany) {
         this.companyName = companyName;
+        this.contactNumber = contactNumber;
         this.itemReleaseAddress = itemReleaseAddress;
         this.itemReturnAddress = itemReturnAddress;
         this.shippingFeeDefault = shippingFeeDefault;

@@ -85,6 +85,11 @@ public class SellerApiController {
 
     @PostMapping("/settings")
     public ResponseEntity<?> sellerSettingsAction(@Valid @RequestBody SellerDefaultSettingsRequest request, @CurrentUser User user) {
+        final String trimmedNumber = request.getContactNumber().trim().replace("-", "");
+        request.setContactNumber(trimmedNumber);
+        if (!request.getContactNumber().matches("^0([1|2])([0|1|6|7|8|9])?-?([0-9]{3,4})-?([0-9]{4})$")) {
+            throw new NotValidException("전화번호가 형식에 맞지 않습니다");
+        }
         sellerService.sellerDefaultSettingSave(request, user);
 
         return ResponseEntity.ok(null);
