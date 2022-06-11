@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.dto.request;
+package com.jay.shoppingmall.dto.request.qna;
 
 import com.jay.shoppingmall.domain.qna.QnaCategory;
 import lombok.AccessLevel;

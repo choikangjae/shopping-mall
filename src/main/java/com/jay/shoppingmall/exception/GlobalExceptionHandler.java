@@ -45,6 +45,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //                .build();
 //        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 //    }
+    @ExceptionHandler(ReviewException.class)
+    public ResponseEntity<?> handleReviewException(ReviewException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("REVIEW_NOT_AVAILABLE")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
     @ExceptionHandler(StockInvalidException.class)
     public ResponseEntity<?> handleStockInvalidException(StockInvalidException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()

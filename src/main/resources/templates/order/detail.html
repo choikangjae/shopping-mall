@@ -4,6 +4,43 @@
 
 <head>
     <title>주문조회</title>
+    <style>
+         .rating {
+    float:left;
+    border:none;
+}
+.rating:not(:checked) > input {
+    position:absolute;
+    top:-9999px;
+    clip:rect(0, 0, 0, 0);
+}
+.rating:not(:checked) > label {
+    float:right;
+    width:1em;
+    padding:0 .1em;
+    overflow:hidden;
+    white-space:nowrap;
+    cursor:pointer;
+    font-size:200%;
+    line-height:1.2;
+    color:#ddd;
+}
+.rating:not(:checked) > label:before {
+    content:'★ ';
+}
+.rating > input:checked ~ label {
+    color: #f70;
+}
+.rating:not(:checked) > label:hover, .rating:not(:checked) > label:hover ~ label {
+    color: gold;
+}
+.rating > input:checked + label:hover, .rating > input:checked + label:hover ~ label, .rating > input:checked ~ label:hover, .rating > input:checked ~ label:hover ~ label, .rating > label:hover ~ input:checked ~ label {
+    color: #ea0;
+}
+.rating > label:active {
+    position:relative;
+}
+    </style>
 </head>
 
 <body>
@@ -27,6 +64,9 @@
                             <th scope="col">진행 정보</th>
                         </tr>
                     </thead>
+
+                    <div th:replace="fragments/modal/review :: reviewModal"></div>
+
                     <!-- Modal -->
                     <div class="modal fade" id="trackingPackage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
@@ -89,6 +129,12 @@
                                 <span th:if="${orderItem.isTrackingStarted == true}">
                                     <button type="button" th:onclick="retrievePackageData([[${orderItem.trackingNumber}]])" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#trackingPackage">
                                         배송 조회
+                                      </button>
+                                    <button th:if="${orderItem.isDelivered == true}" type="button" th:onclick="getReviewWriteForm([[${orderItem.orderItemId}]])" data-bs-toggle="modal" data-bs-target="#reviewWriteModal"  class="btn btn-warning">
+                                        리뷰 작성
+                                      </button>
+                                    <button th:if="${orderItem.isDelivered == true}" type="button" th:onclick="goToReturnRequestForm([[${orderItem.orderItemId}]])" class="btn btn-secondary">
+                                        반품 요청
                                       </button>
                                 </span>
                             </td>
@@ -174,6 +220,35 @@
             </div>
         </div>
         <script>
+            function getReviewWriteForm(orderItemId) {
+                const onSuccess = res => {
+                    res.json()
+                        .then(data => {
+                            document.getElementById('orderItemId').value = data.orderItemId;
+                            document.getElementById('orderItemName').textContent = data.name;
+                            document.getElementById('orderItemOnlyText').textContent = data.pointOnlyText;
+                            document.getElementById('orderItemWithPicture').textContent = data.pointWithPicture;
+                        });
+                }
+                const onFailure = res => {
+                    return res.json().then(json => alert(json.message));
+                }
+
+                fetch(`/api/v1/review/write/` + orderItemId)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        alert(err.message);
+                    });
+
+            }
+
+
 
             function retrievePackageData(trackingNumber) {
                 const onSuccess = res => {

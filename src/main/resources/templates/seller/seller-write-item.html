@@ -240,6 +240,7 @@
                     let descriptionImageLength = document.getElementById('descriptionImage').files.length;
                     if (descriptionImageLength > 5) {
                         alert('상품 이미지는 최대 5개까지만 가능합니다');
+                        semaphore = semaphore + 1;
                         return false;
                     }
 
@@ -304,10 +305,6 @@
 
                     let mainOptionTrue = optionArray.find(el =>
                         el.option2 === option2Value);
-                    // if (!mainOptionTrue) {
-                    //     alert('대표 상품을 선택해주세요');
-                    //     return false;
-                    // }
                     mainOptionTrue.isOptionMainItem = true;
 
                     let itemName = document.getElementById('itemName').value;
@@ -318,6 +315,7 @@
                     let descriptionImageLength = document.getElementById('descriptionImage').files.length;
                     if (descriptionImageLength > 5) {
                         alert('상품 이미지는 최대 5개까지만 가능합니다');
+                        semaphore = semaphore + 1;
                         return false;
                     }
 

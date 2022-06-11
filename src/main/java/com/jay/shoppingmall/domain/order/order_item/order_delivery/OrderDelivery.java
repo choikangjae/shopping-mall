@@ -27,4 +27,13 @@ public class OrderDelivery {
         this.deliveryStatus = DeliveryStatus.DELIVERING;
         this.deliveryStartDate = LocalDateTime.now();
     }
+    public void deliveryDone() {
+        this.deliveryStatus = DeliveryStatus.DELIVERED;
+        this.deliveryUpdateDate = LocalDateTime.now();
+    }
+    public void paymentDone() {
+        this.deliveryStatus = DeliveryStatus.FINISHED;
+        this.deliveryUpdateDate = LocalDateTime.now();
+    }
+
 }

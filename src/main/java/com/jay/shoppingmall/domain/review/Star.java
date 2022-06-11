@@ -1,5 +1,9 @@
 package com.jay.shoppingmall.domain.review;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Predicate;
+
 public enum Star {
 //    TEN(10),
 //    NINE(9),
@@ -19,5 +23,11 @@ public enum Star {
     }
     public Integer value() {
         return value;
+    }
+    public static Star getByValue(Integer value) {
+        return Arrays.stream(values())
+                .filter(v -> Objects.equals(v.value, value))
+                .findAny()
+                .orElse(null);
     }
 }

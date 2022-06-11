@@ -4,7 +4,7 @@ import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.controller.common.SellerValidator;
 import com.jay.shoppingmall.controller.common.UserValidator;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.PasswordResetRequest;
+import com.jay.shoppingmall.dto.request.password.PasswordResetRequest;
 import com.jay.shoppingmall.dto.request.UserValidationRequest;
 import com.jay.shoppingmall.service.AuthService;
 import com.jay.shoppingmall.service.MailService;

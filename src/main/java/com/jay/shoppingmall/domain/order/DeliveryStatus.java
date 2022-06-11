@@ -10,6 +10,7 @@ public enum DeliveryStatus {
     SHIPPED("배송 출발", 11),
     DELIVERING("배송 중", 12),
     DELIVERED("배송 완료", 13),
+    FINISHED("구매 확정", 14),
 
     //다른 ENUM으로 관리할 것. priority를 위해
 //    ORDER_CANCEL_REQUEST("주문 취소 요청"),

@@ -7,6 +7,8 @@ import java.util.Optional;
 
 public interface VirtualDeliveryCompanyRepository extends JpaRepository<VirtualDeliveryCompany, Long> {
 
+    List<VirtualDeliveryCompany> findByTrackingNumber(String trackingNumber);
+
     Optional<VirtualDeliveryCompany> findFirstByTrackingNumber(String trackingNumber);
 
     Optional<List<VirtualDeliveryCompany>> findByUserId(Long userId);

@@ -22,7 +22,7 @@ import com.jay.shoppingmall.domain.zzim.Zzim;
 import com.jay.shoppingmall.domain.zzim.ZzimRepository;
 import com.jay.shoppingmall.dto.request.ItemOptionRequest;
 import com.jay.shoppingmall.dto.request.ItemZzimRequest;
-import com.jay.shoppingmall.dto.response.ReviewStarCalculationResponse;
+import com.jay.shoppingmall.dto.response.review.ReviewStarCalculationResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemDetailResponse;
@@ -32,9 +32,7 @@ import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.StockInvalidException;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
-import lombok.ToString;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -101,16 +99,6 @@ public class ItemService {
                 .customPage(customPage)
                 .content(itemResponses)
                 .build();
-//        return itemRepository.findAll(pageable)
-//                .map(item -> ItemResponse.builder()
-//                        .id(item.getId())
-//                        .name(item.getName())
-//                        .priceNow(item.getPrice())
-//                        .originalPrice()
-//                        .zzim(item.getZzim())
-//                        .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
-//                        .isZzimed(user != null && zzimService.isZzimed(user.getId(), item.getId()))
-//                        .build());
     }
 
     private void setItemsZzimBoolean(final User user, final List<ItemResponse> itemResponses) {

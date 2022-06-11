@@ -2,7 +2,7 @@ package com.jay.shoppingmall.controller.api;
 
 import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.QnaPageRequest;
+import com.jay.shoppingmall.dto.request.qna.QnaPageRequest;
 import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;
 import com.jay.shoppingmall.service.QnaService;
 import lombok.RequiredArgsConstructor;

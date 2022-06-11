@@ -29,4 +29,6 @@ public class OrderItemResponse {
     private Boolean isTrackingStarted;
 
     private String trackingNumber;
+
+    private Boolean isDelivered;
 }

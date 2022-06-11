@@ -3,6 +3,7 @@ package com.jay.shoppingmall.domain.review;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.user.User;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -25,13 +26,8 @@ public class Review extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Min(20)
-    @Column(nullable = false)
-    private String description;
+    private String text;
 
-//    private Image image;
-
-    @Column(name = "star", nullable = false)
     @Enumerated(EnumType.STRING)
     private Star star;
 
@@ -40,13 +36,11 @@ public class Review extends BaseTimeEntity {
 
     private LocalDateTime deletedDate;
 
-    //nto1
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    //nto1
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
-    private Item item;
+    @JoinColumn(name = "order_item_id")
+    private OrderItem orderItem;
 }

@@ -1,6 +1,6 @@
 package com.jay.shoppingmall.dto.response.item;
 
-import com.jay.shoppingmall.dto.response.ReviewStarCalculationResponse;
+import com.jay.shoppingmall.dto.response.review.ReviewStarCalculationResponse;
 import lombok.*;
 
 import java.time.LocalDateTime;

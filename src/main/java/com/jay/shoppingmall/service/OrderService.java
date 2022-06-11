@@ -96,6 +96,10 @@ public class OrderService {
                         .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다")).getTrackingNumber();
                 isTrackingStarted = true;
             }
+            boolean isDelivered = false;
+            if (deliveryStatus.equals(DeliveryStatus.DELIVERED)) {
+                isDelivered = true;
+            }
 
             final Image image = imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, orderItem.getMainImageId());
             final String mainImage = fileHandler.getStringImage(image);
@@ -111,6 +115,7 @@ public class OrderService {
                     .deliveryStatus(deliveryStatus.getValue())
                     .trackingNumber(trackingNumber)
                     .isTrackingStarted(isTrackingStarted)
+                    .isDelivered(isDelivered)
                     .build();
             orderItemResponses.add(orderItemResponse);
         }

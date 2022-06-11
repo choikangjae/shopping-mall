@@ -36,6 +36,7 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.dto.request.*;
+import com.jay.shoppingmall.dto.request.qna.QnaAnswerRequest;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.OrderItemResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;

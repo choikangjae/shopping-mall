@@ -1,4 +1,4 @@
-package com.jay.shoppingmall.dto.request;
+package com.jay.shoppingmall.dto.request.password;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

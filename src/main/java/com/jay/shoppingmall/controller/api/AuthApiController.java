@@ -2,7 +2,7 @@ package com.jay.shoppingmall.controller.api;
 
 import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.PasswordResetRequest;
+import com.jay.shoppingmall.dto.request.password.PasswordResetRequest;
 import com.jay.shoppingmall.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

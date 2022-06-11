@@ -5,7 +5,7 @@ import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
-import com.jay.shoppingmall.dto.request.PasswordRequest;
+import com.jay.shoppingmall.dto.request.password.PasswordRequest;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.SimpleOrderResponse;
 import com.jay.shoppingmall.service.ItemService;

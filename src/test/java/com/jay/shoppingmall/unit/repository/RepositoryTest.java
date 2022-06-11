@@ -19,10 +19,10 @@ class RepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-//    @BeforeEach
-//    void setup() throws Exception {
-//        userRepository.save(user());
-//    }
+    @BeforeEach
+    void setup() throws Exception {
+        userRepository.save(user());
+    }
 
     private User user() {
         return User.builder()

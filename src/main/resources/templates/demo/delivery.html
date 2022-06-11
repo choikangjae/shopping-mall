@@ -30,11 +30,11 @@
                         <td th:text="${orderItemResponse.quantity}">개수</td>
                         <td th:text="${orderItemResponse.deliveryStatus}">배송상태</td>
                         <td>
-                            <button th:id="'deliveryDone' + ${orderItemResponse.orderItemId}" th:onclick="deliveryDone([[${orderItemResponse.orderItemId}]])"
+                            <button class="btn btn-primary" th:id="'deliveryDone' + ${orderItemResponse.orderItemId}" th:onclick="deliveryDone([[${orderItemResponse.orderItemId}]])"
                             >
                                 배송 완료로 변경
                             </button>
-                            <input th:value="${orderItemResponse.orderItemId}">
+                            <input type="hidden" th:value="${orderItemResponse.orderItemId}">
                         </td>
                     </tr>
                 </tbody>

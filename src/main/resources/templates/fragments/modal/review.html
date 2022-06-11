@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <div th:fragment="reviewModal" class="modal fade" id="reviewWriteModal" tabindex="-1" data-bs-backdrop="static"
+        data-bs-keyboard="false" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">리뷰 작성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form id="reviewWriteForm">
+                            <div>
+                                <input type="hidden" id="orderItemId">
+                                <h5><strong>상품명 </strong>
+                                    <div class="mt-3">
+                                        <span id="orderItemName">
+
+                                        </span>
+                                    </div>
+                                </h5>
+                            </div>
+                            <br>
+
+                            <div>
+
+                            </div>
+                            <div>
+                                <h5><strong>포인트 </strong> <br>
+                                    <div class="mt-3">
+                                        <span id="orderItemOnlyText"></span> 포인트 <br>
+                                        사진과 함께 작성시 총 <span class="text-warning" id="orderItemWithPicture"></span> 포인트
+                                    </div>
+                                </h5>
+                            </div>
+                            <br>
+                            <div>
+                                <h5><strong>리뷰 </strong></h5>
+                                <fieldset class="rating" id="reviewStar">
+                                    <input type="radio" id="star5" name="rating" value="5" />
+                                    <label for="star5">5 stars</label>
+                                    <input type="radio" id="star4" name="rating" value="4" />
+                                    <label for="star4">4 stars</label>
+                                    <input type="radio" id="star3" name="rating" value="3" />
+                                    <label for="star3">3 stars</label>
+                                    <input type="radio" id="star2" name="rating" value="2" />
+                                    <label for="star2">2 stars</label>
+                                    <input type="radio" id="star1" name="rating" value="1" />
+                                    <label for="star1">1 star</label>
+                                </fieldset>
+                                <br>
+                            </div>
+                            <br>
+                            <div>
+                                <h5><strong>사진 </strong>
+                                    <div class="input-group mt-3">
+                                        <input type="file" class="form-control" id="reviewImages"
+                                            aria-describedby="inputGroupFileAddon04" aria-label="Upload" multiple>
+                                    </div>
+                                </h5>
+                            </div>
+                            <br>
+                            <div>
+                                <h5><strong>내용 (20글자 이상) </strong>
+                                    <textarea id="reviewText" class="form-control mt-3" style="height: 200px"></textarea>
+                                </h5>
+                            </div>
+                            <br>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="reviewSubmit" class="btn btn-primary">작성 완료</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            let semaphore = 1;
+            document.getElementById('reviewSubmit').addEventListener('click', (e) => {
+                e.preventDefault();
+
+                semaphore = semaphore - 1;
+
+                if (semaphore == 0) {
+                    let orderItemId = document.getElementById('orderItemId').value;
+                    let star;
+                    let text = document.getElementById('reviewText').value;
+
+                    try {
+                        star = document.querySelector('input[name="rating"]:checked').value;
+                    } catch (e) {
+                        alert('리뷰 평점을 선택해주세요');
+                        semaphore += 1;
+                        return false;
+                    }
+                    if (reviewText.length > 20) {
+                        alert('내용을 20글자 이상 작성해주세요' + '현재 ' + reviewText.length + ' 글자');
+                        semaphore += 1;
+                        return false;
+                    }
+
+                    let reviewImages = document.getElementById('reviewImages').files.length;
+                    if (reviewImages == 0) {
+                        if (!confirm('리뷰 이미지없이 작성하시겠습니까?')) {
+                            semaphore += 1;
+                            return false;
+                        }
+                    }
+                    if (reviewImages > 5) {
+                        alert('이미지는 최대 5개까지만 가능합니다');
+                        semaphore += 1;
+                        return false;
+                    }
+
+                    let formData = new FormData();
+
+                    for (let i = 0; i < reviewImages; i++) {
+                        formData.append("reviewImages", document.getElementById('reviewImages').files[i]);
+                    }
+
+                    formData.append('request', new Blob([JSON.stringify({
+                        orderItemId,
+                        star,
+                        text
+                    })], {
+                        type: "application/json"
+                    }));
+
+                    let data = {
+                        method: 'POST',
+                        body: formData
+                    };
+
+                    const onSuccess = res => {
+                        res.json()
+                            .then((data) => {
+                                alert('리뷰 등록이 완료되었습니다');
+                            })
+                    }
+                    const onFailure = res => {
+                        return res.json().then(json => alert(json.message));
+                    }
+
+                    fetch(`/api/v1/review/write`, data)
+                        .then(res => {
+                            if (!res.ok) {
+                                throw res;
+                            }
+                            return res
+                        })
+                        .then(onSuccess, onFailure)
+                        .catch(err => {
+                            alert(err.message);
+                        });
+                }
+                semaphore += 1;
+            })
+
+        </script>
+    </div>
+</body>
+
+</html>
