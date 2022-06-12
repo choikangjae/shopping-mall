@@ -1,6 +1,7 @@
 package com.jay.shoppingmall.domain.order.order_item.order_delivery;
 
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
+import com.jay.shoppingmall.exception.exceptions.DeliveryException;
 import lombok.*;
 
 import javax.persistence.*;
@@ -32,6 +33,9 @@ public class OrderDelivery {
         this.deliveryUpdateDate = LocalDateTime.now();
     }
     public void paymentDone() {
+        if (this.deliveryStatus.equals(DeliveryStatus.FINISHED)) {
+            throw new DeliveryException("이미 배송이 완료된 상품입니다");
+        }
         this.deliveryStatus = DeliveryStatus.FINISHED;
         this.deliveryUpdateDate = LocalDateTime.now();
     }

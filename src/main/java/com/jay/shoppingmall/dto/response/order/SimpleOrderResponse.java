@@ -4,6 +4,7 @@ import com.jay.shoppingmall.domain.order.DeliveryStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -19,7 +20,7 @@ public class SimpleOrderResponse {
 
     private String mainImage;
 
-    private String deliveryStatus;
+    private List<String> deliveryStatuses;
 
     private String merchantUid;
 

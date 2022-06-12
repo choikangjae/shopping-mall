@@ -4,6 +4,7 @@ import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.seller.Seller;
+import com.jay.shoppingmall.exception.exceptions.MoneyTransactionException;
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,6 +13,8 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PaymentPerSeller {
 
@@ -20,10 +23,14 @@ public class PaymentPerSeller {
     private Long id;
 
     private Long itemTotalPricePerSeller;
+    @Column(columnDefinition = "boolean default 0")
+    private Boolean isMoneyTransferredToSeller = false;
 
     private Integer itemTotalQuantityPerSeller;
 
     private Integer itemShippingFeePerSeller;
+    @Column(columnDefinition = "boolean default 0")
+    private Boolean isMoneyTransferredToDeliveryCompany = false;
 
 //    @OneToMany(mappedBy = "paymentPerSeller")
 //    @Builder.Default
@@ -56,5 +63,12 @@ public class PaymentPerSeller {
     private void paymentPerSeller(final Payment payment) {
         this.payment = payment;
         payment.getPaymentPerSellers().add(this);
+    }
+
+    public void paymentToSellerTrue() {
+        if (this.isMoneyTransferredToSeller) {
+            throw new MoneyTransactionException("이미 정산이 완료된 주문입니다");
+        }
+        this.isMoneyTransferredToSeller = true;
     }
 }

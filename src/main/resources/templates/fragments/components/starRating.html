@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="starRating">
+    <div>
+                            <span class="fa fa-star text-warning"
+                                  th:if="${response.fullStar != 0}"
+                                  th:each="star : ${#numbers.sequence(1, response.fullStar)}"></span><span
+            class="fa fa-star-half-alt text-warning"
+            th:if="${response.halfStar != 0}"
+            th:each="star : ${#numbers.sequence(1, response.halfStar)}"></span><span
+            class="fa fa-star" th:if="${response.emptyStar != 0}"
+            th:each="star : ${#numbers.sequence(1, response.emptyStar)}"></span>
+        <span th:text="'(' + ${response.reviewCount} + ' 명)'"></span>
+    </div>
+
+</div>
+</body>
+</html>

@@ -34,7 +34,7 @@
             <br>
             <label for="recentOrders">최근 주문 내역</label>
             <span class="text-center" th:if="${#lists.isEmpty(orders)}">
-                <h5>최근 주문 내역이 없습니다</h5>
+                최근 주문 내역이 없습니다
             </span>
             <table class="table" id="recentOrders">
                 <thead>
@@ -54,7 +54,11 @@
                                                   height="100%"
                                                   th:src="'data:image/jpeg;base64,'+${order.mainImage}" alt="..."/></td>
                     <td th:text="${order.name}">주문내역</td>
-                    <td th:text="${order.deliveryStatus}">배송상태</td>
+                    <td>
+                        <div th:each="deliveryStatus : ${order.deliveryStatuses}">
+                            <p th:text="${deliveryStatus}"></p>
+                        </div>
+                    </td>
                     <td th:text="${order.merchantUid}">주문번호</td>
                     <td th:text="${#numbers.formatDecimal(order.amount, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
                 </tr>

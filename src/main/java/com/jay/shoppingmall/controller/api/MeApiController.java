@@ -32,7 +32,6 @@ import java.util.Objects;
 public class MeApiController {
 
     private final MeService meService;
-    private final AuthenticationManager authenticationManager;
     private final UpdateValidator updateValidator;
     private final AuthService authService;
     private final SessionUpdater sessionUpdater;
@@ -57,7 +56,6 @@ public class MeApiController {
 
     @PostMapping("/me/password-update")
     public ResponseEntity<?> passwordUpdate(@Valid @RequestBody PasswordChangeRequest passwordChangeRequest, @CurrentUser User user) {
-
         if (user == null) {
             throw new UserNotFoundException("잘못된 요청입니다");
         }
@@ -73,18 +71,6 @@ public class MeApiController {
 
         return ResponseEntity.ok(null);
     }
-
-//    @PostMapping("/reconfirm")
-//    public ResponseEntity<?> reConfirm(@RequestBody PasswordCheckRequest password, @CurrentUser User user, RedirectAttributes redirectAttributes) {
-//        if (password.getPassword().isEmpty()) {
-//            return ResponseEntity.badRequest().body(null);
-//        }
-//        if (!meService.passwordCheck(password.getPassword(), user)) {
-//            return ResponseEntity.badRequest().body(null);
-//        }
-//        request.getSession().setAttribute("password", password.getPassword());
-//        return ResponseEntity.ok().body(true);
-//    }
 
     @PostMapping("/privacy/update")
     public ResponseEntity<ErrorResponse> updateMe(@Valid @RequestBody UserUpdateRequest request, BindingResult bindingResult,

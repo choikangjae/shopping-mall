@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,7 +70,7 @@ public class DemoController {
                                 "demo@seller", "password123"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         session.setAttribute("demo", "password123");
-        return "redirect:/";
+        return "redirect:/seller";
     }
 
     @PostMapping("/demo/login/seller2")
@@ -80,7 +81,7 @@ public class DemoController {
                                 "demo@seller2", "password123"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         session.setAttribute("demo", "password123");
-        return "redirect:/";
+        return "redirect:/seller";
     }
 
     @PostMapping("/demo/login/admin")
@@ -90,7 +91,7 @@ public class DemoController {
                         new UsernamePasswordAuthenticationToken(
                                 "demo@admin", "specialPassWorD123"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return "redirect:/";
+        return "redirect:/admin";
     }
 
 

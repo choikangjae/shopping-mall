@@ -26,10 +26,12 @@
 
         <div class="album py-5 bg-light">
             <div class="container">
-                <div th:replace="fragments/itemCard :: itemCard"></div>
+                <div th:replace="fragments/components/itemCard :: itemCard"></div>
             </div>
             <br>
-            <div th:replace="fragments/pagination :: pagination"></div>
+            <th:block th:with="pages = ${items.customPage}">
+            <div th:replace="fragments/components/pagination :: pagination"></div>
+            </th:block>
         </div>
     </main>
 </div>

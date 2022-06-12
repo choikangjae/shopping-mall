@@ -2,6 +2,8 @@ package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.model.page.CustomPage;
+import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
 import com.jay.shoppingmall.domain.seller.SellerRepository;
@@ -13,6 +15,7 @@ import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.QnaException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
+import com.jay.shoppingmall.service.common.CommonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +38,7 @@ public class QnaService {
     private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
     private final SellerService sellerService;
+    private final CommonService commonService;
 
     public QnaResponse qnaFindById(final Long id) {
         Qna qna = qnaRepository.findById(id)
@@ -81,7 +85,7 @@ public class QnaService {
             qnaRepository.save(qna);
         }
 
-        QnaResponse qnaResponse = QnaResponse.builder()
+        return QnaResponse.builder()
                 .username(qna.getUser().getUsername())
                 .answer(qna.getAnswer())
                 .isAnswered(qna.getIsAnswered())
@@ -92,8 +96,6 @@ public class QnaService {
                 .question(qna.getQuestion())
                 .isEmailNotification(qna.getIsEmailNotification())
                 .build();
-
-        return qnaResponse;
     }
 
     public QnaResponseWithPagination getQnaListByPaging(Long itemId, User user, Pageable pageable) {
@@ -144,6 +146,52 @@ public class QnaService {
                 .totalElements(qnas.getTotalElements())
                 .totalPages(qnas.getTotalPages() == 0 ? 1 : qnas.getTotalPages())
                 .qnaResponses(qnaResponses)
+                .build();
+    }
+
+    public PageDto getQnas(Long itemId, User user, Pageable pageable) {
+        Page<Qna> qnaPage = qnaRepository.findAllByItemId(itemId, pageable);
+        CustomPage customPage = new CustomPage(qnaPage);
+        List<Qna> qnas = qnaPage.getContent();
+        final Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
+
+        List<QnaResponse> qnaResponses = new ArrayList<>();
+        for (Qna qna : qnas) {
+            boolean isQnaOwner = user != null && user.getEmail().equals(qna.getUser().getEmail());
+
+            final String anonymousName = commonService.anonymousName(qna.getUser().getUsername());
+
+            //비밀글일때
+            QnaResponse qnaResponse = QnaResponse.builder()
+                    .username(anonymousName)
+                    .isAnswered(qna.getIsAnswered())
+                    .isSecret(qna.getIsSecret())
+                    .itemId(qna.getItem().getId())
+                    .qnaCategory(qna.getQnaCategory().value())
+                    .qnaId(qna.getId())
+                    .answer(qna.getIsSecret() ? "" : qna.getAnswer())
+                    .question(qna.getIsSecret() ? "" : qna.getQuestion())
+                    .isEmailNotification(qna.getIsEmailNotification())
+                    .createdDate(qna.getCreatedDate())
+                    .isQnaOwner(isQnaOwner)
+                    .build();
+            //주인일때
+            if (isQnaOwner) {
+                qnaResponse.setQuestion(qna.getQuestion());
+                qnaResponse.setAnswer(qna.getAnswer());
+                qnaResponse.setIsQnaOwner(isQnaOwner);
+            }
+            //판매자일때
+            if (isSellerItem){
+                qnaResponse.setIsSecret(false);
+                qnaResponse.setQuestion(qna.getQuestion());
+                qnaResponse.setAnswer(qna.getAnswer());
+            }
+            qnaResponses.add(qnaResponse);
+        }
+        return PageDto.builder()
+                .content(qnaResponses)
+                .customPage(customPage)
                 .build();
     }
 

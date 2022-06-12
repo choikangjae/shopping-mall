@@ -47,10 +47,6 @@ public class PaymentApiController {
         String imp_uid = queryParameters.get("imp_uid");
         String merchant_uid = queryParameters.get("merchant_uid");
 
-        System.out.println(queryParameters.get("imp_uid"));
-        System.out.println(queryParameters.get("merchant_uid"));
-
-        //flash로 보내기? session? 그냥 내리기? redirect 되면서 값을 뿌려주는 방법?
         PaymentDetailResponse paymentDetailResponse = paymentService.paymentTotal(imp_uid, merchant_uid, user);
 
         return ResponseEntity.ok(paymentDetailResponse);

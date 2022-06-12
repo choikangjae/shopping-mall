@@ -27,16 +27,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .resourceChain(false);
         registry.setOrder(1);
     }
-
-    //    @Value("${resources.path}")
-//    private String uploadImagePath;
-//
-//    @Value("${resources.uri}")
-//    private String uploadImageUri;
-//
-//    @Override
-//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        registry.addResourceHandler(uploadImageUri +"/**")
-//                .addResourceLocations("file://" + uploadImagePath);
-//    }
 }

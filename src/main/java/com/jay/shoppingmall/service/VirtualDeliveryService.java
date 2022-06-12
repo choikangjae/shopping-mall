@@ -15,6 +15,7 @@ import com.jay.shoppingmall.dto.response.VirtualDeliveryResponseForAnonymous;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.NotValidException;
 import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
+import com.jay.shoppingmall.service.common.CommonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,8 @@ public class VirtualDeliveryService {
     private final OrderItemRepository orderItemRepository;
     private final SellerRepository sellerRepository;
     private final VirtualDeliveryCompanyRepository virtualDeliveryCompanyRepository;
+
+    private final CommonService commonService;
 
     public void issueTrackingNumber(final List<Long> orderItemIds, User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -118,16 +121,10 @@ public class VirtualDeliveryService {
     private VirtualDeliveryResponseForAnonymous getVirtualDeliveryResponseForAnonymous(final String trackingNumber, final VirtualDeliveryCompany virtualDeliveryCompany) {
         return VirtualDeliveryResponseForAnonymous.builder()
                 .trackingNumber(trackingNumber)
-                .senderName(anonymousName(virtualDeliveryCompany.getSenderName()))
-                .receiverName(anonymousName(virtualDeliveryCompany.getReceiverName()))
+                .senderName(commonService.anonymousName(virtualDeliveryCompany.getSenderName()))
+                .receiverName(commonService.anonymousName(virtualDeliveryCompany.getReceiverName()))
                 .build();
     }
 
-    public String anonymousName(String name) {
-        StringBuilder stringBuilder = new StringBuilder(name);
-        stringBuilder.delete(stringBuilder.length() / 2, stringBuilder.length());
-        stringBuilder.append("*".repeat(stringBuilder.length() / 2 + 1));
-        return stringBuilder.toString();
-    }
 
 }

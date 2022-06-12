@@ -21,11 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final ImageRepository imageRepository;
-    private final ItemRepository itemRepository;
-    private final FileHandler fileHandler;
     private final UserRepository userRepository;
-
 
     public List<UserDetailResponse> showUserList(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);

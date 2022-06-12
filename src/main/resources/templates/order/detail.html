@@ -59,6 +59,7 @@
                             <th scope="col">판매자</th>
                             <th scope="col"></th>
                             <th scope="col">상품명</th>
+                            <th scope="col">옵션</th>
                             <th scope="col">개수</th>
                             <th scope="col">개당 가격</th>
                             <th scope="col">진행 정보</th>
@@ -68,7 +69,7 @@
                     <div th:replace="fragments/modal/review :: reviewModal"></div>
 
                     <!-- Modal -->
-                    <div class="modal fade" id="trackingPackage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal" id="trackingPackage" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                           <div class="modal-content">
                             <div class="modal-header">
@@ -121,6 +122,10 @@
                                     height="100%" th:src="'data:image/jpeg;base64,'+${orderItem.mainImage}" alt="..." />
                             </td>
                             <td th:text="${orderItem.itemName}">주문내역</td>
+                            <td>
+                                <div th:text="${orderItem.option1}"></div>
+                                <div th:text="${orderItem.option2}"></div>
+                            </td>
                             <td th:text="${orderItem.quantity}">개수</td>
                             <td
                                 th:text="${#numbers.formatDecimal(orderItem.itemPrice, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
@@ -182,14 +187,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                    <tbody>
                         <tr th:with="buyerDetail = ${orderDetailResponse.paymentDetailResponse}">
                             <td th:text="${buyerDetail.buyerName}">성명</td>
                             <td th:text="${buyerDetail.buyerAddr}">주소</td>
                             <td th:text="${buyerDetail.buyerEmail}">이메일</td>
                             <td th:text="${buyerDetail.buyerTel}">전화번호</td>
                         </tr>
-                    </tbody>
                     </tbody>
                 </table>
 
@@ -204,14 +207,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                    <tbody>
                         <tr th:with="receiverDetail = ${orderDetailResponse.paymentDetailResponse}">
                             <td th:text="${receiverDetail.receiverName}">성명</td>
                             <td th:text="${receiverDetail.receiverAddress}">주소</td>
                             <td th:text="${receiverDetail.receiverEmail}">이메일</td>
                             <td th:text="${receiverDetail.receiverPhoneNumber}">전화번호</td>
                         </tr>
-                    </tbody>
                     </tbody>
                 </table>
 

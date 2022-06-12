@@ -10,12 +10,39 @@
     <div class="container">
         <div th:replace="seller/seller-navbar :: seller-navbar"></div>
 
+        <div>
+            현재 계좌 금액 <span th:text="${balance.bankAccount}"></span>
+        </div>
+        <div>
+            <span class="text-center" th:if="${#lists.isEmpty(balance.sellerBankAccountHistoryResponses)}">
+                최근 정산된 내역이 없습니다
+            </span>
 
-        브랜드명
-        택배비
-        출고지
-        반품/교환지
-        반품배송비
+            <span th:each="response : ${balance.sellerBankAccountHistoryResponses}">
+                거래 내역 <span th:text="${response.transactionMoney}"></span>
+            </span>
+        </div>
+
+        <div>
+            통계
+            일자 매출액 총조회수 총주문량 판매량 TOP3
+        </div>
+        <div>
+            통계
+            손님 장바구니에 많이 들어있는 내 아이템들
+        </div>
+        <div>
+            최근 주문 내역
+        </div>
+        <div>
+            최근 리뷰 내역
+        </div>
+        <div>
+            최근 QnA 내역
+        </div>
+        <div>
+            최근 취소/교환/반품 내역
+        </div>
     </div>
 </div>
 </body>

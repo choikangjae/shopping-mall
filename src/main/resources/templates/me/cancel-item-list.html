@@ -14,9 +14,9 @@
         <div class="container position-relative">
 
             <br>
-            <label for="recentOrders">최근 취소 내역</label>
+            <label for="recentOrders">최근 취소/교환/반품 내역</label>
             <span class="text-center" th:if="${#lists.isEmpty(orders)}">
-                <h5>최근 취소 내역이 없습니다</h5>
+                <h5>최근 취소/교환/반품 내역이 없습니다</h5>
             </span>
             <table class="table" id="recentOrders">
                 <thead>

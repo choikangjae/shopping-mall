@@ -37,7 +37,7 @@ public class ItemApiController {
         return ResponseEntity.ok(zzimResponse);
     }
     @PostMapping("/option/add")
-    public ResponseEntity<?> itemOptionCheckAndAdd(@Valid @RequestBody ItemOptionRequest request, @CurrentUser User user, HttpSession session) {
+    public ResponseEntity<?> itemOptionCheckAndAdd(@RequestBody ItemOptionRequest request, @CurrentUser User user, HttpSession session) {
         if (user == null) {
             throw new UserNotFoundException("로그인이 필요한 서비스입니다");
         }
@@ -48,7 +48,7 @@ public class ItemApiController {
             itemOptionResponses.add(itemOptionResponse);
             session.setAttribute("itemOptions", itemOptionResponses);
         } else {
-//            @SuppressWarnings("unchecked")
+            @SuppressWarnings("unchecked")
             final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
             for (ItemOptionResponse optionResponse : itemOptions) {
                 if (optionResponse.getOption2().equals(itemOptionResponse.getOption2()) && optionResponse.getOption1().equals(itemOptionResponse.getOption1())) {
@@ -67,7 +67,7 @@ public class ItemApiController {
         final String option1 = request.getOption1();
         final String option2 = request.getOption2();
 
-//        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
         if (!itemOptions.isEmpty()) {
             itemOptions.removeIf(itemOptionResponse -> option1.equals(itemOptionResponse.getOption1()) && option2.equals(itemOptionResponse.getOption2()));
@@ -81,7 +81,7 @@ public class ItemApiController {
     @PostMapping("/option/update")
     public ResponseEntity<?> updateOption(@Valid @RequestBody ItemOptionRequest request, HttpSession session) {
 
-//        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
         final ItemOptionResponse itemOptionResponse = itemService.itemOptionUpdate(request);
 

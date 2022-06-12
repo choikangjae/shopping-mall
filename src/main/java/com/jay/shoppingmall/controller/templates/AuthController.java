@@ -65,7 +65,6 @@ public class AuthController {
         if (result.hasErrors()) {
             return "auth/signup";
         }
-
         authService.userRegistration(userValidationRequest);
 
         sessionUpdater.sessionUpdateToken(userValidationRequest.getEmail(), userValidationRequest.getPassword());

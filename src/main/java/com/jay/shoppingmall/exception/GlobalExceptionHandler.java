@@ -53,6 +53,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+    @ExceptionHandler(MoneyTransactionException.class)
+    public ResponseEntity<?> handleMoneyTransactionException(MoneyTransactionException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("FINANCE_TRANSACTION_ERROR")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    @ExceptionHandler(DeliveryException.class)
+    public ResponseEntity<?> handleDeliveryException(DeliveryException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("DELIVERY_NOT_AVAILABLE")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
     @ExceptionHandler(StockInvalidException.class)
     public ResponseEntity<?> handleStockInvalidException(StockInvalidException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()

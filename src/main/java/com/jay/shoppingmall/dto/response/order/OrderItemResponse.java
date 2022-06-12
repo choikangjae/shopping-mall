@@ -14,6 +14,10 @@ public class OrderItemResponse {
 
     private String sellerCompanyName;
 
+    private String option1;
+
+    private String option2;
+
     private String mainImage;
 
     private LocalDateTime orderDate;

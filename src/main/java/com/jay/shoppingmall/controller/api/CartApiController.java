@@ -45,7 +45,7 @@ public class CartApiController {
             HttpSession session,
             @CurrentUser User user) {
 
-//        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
         if (itemOptions == null) {
             throw new ItemNotFoundException("옵션을 선택해주세요");
@@ -61,7 +61,6 @@ public class CartApiController {
 
         return ResponseEntity.ok().body(cartPriceResponse);
     }
-    //seller id랑 총 개수 변경 개수 받아서 셀러별 가격 및 전체 가격 리턴.
     @PostMapping("/item/price")
     public ResponseEntity<?> cartManipulation(@Valid @RequestBody CartManipulationRequest request, @CurrentUser User user) {
         final CartPriceResponse cartPriceResponse = cartService.changeQuantity(request, user);
@@ -75,9 +74,7 @@ public class CartApiController {
         return ResponseEntity.ok(cartPriceTotalResponse);
     }
     @GetMapping("/select/{boolean}")
-    public ResponseEntity<?> getCartTotals(@PathVariable("boolean") String check, @CurrentUser User user) {
-        System.out.println("check = " + check);
-
+    public ResponseEntity<?> getCartSelects(@PathVariable("boolean") String check, @CurrentUser User user) {
         final CartPriceResponse cartPriceResponse = cartService.cartSelect(check, user);
 
         return ResponseEntity.ok(cartPriceResponse);

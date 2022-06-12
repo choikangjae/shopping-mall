@@ -45,20 +45,18 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @AllArgsConstructor
-//@ToString
 public class ItemService {
 
     private final ItemRepository itemRepository;
     private final SellerRepository sellerRepository;
     private final ImageRepository imageRepository;
-    private final FileHandler fileHandler;
     private final ZzimRepository zzimRepository;
-    private final ZzimService zzimService;
     private final ItemOptionRepository itemOptionRepository;
-    private final ItemStockRepository itemStockRepository;
-    private final ItemPriceRepository itemPriceRepository;
-    private final ReviewRepository reviewRepository;
     private final BrowseHistoryRepository browseHistoryRepository;
+
+    private final ZzimService zzimService;
+    private final FileHandler fileHandler;
+    private final SellerService sellerService;
 
     public ReviewStarCalculationResponse reviewStarCalculation(Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(
@@ -79,6 +77,7 @@ public class ItemService {
             halfStar = 1.0;
         }
         return ReviewStarCalculationResponse.builder()
+                .reviewCount(item.getReviewCount() == null ? 0 : item.getReviewCount())
                 .reviewAverageRating(reviewAverageRating)
                 .fullStar(fullStar)
                 .halfStar(halfStar)
@@ -139,9 +138,10 @@ public class ItemService {
                 () -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
         final ReviewStarCalculationResponse reviewStarCalculationResponse = reviewStarCalculation(item.getId());
 
+        final Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
+
         //대표 상품
         final ItemOption mainOptionItem = itemOptionRepository.findByItemIdAndIsOptionMainItemTrue(itemId);
-//        List<ItemOption> optionItemAll = itemOptionRepository.findByItemId(itemId);
 
         Map<String, List<String>> optionMap = new HashMap<>();
         final List<String> itemOptions = itemOptionRepository.findByItemId(item.getId()).stream().map(ItemOption::getOption1).distinct().collect(Collectors.toList());
@@ -167,7 +167,6 @@ public class ItemService {
         //상품 조회 기록 저장/ 캐시 메모리로 전환 필요 ?
         if (user != null) {
             final List<BrowseHistory> browseHistories = browseHistoryRepository.findAllByUserIdOrderByBrowseAtDesc(user.getId());
-            final List<Long> itemIds = browseHistories.stream().map(BrowseHistory::getItem).map(Item::getId).collect(Collectors.toList());
 
             if (browseHistories.size() >= 20) {
                 final BrowseHistory history = browseHistories.get(browseHistories.size() - 1);
@@ -192,6 +191,7 @@ public class ItemService {
 
         return ItemDetailResponse.builder()
                 .id(item.getId())
+                .isSellerItem(isSellerItem)
                 .name(item.getName())
                 .brandName(item.getBrandName())
                 .optionMap(optionMap)
@@ -200,7 +200,6 @@ public class ItemService {
                 .originalPrice(mainOptionItem.getItemPrice().getOriginalPrice())
                 .priceNow(mainOptionItem.getItemPrice().getPriceNow())
                 .stock(mainOptionItem.getItemStock().getStock())
-
                 .mainImage(stringMainImage)
                 .descriptionImages(stringDescriptionImages)
                 .zzim(item.getZzim())
@@ -271,6 +270,7 @@ public class ItemService {
     public ItemOptionResponse itemOptionUpdate(final ItemOptionRequest request) {
         final ItemOption itemOption = itemOptionRepository.findByOption1AndOption2AndItemId(request.getOption1(), request.getOption2(), request.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException("잘못된 상품 접근입니다"));
+
 
         if (itemOption.getItemStock().getStock() < request.getOptionQuantity()) {
             throw new StockInvalidException("해당 상품의 재고는 " + itemOption.getItemStock().getStock() + " 개 입니다");
@@ -360,5 +360,18 @@ public class ItemService {
                 .customPage(customPage)
                 .build()
                 ;
+    }
+
+    public PageDto getSellerOtherItems(final Long itemId) {
+        final Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
+        final List<Item> items = itemRepository.findFirst3BySellerId(item.getSeller().getId());
+
+        return PageDto.builder()
+                .content(getItemResponses(items))
+                .customPage(new CustomPage())
+                .build()
+                ;
+
     }
 }

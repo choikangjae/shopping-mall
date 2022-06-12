@@ -55,7 +55,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     protected void resultRedirectStrategy(final HttpServletRequest request,
                                           final HttpServletResponse response,
                                           final Authentication authentication) throws IOException, ServletException {
-
+        
         SavedRequest savedRequest = (SavedRequest) request.getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
         if (savedRequest != null && savedRequest.toString().contains("api")) {
             redirectStrategy.sendRedirect(request, response, defaultUrl);

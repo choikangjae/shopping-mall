@@ -37,4 +37,6 @@ public class ItemDetailResponse {
     private Integer zzim;
 
     private Boolean isZzimed;
+
+    private Boolean isSellerItem;
 }

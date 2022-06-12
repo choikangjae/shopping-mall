@@ -31,6 +31,8 @@ import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.SellerRepository;
+import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistory;
+import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistoryRepository;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
@@ -43,6 +45,8 @@ import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerSimpleResponse;
+import com.jay.shoppingmall.dto.response.seller.SellerBankAccountHistoryResponse;
+import com.jay.shoppingmall.dto.response.seller.SellerBankResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
@@ -69,10 +73,8 @@ public class SellerService {
 
     private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
-    private final FileHandler fileHandler;
     private final ImageRepository imageRepository;
     private final ItemRepository itemRepository;
-    private final ZzimService zzimService;
     private final QnaRepository qnaRepository;
     private final ItemTemporaryRepository itemTemporaryRepository;
     private final CartRepository cartRepository;
@@ -84,8 +86,11 @@ public class SellerService {
     private final OrderItemRepository orderItemRepository;
     private final PaymentPerSellerRepository paymentPerSellerRepository;
     private final OrderRepository orderRepository;
+    private final SellerBankAccountHistoryRepository sellerBankAccountHistoryRepository;
 
     private final PaymentService paymentService;
+    private final ZzimService zzimService;
+    private final FileHandler fileHandler;
 
     public Page<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -505,4 +510,24 @@ public class SellerService {
                 .build();
     }
 
+    public SellerBankResponse getSellerBalance(final User user) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        final List<SellerBankAccountHistory> transactionHistories = sellerBankAccountHistoryRepository.findTop20BySellerIdOrderByCreatedDateDesc(seller.getId());
+
+        List<SellerBankAccountHistoryResponse> sellerBankAccountHistoryResponses = new ArrayList<>();
+        //null 처리?
+        for (SellerBankAccountHistory sellerBankAccountHistory : transactionHistories) {
+            sellerBankAccountHistoryResponses.add(SellerBankAccountHistoryResponse.builder()
+                    .transactionMoney(sellerBankAccountHistory.getTransactionMoney())
+                    .build());
+        }
+
+        return SellerBankResponse.builder()
+                .sellerId(seller.getId())
+                .bankAccount(seller.getBankAccount())
+                .sellerBankAccountHistoryResponses(sellerBankAccountHistoryResponses)
+                .build();
+    }
 }

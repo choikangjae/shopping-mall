@@ -15,6 +15,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Page<Item> findBySellerId(Long id, Pageable pageable);
 
+    List<Item> findFirst3BySellerId(Long sellerId);
 //    Optional<List<Item>> findByUserId(Long id);
 
 //    Slice<Item> findAll(Pageable pageable);

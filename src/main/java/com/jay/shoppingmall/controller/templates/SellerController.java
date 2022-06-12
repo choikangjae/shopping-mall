@@ -7,6 +7,7 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
+import com.jay.shoppingmall.dto.response.seller.SellerBankResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
@@ -36,7 +37,11 @@ public class SellerController {
     private final ItemService itemService;
 
     @GetMapping
-    public String sellerHome() {
+    public String sellerHome(@CurrentUser User user, Model model) {
+        final SellerBankResponse sellerBalance = sellerService.getSellerBalance(user);
+
+        model.addAttribute("balance", sellerBalance);
+
         return "seller/seller-home";
     }
     @GetMapping("/start")

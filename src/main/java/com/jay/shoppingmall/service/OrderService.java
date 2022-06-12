@@ -45,18 +45,13 @@ import java.util.stream.Collectors;
 @Service
 public class OrderService {
 
-    private final PaymentService paymentService;
     private final CartService cartService;
-    private final VirtualDeliveryCompanyRepository virtualDeliveryCompanyRepository;
 
-    private final PaymentRepository paymentRepository;
+    private final VirtualDeliveryCompanyRepository virtualDeliveryCompanyRepository;
     private final OrderRepository orderRepository;
-    private final CartRepository cartRepository;
-    private final ItemRepository itemRepository;
     private final FileHandler fileHandler;
     private final ImageRepository imageRepository;
     private final OrderItemRepository orderItemRepository;
-    private final ItemOptionRepository itemOptionRepository;
     private final PaymentPerSellerRepository paymentPerSellerRepository;
 
     public Map<SellerResponse, List<ItemAndQuantityResponse>> orderProcess(User user) {
@@ -90,16 +85,13 @@ public class OrderService {
             boolean isTrackingStarted = false;
             String trackingNumber = "";
             final DeliveryStatus deliveryStatus = orderItem.getOrderDelivery().getDeliveryStatus();
-            if (deliveryStatus.equals(DeliveryStatus.DELIVERING) || deliveryStatus.equals(DeliveryStatus.SHIPPED) || deliveryStatus.equals(DeliveryStatus.DELIVERED)) {
-
+            if (deliveryStatus.equals(DeliveryStatus.DELIVERING) || deliveryStatus.equals(DeliveryStatus.SHIPPED) || deliveryStatus.equals(DeliveryStatus.DELIVERED) || deliveryStatus.equals(DeliveryStatus.FINISHED)) {
                 trackingNumber = virtualDeliveryCompanyRepository.findByOrderItemId(orderItem.getId())
                         .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다")).getTrackingNumber();
+
                 isTrackingStarted = true;
             }
-            boolean isDelivered = false;
-            if (deliveryStatus.equals(DeliveryStatus.DELIVERED)) {
-                isDelivered = true;
-            }
+            boolean isDelivered = deliveryStatus.equals(DeliveryStatus.DELIVERED);
 
             final Image image = imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, orderItem.getMainImageId());
             final String mainImage = fileHandler.getStringImage(image);
@@ -107,6 +99,8 @@ public class OrderService {
             OrderItemResponse orderItemResponse = OrderItemResponse.builder()
                     .orderDate(orderDate)
                     .itemName(orderItem.getItem().getName())
+                    .option1(orderItem.getItemOption().getOption1())
+                    .option2(orderItem.getItemOption().getOption2())
                     .mainImage(mainImage)
                     .sellerCompanyName(orderItem.getSeller().getCompanyName())
                     .orderItemId(orderItem.getId())
@@ -162,42 +156,6 @@ public class OrderService {
                 .build();
     }
 
-//    public CartOrderResponse orderProcess(User user) {
-//
-//
-//        List<Cart> cartList = cartRepository.findByUserAndIsSelectedTrue(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
-//
-//        if (cartList.isEmpty()) {
-//            throw new CartEmptyException("장바구니가 비어있습니다");
-//        }
-//        int totalPrice = 0;
-//        int totalCount = 0;
-//
-//        List<ItemResponse> itemResponses = new ArrayList<>();
-//        for (Cart cart : cartList) {
-//            Item item = cart.getItem();
-//            totalPrice += cart.getQuantity() * cart.getItemOption().getItemPrice().getPriceNow();
-//            totalCount += cart.getQuantity();
-//
-//            itemResponses.add(ItemResponse.builder()
-//                    .id(item.getId())
-//                    .name(item.getName())
-//                    .option1(cart.getItemOption().getOption1())
-//                    .option2(cart.getItemOption().getOption2())
-//                    .zzim(item.getZzim())
-//                    .cartQuantity(cart.getQuantity())
-//                    .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, item.getId())))
-//                    .priceNow(cart.getItemOption().getItemPrice().getPriceNow())
-//                    .originalPrice(cart.getItemOption().getItemPrice().getOriginalPrice())
-//                    .build());
-//        }
-//        return CartOrderResponse.builder()
-//                .orderTotalPrice(totalPrice)
-//                .orderTotalCount(totalCount)
-//                .itemResponses(itemResponses)
-//                .build();
-//    }
-
     public List<SimpleOrderResponse> showOrders(User user, Pageable pageable) {
 
         final Page<Order> orders = orderRepository.findByUserId(user.getId(), pageable)
@@ -213,9 +171,7 @@ public class OrderService {
             List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
 
             //주문 상품 중 가장 배송 상태가 빠른 상품을 메인 배송 상태로.
-            final String deliveryStatus = orderItems.stream().map(OrderItem::getOrderDelivery).map(OrderDelivery::getDeliveryStatus).max(Comparator.comparingInt(DeliveryStatus::getPriority)).map(DeliveryStatus::getValue)
-                    .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
-
+            final List<String> deliveryStatuses = orderItems.stream().map(OrderItem::getOrderDelivery).map(OrderDelivery::getDeliveryStatus).map(DeliveryStatus::getValue).distinct().collect(Collectors.toList());
             //주문 상품 중 가장 비싼 상품을 메인 사진으로
             //썸네일 처리.
             final OrderItem mostExpensiveOneAtOrder = orderItems.stream().max(Comparator.comparingLong(OrderItem::getPriceAtPurchase))
@@ -228,56 +184,11 @@ public class OrderService {
                     .orderDate(order.getCreatedDate())
                     .mainImage(mainImage)
                     .amount(payment.getAmount())
-                    .deliveryStatus(deliveryStatus)
+                    .deliveryStatuses(deliveryStatuses)
                     .merchantUid(payment.getMerchantUid())
                     .name(payment.getName())
                     .build());
         }
         return simpleOrderResponses;
     }
-
-
-
-//    public OrderResultResponse doOrderPaymentProcess(PaymentRequest paymentRequest, User user) {
-//        CartOrderResponse cartOrderResponse= orderProcess(user);
-
-    //결제 완료
-//        Payment payment = paymentService.doPayment(paymentRequest.getItemId(), paymentRequest.getPg(), paymentRequest.getAmount());
-//
-//        //재고 변경
-//        List<Cart> cartList = cartRepository.findByUser(user).orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
-//        List<Item> itemList = new ArrayList<>();
-//
-//        for (Cart cart : cartList) {
-//            Item item = itemRepository.findById(cart.getItem().getId()).orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
-//            item.setStock(item.getStock() - paymentRequest.getItemQuantity());
-////            itemRepository.save(item);
-//            itemList.add(item);
-//        }
-//        //결제 정보 생성
-//        Order order = Order.builder()
-//                .payment(payment)
-////                .itemList(itemList)
-//                .deliveryStatus(payment.getPg() == Pg.MUTONGJANG? DeliveryStatus.WAITING_FOR_PAYMENT : DeliveryStatus.PAYMENT_DONE)
-//                .build();
-//
-//        cartRepository.deleteByItemId(paymentRequest.getItemId());
-//        orderRepository.saveAndFlush(order);
-
-//        List<ItemResponse> itemResponseList = new ArrayList<>();
-//        for (Item item : itemList) {
-//            itemResponseList.add(ItemResponse.builder()
-//                    .id(item.getId())
-//                    .name(item.getName())
-//                    .price(item.getPrice())
-////                    .image(item.getImageList())
-//                            .build()
-//            );
-//        }
-//        return OrderResultResponse.builder()
-//                .itemResponseList(itemResponseList)
-//                .amount(payment.getAmount())
-//                .pg(payment.getPg())
-//                .build();
-//    }
 }

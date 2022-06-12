@@ -19,6 +19,8 @@ public class Seller {
 
     private Long userId;
 
+    private Long bankAccount;
+
     private String companyName;
 
     private String contactNumber;
@@ -64,5 +66,12 @@ public class Seller {
         this.returnShippingFeeDefault = returnShippingFeeDefault;
         this.shippingFeeFreePolicy = shippingFeeFreePolicy;
         this.defaultDeliveryCompany = defaultDeliveryCompany;
+    }
+
+    public void sellerBankAccountUp(final Long bankAccount) {
+        if (this.bankAccount == null) {
+            this.bankAccount = 0L;
+        }
+        this.bankAccount += bankAccount;
     }
 }

@@ -8,9 +8,11 @@ import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.request.password.PasswordRequest;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.SimpleOrderResponse;
+import com.jay.shoppingmall.dto.response.review.ReviewResponse;
 import com.jay.shoppingmall.service.ItemService;
 import com.jay.shoppingmall.service.MeService;
 import com.jay.shoppingmall.service.OrderService;
+import com.jay.shoppingmall.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -35,6 +37,7 @@ public class MeController {
     private final MeService meService;
     private final OrderService orderService;
     private final ItemService itemService;
+    private final ReviewService reviewService;
 
     @GetMapping
     public String me(@CurrentUser User user, Model model, @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -48,14 +51,6 @@ public class MeController {
         return "me/home";
     }
 
-//    @PostMapping("/privacy")
-//    public String showPersonalInformationAgreementForm(@CurrentUser User user, Model model) {
-//        if (user == null) {
-//            return "redirect:/";
-//        }
-//        model.addAttribute("user", user);
-//        return "me/agreement";
-//    }
     @GetMapping("/privacy")
     public String showPersonalInformationAgreementForm(@CurrentUser User user, Model model) {
         if (user == null) {
@@ -73,11 +68,6 @@ public class MeController {
 
     @GetMapping("/reconfirm")
     public String reConfirm(PasswordRequest passwordRequest, @CurrentUser User user, Model model, RedirectAttributes redirectAttributes) {
-//        if (!meService.userAgreeCheck(user)) {
-//            redirectAttributes.addFlashAttribute("message", "필수 동의가 필요합니다");
-//
-//            return "redirect:/me/privacy";
-//        }
         model.addAttribute("user", user);
         return "me/reconfirm";
     }
@@ -134,16 +124,18 @@ public class MeController {
 
         return "/me/cancel-item-list";
     }
-    //TODO 기본 틀만 작성
+
     @GetMapping("/reviews")
-    public String showReviews(@CurrentUser User user, Pageable pageable, Model model) {
-        List<SimpleOrderResponse> simpleOrderResponses = orderService.showOrders(user, pageable);
-        if (!simpleOrderResponses.isEmpty()) {
-            model.addAttribute("orders", simpleOrderResponses);
+    public String showMyReviewList(@CurrentUser User user, Model model) {
+        final List<ReviewResponse> reviewResponses = reviewService.getMyRecentReviews(user);
+
+        if (!reviewResponses.isEmpty()) {
+            model.addAttribute("reviews", reviewResponses);
         }
 
         return "/me/reviews";
     }
+
     @GetMapping("/browse-history")
     public String showBrowseHistoriesByUser(@CurrentUser User user, Model model, Pageable pageable) {
         final PageDto browseHistories = itemService.getMyBrowseHistories(user, pageable);

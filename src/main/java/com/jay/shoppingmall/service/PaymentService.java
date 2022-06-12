@@ -27,15 +27,14 @@ import com.jay.shoppingmall.domain.payment.model.ReceiverInfo;
 import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
 import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
+import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistory;
+import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistoryRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
 import com.jay.shoppingmall.dto.response.cart.CartPricePerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
-import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
-import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
-import com.jay.shoppingmall.exception.exceptions.PaymentFailedException;
-import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -57,7 +56,6 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final CartRepository cartRepository;
-    private final MerchantUidGenerator merchantUidGenerator;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ImageRepository imageRepository;
@@ -65,13 +63,35 @@ public class PaymentService {
     private final OrderDeliveryRepository orderDeliveryRepository;
     private final ItemStockHistoryRepository itemStockHistoryRepository;
     private final PaymentPerSellerRepository paymentPerSellerRepository;
+    private final SellerBankAccountHistoryRepository sellerBankAccountHistoryRepository;
 
     private final CartService cartService;
+    private final MerchantUidGenerator merchantUidGenerator;
+
+    public void moneyTransactionToSeller(final OrderItem orderItem) {
+        orderItem.getOrderDelivery().paymentDone();
+        final Seller seller = orderItem.getSeller();
+
+        final PaymentPerSeller paymentPerSeller = paymentPerSellerRepository.findByOrderIdAndSellerId(orderItem.getOrder().getId(), seller.getId());
+        if (paymentPerSeller.getIsMoneyTransferredToSeller()) {
+            throw new MoneyTransactionException("이미 정산이 완료된 주문입니다");
+        }
+
+        final Long moneyToSellerBankAccount = paymentPerSeller.getItemTotalPricePerSeller();
+        SellerBankAccountHistory sellerBankAccountHistory = SellerBankAccountHistory.builder()
+                .transactionMoney(moneyToSellerBankAccount)
+                .seller(seller)
+                .build();
+        sellerBankAccountHistoryRepository.save(sellerBankAccountHistory);
+
+        seller.sellerBankAccountUp(moneyToSellerBankAccount);
+        paymentPerSeller.paymentToSellerTrue();
+    }
+
 
     public PaymentDetailResponse paymentTotal(String imp_uid, final String merchant_uid, User user) throws IOException {
         String accessToken = getAccessToken();
 
-        System.out.println("token : " + accessToken);
         //PG사에 의해 실제로 결제된 금액
         Long amountByPg = getPaymentInfoByToken(imp_uid, accessToken);
 
@@ -119,7 +139,6 @@ public class PaymentService {
 
 
         //상품 주문 테이블로 정보 옮기고 장바구니 비우기
-        //TODO 상품의 배송 정보는 paymentPerSeller에서 ??
         for (Cart cart : carts) {
             OrderDelivery orderDelivery = OrderDelivery.builder()
                     .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
@@ -164,7 +183,6 @@ public class PaymentService {
             }
         }
 
-        //model로 paymentRecord 돌려주기.
         return PaymentDetailResponse.builder()
                 .pg(paymentRecord.getPg().getName())
                 .payMethod(paymentRecord.getPayMethod().getName())
@@ -199,9 +217,7 @@ public class PaymentService {
             shippingFeeTotal += cartPricePerSellerResponse.getItemShippingFeePerSeller();
         }
         long amount = cartPriceTotal + shippingFeeTotal;
-//        for (Cart cart : carts) {
-//            amount += (long) cart.getItemOption().getItemPrice().getPriceNow() * cart.getQuantity();
-//        }
+
         //유효성 검사 로직 더 작성할 것.
 
         ReceiverInfo receiverInfo = ReceiverInfo.builder()

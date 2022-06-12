@@ -41,6 +41,8 @@ public class Item extends BaseTimeEntity {
 
     private Double reviewAverageRating;
 
+    private Integer reviewCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
     private Image image;
@@ -62,6 +64,20 @@ public class Item extends BaseTimeEntity {
             this.viewCount = 1;
         } else {
             this.viewCount += 1;
+        }
+    }
+    public void reviewAverageCalculation(double value) {
+        if (this.getReviewAverageRating() == null) {
+            this.reviewAverageRating = value;
+        } else {
+            double totalReviewPoint = this.reviewAverageRating * this.reviewCount;
+            this.reviewAverageRating = (totalReviewPoint + value) / (this.reviewCount + 1);
+        }
+
+        if (this.getReviewCount() == null) {
+            this.reviewCount = 1;
+        } else {
+            this.reviewCount += 1;
         }
     }
 

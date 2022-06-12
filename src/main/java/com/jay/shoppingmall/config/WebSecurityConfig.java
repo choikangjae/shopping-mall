@@ -64,7 +64,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
 
 
-                .antMatchers("/demo/**", "/random-user-generator", "/api/v1/item/option", "/api/v1/pagination", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
+                .antMatchers("/demo/**", "/random-user-generator", "/api/v1/item/option/add", "/api/v1/pagination", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
                 .antMatchers("/auth/new-password", "/auth/reset**", "/auth/login**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/auth/forgot-password").permitAll()
                 .antMatchers("/item/details/null", "/seller/null", "/admin/null", "/auth/null", "/null").permitAll()
                 .antMatchers("/swagger-ui.html#", "/search**",  "/", "/item/**","/item/details/**").permitAll()
@@ -82,12 +82,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .successHandler(loginSuccessHandler())
                 .failureHandler(loginFailureHandler())
-//                .failureUrl("/auth/login?error")
                 .permitAll()
                 .and()
                 .logout()
                 .logoutSuccessUrl("/auth/login")
-                //로그아웃시 세션을 통해 발급한 모든 쿠키 삭제.
                 .deleteCookies("JSESSIONID", "remember-me")
                 .invalidateHttpSession(true);
     }
@@ -98,6 +96,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
+    @Override
     public AuthenticationManager authenticationManager() throws Exception {
         return super.authenticationManager();
     }
@@ -132,31 +131,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         webSecurityExpressionHandler.setRoleHierarchy(roleHierarchy());
         return webSecurityExpressionHandler;
     }
-//    @Bean
-//    public AccessDecisionVoter<? extends Object> roleVoter() {
-//        RoleHierarchyVoter roleHierarchyVoter = new RoleHierarchyVoter(roleHierarchy());
-//        return roleHierarchyVoter;
-//    }
-
-//    AccessDecisionManager accessDecisionManager() {
-//        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-//        roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_SELLER > ROLE_USER");
-//
-//        DefaultWebSecurityExpressionHandler defaultWebSecurityExpressionHandler = new DefaultWebSecurityExpressionHandler();
-//        defaultWebSecurityExpressionHandler.setRoleHierarchy(roleHierarchy);
-//
-//        WebExpressionVoter webExpressionVoter = new WebExpressionVoter();
-//        webExpressionVoter.setExpressionHandler(defaultWebSecurityExpressionHandler);
-//
-//        List<AccessDecisionVoter<? extends Object>> voters = Arrays.asList();
-//
-//        AccessDecisionManager accessDecisionManager = new AffirmativeBased(voters);
-//        return accessDecisionManager;
-//    }
-
-
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(customUserDetailsService);
-//    }
 }

@@ -1,11 +1,14 @@
 package com.jay.shoppingmall.controller.templates;
 
 import com.jay.shoppingmall.common.CurrentUser;
+import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.response.item.ItemDetailResponse;
 import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;
+import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
 import com.jay.shoppingmall.service.QnaService;
+import com.jay.shoppingmall.service.ReviewService;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,23 +29,25 @@ public class ItemDetailController {
 
     private final ItemService itemService;
     private final QnaService qnaService;
-    private final SellerService sellerService;
+    private final ReviewService reviewService;
 
     @GetMapping(
             value = "/item/details/{id}",
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
     )
     public String itemDetailByItemId(@PathVariable(name = "id",required = false) Long itemId,
-                                     @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+                                     @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
                                      Model model, @CurrentUser User user, HttpServletRequest request) {
 
         ItemDetailResponse response = itemService.itemDetail(user, itemId);
-        QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(itemId, user, pageable);
-        Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
+        final PageDto sellerOtherItems = itemService.getSellerOtherItems(itemId);
+        PageDto itemQnas = qnaService.getQnas(itemId, user, pageable);
+        final PageDto itemReviews = reviewService.getItemReviews(itemId, pageable);
 
-//        model.addAttribute("isSellerItem", isSellerItem);
+        model.addAttribute("itemReviews", itemReviews);
         model.addAttribute("response", response);
-        model.addAttribute("qnaResponseWithPagination", qnaResponseWithPagination);
+        model.addAttribute("items", sellerOtherItems);
+        model.addAttribute("itemQnas", itemQnas);
         model.addAttribute("user", user);
         return "item/detail";
     }

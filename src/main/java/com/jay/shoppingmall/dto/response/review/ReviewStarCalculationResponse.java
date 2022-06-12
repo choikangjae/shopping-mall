@@ -8,6 +8,8 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReviewStarCalculationResponse {
 
+    private Integer reviewCount;
+
     private Double reviewAverageRating;
 
     private Double fullStar;

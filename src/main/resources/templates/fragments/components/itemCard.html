@@ -46,16 +46,8 @@
                                 <i class="fas fa-shopping-cart"></i> 바로구매
                             </a>
                         </div>
-                        <div id="starTarget">
-                            <span class="fa fa-star text-warning"
-                                  th:if="${item.reviewStarCalculationResponse.fullStar != 0}"
-                                  th:each="star : ${#numbers.sequence(1, item.reviewStarCalculationResponse.fullStar)}"></span><span
-                                class="fa fa-star-half-alt text-warning"
-                                th:if="${item.reviewStarCalculationResponse.halfStar != 0}"
-                                th:each="star : ${#numbers.sequence(1, item.reviewStarCalculationResponse.halfStar)}"></span><span
-                                class="fa fa-star" th:if="${item.reviewStarCalculationResponse.emptyStar != 0}"
-                                th:each="star : ${#numbers.sequence(1, item.reviewStarCalculationResponse.emptyStar)}"></span>
-                            <span th:text="'(' + ${item.reviewStarCalculationResponse.reviewAverageRating} + ')'"></span>
+                        <div id="starTarget" th:with="response = ${item.reviewStarCalculationResponse}">
+                            <div th:replace="fragments/components/starRating :: starRating"></div>
                         </div>
                     </div>
                 </div>
