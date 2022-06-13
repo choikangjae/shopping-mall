@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Where(clause = "is_deleted = 0")
 @SQLDelete(sql = "UPDATE cart SET is_deleted = 1, deleted_date = NOW() WHERE id = ?")
 public class Cart extends BaseTimeEntity {

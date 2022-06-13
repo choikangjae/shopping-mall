@@ -11,11 +11,14 @@ import com.jay.shoppingmall.dto.response.seller.SellerBankResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
+import com.jay.shoppingmall.dto.response.seller.StatisticsResponse;
 import com.jay.shoppingmall.service.ItemService;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,10 +40,15 @@ public class SellerController {
     private final ItemService itemService;
 
     @GetMapping
-    public String sellerHome(@CurrentUser User user, Model model) {
+    public String sellerHome(@CurrentUser User user, Model model,@PageableDefault(size = 5) Pageable pageable) {
         final SellerBankResponse sellerBalance = sellerService.getSellerBalance(user);
+        final List<StatisticsResponse> statisticsResponses = sellerService.getStatisticsByDay(user);
+        final List<RecentPaymentPerSellerResponse> recentOrders = sellerService.getSellerRecentOrders(user, pageable);
+        sellerService.getItemRecentReviews(user, pageable);
 
         model.addAttribute("balance", sellerBalance);
+        model.addAttribute("statisticsResponses", statisticsResponses);
+        model.addAttribute("recentOrders", recentOrders);
 
         return "seller/seller-home";
     }

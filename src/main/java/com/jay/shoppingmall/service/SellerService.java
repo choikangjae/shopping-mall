@@ -29,6 +29,8 @@ import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
 import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
+import com.jay.shoppingmall.domain.review.Review;
+import com.jay.shoppingmall.domain.review.ReviewRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistory;
@@ -45,11 +47,13 @@ import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerSimpleResponse;
+import com.jay.shoppingmall.dto.response.review.ReviewResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerBankAccountHistoryResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerBankResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
+import com.jay.shoppingmall.dto.response.seller.StatisticsResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +63,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -87,6 +93,7 @@ public class SellerService {
     private final PaymentPerSellerRepository paymentPerSellerRepository;
     private final OrderRepository orderRepository;
     private final SellerBankAccountHistoryRepository sellerBankAccountHistoryRepository;
+    private final ReviewRepository reviewRepository;
 
     private final PaymentService paymentService;
     private final ZzimService zzimService;
@@ -400,10 +407,10 @@ public class SellerService {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
-        final List<PaymentPerSeller> recent20BySeller = paymentPerSellerRepository.findTop20BySellerId(seller.getId());
+        final List<PaymentPerSeller> recentPayments = paymentPerSellerRepository.findBySellerIdOrderByCreatedDateDesc(seller.getId(), pageable);
 
         List<RecentPaymentPerSellerResponse> recentPaymentPerSellerResponses = new ArrayList<>();
-        for (PaymentPerSeller paymentPerSeller : recent20BySeller) {
+        for (PaymentPerSeller paymentPerSeller : recentPayments) {
             final Integer itemTotalQuantityPerSeller = paymentPerSeller.getItemTotalQuantityPerSeller();
 
             final PaymentPerSellerResponse paymentPerSellerResponse = PaymentPerSellerResponse.builder()
@@ -529,5 +536,39 @@ public class SellerService {
                 .bankAccount(seller.getBankAccount())
                 .sellerBankAccountHistoryResponses(sellerBankAccountHistoryResponses)
                 .build();
+    }
+
+    public List<StatisticsResponse> getStatisticsByDay(final User user) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        List<StatisticsResponse> statisticsResponses = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            LocalDateTime startDatetime = LocalDateTime.of(LocalDate.now().minusDays(i), LocalTime.of(0,0,0));
+            LocalDateTime endDatetime = LocalDateTime.of(LocalDate.now().minusDays(i), LocalTime.of(23,59,59));
+
+            final List<PaymentPerSeller> perDay = paymentPerSellerRepository.findBySellerIdAndCreatedDateBetween(seller.getId(), startDatetime, endDatetime);
+            final long totalPricePerDay = perDay.stream().mapToLong(PaymentPerSeller::getItemTotalPricePerSeller).sum();
+            final long totalQuantityPerDay = perDay.stream().mapToLong(PaymentPerSeller::getItemTotalQuantityPerSeller).sum();
+            final long totalOrderPerDay = perDay.size();
+
+            final StatisticsResponse statisticsResponse = StatisticsResponse.builder()
+                    .date(startDatetime)
+                    .totalPricePerDay(totalPricePerDay)
+                    .totalQuantityPerDay(totalQuantityPerDay)
+                    .totalOrderPerDay(totalOrderPerDay)
+                    .build();
+            statisticsResponses.add(statisticsResponse);
+        }
+        return statisticsResponses;
+    }
+
+    public void getItemRecentReviews(final User user, final Pageable pageable) {
+        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
+                .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        //Seller를 기준으로 Review를 가져오려면 어떻게 해야할까??
+        //Review나 QnA가 작성이 될때 메시지큐를 이용해서 셀러에게 알림을 준다. 이때 아이템 아이디와 유저명 등을 같이 보냄.
+        //TODO RabbitMQ 공부 후 구현할 것.
     }
 }

@@ -52,17 +52,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf().disable()
-//                    .requestCache().requestCache(requestCache())
-//                .and()
-//                .rememberMe()
-//                .rememberMeParameter("remember-me")
-                //토큰 유효기간 1달
-//                .tokenValiditySeconds(86400 * 30)
-//                    .alwaysRemember(true)
-//                .userDetailsService(customUserDetailsService)
-//                .and()
+                .rememberMe()
+                .rememberMeParameter("remember-me")
+//                토큰 유효기간 1달
+                .tokenValiditySeconds(86400 * 30)
+//                .alwaysRemember(true)
+                .userDetailsService(customUserDetailsService)
+                .and()
                 .authorizeRequests()
-
 
                 .antMatchers("/demo/**", "/random-user-generator", "/api/v1/item/option/add", "/api/v1/pagination", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
                 .antMatchers("/auth/new-password", "/auth/reset**", "/auth/login**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/auth/forgot-password").permitAll()

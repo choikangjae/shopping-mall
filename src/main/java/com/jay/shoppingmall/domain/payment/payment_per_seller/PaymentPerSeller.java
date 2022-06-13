@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.domain.payment.payment_per_seller;
 
+import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.payment.Payment;
@@ -16,7 +17,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PaymentPerSeller {
+public class PaymentPerSeller extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

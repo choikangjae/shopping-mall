@@ -30,9 +30,9 @@ public class AdminController {
         return "admin/admin-home";
     }
 
-    @GetMapping("/write")
-    public String adminWrite(WriteItemRequest writeItemRequest) {
-        return "admin/admin-write-item";
+    @GetMapping("/category")
+    public String adminCategoryWrite() {
+        return "admin/admin-category";
     }
 
     @GetMapping("/management/users")

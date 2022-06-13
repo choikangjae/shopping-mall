@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+    layout:decorate="~{layouts/layout.html}">
+
+<head>
+    <title>어드민</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container">
+            <div th:replace="admin/admin-navbar :: admin-navbar"></div>
+
+            <div class="row">
+
+                <div class="col-6">
+                    <label class="mt-3 mb-2" for="categorySearch">카테고리 검색</label>
+                    <form id="categorySearch" th:action="@{/admin/search/categories}" class="d-flex col-11"
+                        role="search" method="get">
+                        <input name="q" th:value="${result}" id="categoryQuery" class="form-control me-2" type="search"
+                            placeholder="카테고리 검색" aria-label="Search">
+                        <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i></button>
+                    </form>
+
+                    <label class="mt-3 mb-2" for="categoryForm">카테고리 추가</label>
+                    <form id="categoryForm" class="col-11 center-block">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="parentCategory" placeholder="부모">
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="childCategory" placeholder="자식">
+                        </div>
+                        <div>
+                            <!-- <div class="input-group mb-3 d-flex justify-content-center">
+                            <button class="btn btn-outline-primary" type="button">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" type="button">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div> -->
+                            <div class="input-group mb-3 d-flex justify-content-center">
+                                <button id="categoryAddAction" class="btn btn-outline-primary" type="button"> 카테고리
+                                    등록하기</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-6">
+
+                    <label class="mt-3 mb-2" for="categoryList">등록된 카테고리</label>
+                    <table id="categoryList" class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">카테고리1</th>
+                                <th scope="col">카테고리2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="originalCategory">
+                                <td id="w"></td>
+                                <td id="q"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ul class="list-group" id="categoryTarget">
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script>
+            window.addEventListener('load', () => {
+                fetch(`/api/v1/admin/category`)
+                .then(res => res.json())
+                .then(data => {
+                    for (let i = 0; i < data.length; i++) {
+                        let li = document.createElement('li');
+                        li.classList.add('list-group-item');
+                        li.innerText = data[i].parentCategory;
+                        categoryTarget.append(li);
+                    }
+                });
+                
+
+            })
+            document.getElementById('categoryAddAction').addEventListener('click', (e) => {
+                e.preventDefault();
+
+                let parentCategory = document.getElementById('parentCategory').value;
+                let childCategory = document.getElementById('childCategory').value;
+
+
+                let data = {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        parentCategory,
+                        childCategory
+                    }),
+
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                const onSuccess = res => {
+                    res.json()
+                        .then((data) => {
+                            document.getElementById('parentCategory').textContent = data.parentCategory;
+                            document.getElementById('childCategory').textContent = data.childCategory;
+
+                            let originalCategory = document.getElementById('originalCategory');
+                            let category = originalCategory.cloneNode(true);
+                            // addIdToClone(optionCard);
+                            document.getElementById('originalCategory').appendChild(category);
+
+                        })
+                }
+                const onFailure = res => {
+                    return res.json()
+                        .then(json => {
+                            alert(json.message);
+                        })
+                }
+
+                fetch(`/api/v1/admin/category/add`, data)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(onSuccess, onFailure)
+                    .catch(err => {
+                        console.log(err.message);
+                    });
+            })
+        </script>
+    </div>
+</body>
+
+</html>

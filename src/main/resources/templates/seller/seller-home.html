@@ -24,19 +24,112 @@
         </div>
 
         <div>
-            통계
-            일자 매출액 총조회수 총주문량 판매량 TOP3
+            <button class="btn btn-outline-primary">쿠폰 발행</button>
         </div>
+
+        <label class="mt-3" for="statisticsByDay">최근 일주일 통계</label>
+        <table class="table mt-1" id="statisticsByDay">
+            <thead>
+            <tr>
+                <th scope="col">날짜</th>
+                <th scope="col">총 조회수</th>
+                <th scope="col">총 매출액</th>
+                <th scope="col">총 주문 물량</th>
+                <th scope="col">총 주문건수</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr th:each="response : ${statisticsResponses}" th:onclick="|goToOrderDetail('${response.totalPricePerDay}');|" style="cursor:pointer;">
+                    <td th:text="${#temporals.format(response.date, 'yyyy-MM-dd')}">날짜</td>
+                    <td th:text="${#numbers.formatDecimal(response.totalPricePerDay, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 회'">총 조회수</td>
+                    <td th:text="${#numbers.formatDecimal(response.totalPricePerDay, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">총 매출액</td>
+                    <td th:text="${#numbers.formatDecimal(response.totalQuantityPerDay, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 개'">총 주문 물량</td>
+                    <td th:text="${#numbers.formatDecimal(response.totalOrderPerDay, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 건'">총 주문 물량</td>
+                </tr>
+            </tbody>
+        </table>
         <div>
             통계
             손님 장바구니에 많이 들어있는 내 아이템들
         </div>
-        <div>
-            최근 주문 내역
-        </div>
-        <div>
-            최근 리뷰 내역
-        </div>
+
+        <label class="mt-3" for="recentOrders">최근 주문 내역</label>
+        <table class="table mt-1" id="recentOrders">
+            <thead>
+            <tr>
+                <th scope="col">결제시각</th>
+                <th scope="col"></th>
+                <th scope="col">상품명</th>
+                <th scope="col">결제수단</th>
+                <th scope="col">주문번호</th>
+                <th scope="col">가격</th>
+                <th scope="col">배송비</th>
+                <th scope="col">총 결제액</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="recentOrder : ${recentOrders}" th:with="paymentDetail = ${recentOrder.recentPaymentPerSellerSimpleResponse}"
+                th:onclick="|goToOrderDetail('${paymentDetail.orderId}');|" style="cursor:pointer;">
+                <td th:text="${#temporals.format(paymentDetail.orderDate, 'yyyy-MM-dd HH:mm')}">주문날짜</td>
+                <td style="width: 6rem;"><img class="bd-placeholder-img card-img-top img-fluid" width="100%"
+                                              height="100%"
+                                              th:src="'data:image/jpeg;base64,'+${paymentDetail.mainImage}" alt="..."/></td>
+                <td th:text="${paymentDetail.name}">상품명</td>
+                <td>
+                        <span th:inline="text">
+                            [[${paymentDetail.payMethod}]]
+                        </span>
+                    <br>
+                    <span th:inline="text">
+                            ([[${paymentDetail.pg}]])
+                        </span>
+                </td>
+                <td th:text="${paymentDetail.merchantUid}">주문번호</td>
+                <td th:text="${#numbers.formatDecimal(recentOrder.paymentPerSellerResponse.itemTotalPricePerSeller, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
+                <td th:text="${#numbers.formatDecimal(recentOrder.paymentPerSellerResponse.itemShippingFeePerSeller, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
+                <td th:text="${#numbers.formatDecimal(recentOrder.paymentPerSellerResponse.itemTotalPricePerSeller + recentOrder.paymentPerSellerResponse.itemShippingFeePerSeller, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
+            </tr>
+            </tbody>
+        </table>
+
+<!--        <label class="mt-3" for="reviewWritten">최근 리뷰 내역</label>-->
+<!--        <table class="table" id="reviewWritten">-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th scope="col">리뷰 작성일</th>-->
+<!--                <th scope="col"></th>-->
+<!--                <th scope="col">상품명</th>-->
+<!--                <th scope="col">내용/사진</th>-->
+<!--                <th scope="col">평가</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            <tr th:each="review : ${reviews}" >-->
+<!--                <td th:text="${#temporals.format(review.reviewWrittenDate, 'yyyy-MM-dd HH:mm')}">주문날짜</td>-->
+<!--                <td style="cursor:pointer;" th:onclick="goToItem([[${review.itemId}]])">-->
+<!--                    <div style="width: 5rem;">-->
+<!--                        <img class="bd-placeholder-img card-img-top img-fluid" width="100%" height="100%"-->
+<!--                             th:src="'data:image/jpeg;base64,'+${review.itemImage}" alt="..."/>-->
+<!--                    </div>-->
+<!--                </td>-->
+<!--                <td th:text="${review.itemName}" style="cursor:pointer;" th:onclick="goToItem([[${review.itemId}]])">상품명</td>-->
+
+<!--                <td>-->
+<!--                    <div th:text="${review.text}"></div>-->
+<!--                    <div style="width: 5rem;">-->
+<!--                        <div  th:each="reviewImage : ${review.reviewImages}" >-->
+<!--                            <img class="bd-placeholder-img card-img-top img-fluid" width="100%" height="100%"-->
+<!--                                 th:src="'data:image/jpeg;base64,'+${reviewImage}" alt="..."/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </td>-->
+<!--                <td>-->
+<!--                    <span class="fa fa-star text-warning" th:each="star : ${#numbers.sequence(1, review.star)}"></span><span th:if="${review.star != 5}" class="fa fa-star" th:each="star : ${#numbers.sequence(1, 5 - review.star)}"></span>-->
+<!--                </td>-->
+<!--            </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+
         <div>
             최근 QnA 내역
         </div>

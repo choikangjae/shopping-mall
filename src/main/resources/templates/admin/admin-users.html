@@ -8,10 +8,11 @@
 <body>
 <div layout:fragment="content">
     <div class="container">
+        <div th:replace="admin/admin-navbar :: admin-navbar"></div>
 
         <h1>회원관리</h1>
 
-        <form th:action="@{/admin/search}" class="d-flex" role="search" method="get">
+        <form th:action="@{/admin/search/users}" class="d-flex" role="search" method="get">
             <input name="q" th:value="${result}" id="keywordQuery" class="form-control me-2" type="search"
                    placeholder="회원 검색" aria-label="Search">
             <button class="btn btn-outline-success" type="submit"><i

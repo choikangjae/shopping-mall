@@ -12,6 +12,8 @@ import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
 import com.jay.shoppingmall.domain.item.item_price.ItemPriceRepository;
 import com.jay.shoppingmall.domain.item.item_stock.ItemStockRepository;
+import com.jay.shoppingmall.domain.item.item_view_history.ItemViewHistory;
+import com.jay.shoppingmall.domain.item.item_view_history.ItemViewHistoryRepository;
 import com.jay.shoppingmall.domain.model.page.CustomPage;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.review.ReviewRepository;
@@ -38,7 +40,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,6 +57,7 @@ public class ItemService {
     private final ZzimRepository zzimRepository;
     private final ItemOptionRepository itemOptionRepository;
     private final BrowseHistoryRepository browseHistoryRepository;
+    private final ItemViewHistoryRepository itemViewHistoryRepository;
 
     private final ZzimService zzimService;
     private final FileHandler fileHandler;
@@ -161,8 +166,25 @@ public class ItemService {
         Image mainImage = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, item.getId());
         String stringMainImage = fileHandler.getStringImage(mainImage);
 
-        //조회수
+        //상품 누적 조회수
         item.viewCountUp();
+
+        //TODO 상품에 대한 조회수를 매일 그리고 시간별로 저장하는 최적화 방법 찾아보기.
+        //상품 일자별 조회수
+//        LocalDateTime startDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(0,0,0));
+//        LocalDateTime endDatetime = LocalDateTime.of(LocalDate.now(), LocalTime.of(23,59,59));
+//        final ItemViewHistory itemView = itemViewHistoryRepository.findByItemIdAndViewDateBetween(item.getId(), startDatetime, endDatetime);
+//        if (itemView != null) {
+//            itemView.viewCountPerDayUp();
+//        } else {
+//            ItemViewHistory itemViewHistory = ItemViewHistory.builder()
+//                    .viewCountPerDay(1)
+//                    .viewDate(LocalDate.now())
+//                    .viewTime(LocalTime.now())
+//                    .item(item)
+//                    .build();
+//            itemViewHistoryRepository.save(itemViewHistory);
+//        }
 
         //상품 조회 기록 저장/ 캐시 메모리로 전환 필요 ?
         if (user != null) {
@@ -294,25 +316,6 @@ public class ItemService {
         final List<ItemResponse> itemResponses = getItemResponses(items);
         setItemsZzimBoolean(user, itemResponses);
         final List<ItemResponse> responses = itemResponses.stream().filter(ItemResponse::getIsZzimed).collect(Collectors.toList());
-
-//        for (Zzim zzim : zzims) {
-//            if (!zzim.getIsZzimed()) {
-//                continue;
-//            }
-//            Item item = itemRepository.findById(zzim.getItem().getId())
-//                    .orElseThrow(() -> new ItemNotFoundException("상품이 없습니다"));
-//
-//            itemResponses.add(ItemResponse.builder()
-//                    .itemId(item.getId())
-//                    .name(item.getName())
-//                    .zzim(item.getZzim())
-//                    .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN,item.getId())))
-//                    .priceNow(item.getPrice())
-//                    .originalPrice(item.getSalePrice())
-//                    .isZzimed(zzim.getIsZzimed())
-//                    .build());
-//        }
-
 
         return PageDto.builder()
                 .content(responses)

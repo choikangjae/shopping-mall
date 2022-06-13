@@ -32,6 +32,12 @@ dependencies {
 	//ObjectMapper
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
 
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	//Mapstruct
+//	implementation 'org.mapstruct:mapstruct:1.5.1.Final'
+//	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.1.Final'
+
 	//WebSocket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.webjars:webjars-locator-core'
@@ -49,14 +55,11 @@ dependencies {
 	implementation group: 'commons-io', name: 'commons-io', version: '2.10.0'
 	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.14'
 
-
-	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 //	runtimeOnly 'com.h2database:h2'
 //	runtimeOnly 'mysql:mysql-connector-java'
-	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

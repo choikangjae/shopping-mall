@@ -20,6 +20,9 @@
                 <li class="nav-item">
                     <a type="button" th:classappend="${#request.requestURI.startsWith('/admin/management/sellers') ? 'active':''}" th:href="@{/admin/management/sellers}" class="nav-link">판매자 관리</a>
                 </li>
+                <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/admin/category') ? 'active':''}" th:href="@{/admin/category}" class="nav-link">카테고리 관리</a>
+                </li>
              </ul>
         </div>
     </div>
