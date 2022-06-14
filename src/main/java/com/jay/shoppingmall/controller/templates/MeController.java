@@ -6,13 +6,11 @@ import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
 import com.jay.shoppingmall.dto.request.password.PasswordRequest;
+import com.jay.shoppingmall.dto.response.notification.MeNotificationResponse;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.SimpleOrderResponse;
 import com.jay.shoppingmall.dto.response.review.ReviewResponse;
-import com.jay.shoppingmall.service.ItemService;
-import com.jay.shoppingmall.service.MeService;
-import com.jay.shoppingmall.service.OrderService;
-import com.jay.shoppingmall.service.ReviewService;
+import com.jay.shoppingmall.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,6 +36,7 @@ public class MeController {
     private final OrderService orderService;
     private final ItemService itemService;
     private final ReviewService reviewService;
+    private final NotificationService notificationService;
 
     @GetMapping
     public String me(@CurrentUser User user, Model model, @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -46,8 +45,10 @@ public class MeController {
         if (!simpleOrderResponses.isEmpty()) {
             model.addAttribute("orders", simpleOrderResponses);
         }
+        final List<MeNotificationResponse> myRecentNotifications = notificationService.getMyRecentNotifications(user);
 
         model.addAttribute("user", user);
+        model.addAttribute("myRecentNotifications", myRecentNotifications);
         return "me/home";
     }
 

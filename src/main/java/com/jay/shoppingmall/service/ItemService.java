@@ -92,7 +92,7 @@ public class ItemService {
 
     public PageDto itemAll(User user, Pageable pageable) {
         final Page<Item> itemPage = itemRepository.findAll(pageable);
-        CustomPage customPage = new CustomPage(itemPage);
+        CustomPage customPage = new CustomPage(itemPage, "localhost:8080/");
 
         List<Item> items = itemPage.getContent();
         List<ItemResponse> itemResponses = getItemResponses(items);
@@ -234,7 +234,7 @@ public class ItemService {
                 .orElseThrow(() -> new ItemNotFoundException("키워드에 해당하는 상품이 없습니다"));
         final List<ItemResponse> itemResponses = getItemResponses(itemPage.getContent());
         setItemsZzimBoolean(user, itemResponses);
-        CustomPage customPage = new CustomPage(itemPage);
+        CustomPage customPage = new CustomPage(itemPage, "search");
 
         return PageDto.builder()
                 .customPage(customPage)
@@ -311,7 +311,7 @@ public class ItemService {
         Page<Zzim> zzims = zzimRepository.findByUser(user, pageable)
                 .orElseThrow(() -> new ItemNotFoundException("아이디에 상품이 없습니다"));
         final List<Item> items = zzims.stream().map(Zzim::getItem).collect(Collectors.toList());
-        CustomPage customPage = new CustomPage(zzims);
+        CustomPage customPage = new CustomPage(zzims, "");
 
         final List<ItemResponse> itemResponses = getItemResponses(items);
         setItemsZzimBoolean(user, itemResponses);
@@ -326,7 +326,7 @@ public class ItemService {
 
     public PageDto getMyBrowseHistories(final User user, Pageable pageable) {
         final Page<BrowseHistory> browseHistoryPage = browseHistoryRepository.findAllByUserIdOrderByBrowseAtDesc(user.getId(), pageable);
-        CustomPage customPage = new CustomPage(browseHistoryPage);
+        CustomPage customPage = new CustomPage(browseHistoryPage, "");
         final List<BrowseHistory> browseHistories = browseHistoryPage.getContent();
 
         final List<Item> items = browseHistories.stream().map(BrowseHistory::getItem).collect(Collectors.toList());
@@ -354,7 +354,7 @@ public class ItemService {
                 .orElseThrow(() -> new SellerNotFoundException("판매자 권한이 없습니다"));
 
         final Page<Item> itemPageBySeller = itemRepository.findBySellerId(seller.getId(), pageable);
-        CustomPage customPage = new CustomPage(itemPageBySeller);
+        CustomPage customPage = new CustomPage(itemPageBySeller, "");
 
         final List<ItemResponse> itemResponses = getItemResponses(itemPageBySeller.getContent());
 

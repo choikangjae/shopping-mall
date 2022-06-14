@@ -5,19 +5,18 @@ import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
+import com.jay.shoppingmall.dto.response.notification.QnaNotificationResponse;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerBankResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
-import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
 import com.jay.shoppingmall.dto.response.seller.StatisticsResponse;
 import com.jay.shoppingmall.service.ItemService;
+import com.jay.shoppingmall.service.NotificationService;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -38,16 +37,19 @@ public class SellerController {
 
     private final SellerService sellerService;
     private final ItemService itemService;
+    private final NotificationService notificationService;
 
     @GetMapping
-    public String sellerHome(@CurrentUser User user, Model model,@PageableDefault(size = 5) Pageable pageable) {
+    public String sellerHome(@CurrentUser User user, Model model, @PageableDefault(size = 5) Pageable pageable) {
         final SellerBankResponse sellerBalance = sellerService.getSellerBalance(user);
         final List<StatisticsResponse> statisticsResponses = sellerService.getStatisticsByDay(user);
         final List<RecentPaymentPerSellerResponse> recentOrders = sellerService.getSellerRecentOrders(user, pageable);
         sellerService.getItemRecentReviews(user, pageable);
+        final List<QnaNotificationResponse> qnaNotificationResponses = notificationService.getSellerRecentQnas(user);
 
         model.addAttribute("balance", sellerBalance);
         model.addAttribute("statisticsResponses", statisticsResponses);
+        model.addAttribute("qnaNotificationResponses", qnaNotificationResponses);
         model.addAttribute("recentOrders", recentOrders);
 
         return "seller/seller-home";
@@ -122,7 +124,6 @@ public class SellerController {
     }
     @GetMapping("/items")
     public String sellerItems(@CurrentUser User user, Model model, Pageable pageable) {
-//        Page<ItemResponse> itemResponses = sellerService.showItemsBySeller(user, pageable);
         final PageDto itemResponses = itemService.showItemsBySeller(user, pageable);
 
         model.addAttribute("items", itemResponses);

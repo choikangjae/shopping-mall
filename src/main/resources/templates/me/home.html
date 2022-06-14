@@ -1,78 +1,136 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
-      layout:decorate="~{layouts/layout.html}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org"
+    layout:decorate="~{layouts/layout.html}">
+
 <head>
     <title>마이 페이지</title>
 </head>
+
 <body>
-<div layout:fragment="content">
-    <div class="container">
-        <div th:replace="me/me-navbar :: me-navbar"></div>
-        <br>
-        <!--본문 들어갈 곳-->
-        <div class="container position-relative">
-            <div th:if="${user.getAgree()?.getIsMandatoryAgree() == null}" class="card col-6 justify-content-center">
-                <div class="card-body">
-                    <div>
-                        <form action="/me/privacy" method="get">
-                            <h6 th:text="${user.getEmail() + '회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요'}"></h6>
-                            <br>
-                            <button type="submit" class="btn btn-success">개인정보 입력하러 가기</button>
-                        </form>
+    <div layout:fragment="content">
+        <div class="container">
+            <div th:replace="me/me-navbar :: me-navbar"></div>
+            <br>
+            <!--본문 들어갈 곳-->
+            <div class="container position-relative">
+                <div th:if="${user.getAgree()?.getIsMandatoryAgree() == null}"
+                    class="card col-6 justify-content-center">
+                    <div class="card-body">
+                        <div>
+                            <form action="/me/privacy" method="get">
+                                <h6
+                                    th:text="${user.getEmail() + '회원님은 아직 개인정보를 입력하지 않으셨습니다. 개인정보를 입력하시고 더 많은 혜택을 누려보세요'}">
+                                </h6>
+                                <br>
+                                <button type="submit" class="btn btn-success">개인정보 입력하러 가기</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <br>
-            <div>
-                <h5 th:if="${user.getName().getFirst() != null}"
-                    th:text="${user.getName().getFullName() + ' 님 안녕하세요!'}"></h5>
-                <h5 th:if="${user.getName().getFirst() == null}" th:text="${user.getEmail() + ' 님 안녕하세요!'}"></h5>
-            </div>
+                <br>
+                <div>
+                    <h5 th:if="${user.getName().getFirst() != null}"
+                        th:text="${user.getName().getFullName() + ' 님 안녕하세요!'}"></h5>
+                    <h5 th:if="${user.getName().getFirst() == null}" th:text="${user.getEmail() + ' 님 안녕하세요!'}"></h5>
+                </div>
 
-            <br>
-            <label for="recentOrders">최근 주문 내역</label>
-            <span class="text-center" th:if="${#lists.isEmpty(orders)}">
-                최근 주문 내역이 없습니다
-            </span>
-            <table class="table" id="recentOrders">
-                <thead>
-                <tr>
-                    <th scope="col">주문날짜</th>
-                    <th scope="col"></th>
-                    <th scope="col">주문내역</th>
-                    <th scope="col">배송상태</th>
-                    <th scope="col">주문번호</th>
-                    <th scope="col">결제금액</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="order : ${orders}" style="cursor:pointer;" th:onclick="|goToOrderDetail('${order.id}');|">
-                    <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">주문날짜</td>
-                    <td style="width: 6rem;"><img class="bd-placeholder-img card-img-top img-fluid" width="100%"
-                                                  height="100%"
-                                                  th:src="'data:image/jpeg;base64,'+${order.mainImage}" alt="..."/></td>
-                    <td th:text="${order.name}">주문내역</td>
-                    <td>
-                        <div th:each="deliveryStatus : ${order.deliveryStatuses}">
-                            <p th:text="${deliveryStatus}"></p>
-                        </div>
-                    </td>
-                    <td th:text="${order.merchantUid}">주문번호</td>
-                    <td th:text="${#numbers.formatDecimal(order.amount, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">결제금액</td>
-                </tr>
-                </tbody>
-            </table>
+                <br>
+                <label for="recentOrders">최근 주문 내역</label>
+                <span class="text-center" th:if="${#lists.isEmpty(orders)}">
+                    최근 주문 내역이 없습니다
+                </span>
+                <table class="table" id="recentOrders">
+                    <thead>
+                        <tr>
+                            <th scope="col">주문날짜</th>
+                            <th scope="col"></th>
+                            <th scope="col">주문내역</th>
+                            <th scope="col">배송상태</th>
+                            <th scope="col">주문번호</th>
+                            <th scope="col">결제금액</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${orders}" style="cursor:pointer;"
+                            th:onclick="|goToOrderDetail('${order.id}');|">
+                            <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">주문날짜</td>
+                            <td style="width: 6rem;"><img class="bd-placeholder-img card-img-top img-fluid" width="100%"
+                                    height="100%" th:src="'data:image/jpeg;base64,'+${order.mainImage}" alt="..." />
+                            </td>
+                            <td th:text="${order.name}">주문내역</td>
+                            <td>
+                                <div th:each="deliveryStatus : ${order.deliveryStatuses}">
+                                    <p th:text="${deliveryStatus}"></p>
+                                </div>
+                            </td>
+                            <td th:text="${order.merchantUid}">주문번호</td>
+                            <td th:text="${#numbers.formatDecimal(order.amount, 0, 'DEFAULT', 0, 'DEFAULT')} + ' 원'">
+                                결제금액</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <label class="mt-3" for="recentQnas">최근 QnA 답변 내역</label>
+                <table class="table mt-1" id="recentQnas">
+                    <thead>
+                        <tr>
+                            <th scope="col">답변시간</th>
+                            <th scope="col"></th>
+                            <th scope="col">상품명</th>
+                            <th scope="col">나의 질문</th>
+                            <th scope="col">판매자 답변</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="response : ${myRecentNotifications}"
+                            th:onclick="goToItemDetail([[${response.itemSimpleResponse.itemId}]], [[${response.notificationResponse.notificationId}]])"
+                            style="cursor:pointer;"
+                            th:classappend="${response.notificationResponse.isRead ? 'text-muted' : ''}">
+                            <td
+                                th:text="${#temporals.format(response.notificationResponse.sentAt, 'yyyy-MM-dd HH:mm')}">
+                                날짜</td>
+                            <td>
+                                <div style="width: 5rem;">
+                                    <img class="bd-placeholder-img card-img-top img-fluid" width="100%" height="100%"
+                                        th:src="'data:image/jpeg;base64,'+${response.itemSimpleResponse.itemImage}"
+                                        alt="..." />
+                                </div>
+                            </td>
+                            <td th:text="${response.itemSimpleResponse.itemName}">상품명</td>
+                            <td th:text="${response.originalMessage}">답변</td>
+                            <td th:text="${response.notificationResponse.message}">답변</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
+        <script>
+            function goToItemDetail(itemId, notificationId) {
+                fetch(`/api/v1/notification/` + notificationId)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw res;
+                        }
+                        return res
+                    })
+                    .then(res => {
+                        console.log(res.message);
+                    })
+                    .catch(err => {
+                        console.log(err.message);
+                    });
+
+                window.location.href = "/item/details/" + itemId;
+            }
+
+            function goToOrderDetail(id) {
+                window.location.href = "/me/order/detail/" + id;
+            }
+
+
+        </script>
     </div>
-    <script>
-        function goToOrderDetail(id) {
-            window.location.href="/me/order/detail/" + id;
-        }
-
-
-    </script>
-</div>
 </body>
+
 </html>

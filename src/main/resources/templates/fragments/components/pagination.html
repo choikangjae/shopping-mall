@@ -8,7 +8,7 @@
                 <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
             </li>
             <li th:each="page : ${#numbers.sequence(1, pages.totalPages)}" class="page-item"><a
-                    class="page-link" th:text="${page}" th:href="@{/(page = ${page - 1})}">페이지</a></li>
+                    class="page-link" th:text="${page}" th:href="@{__${#httpServletRequest.requestURI}__/__${pages.targetPage}__(page = ${page - 1})}">페이지</a></li>
             <li class="page-item">
                 <a class="page-link" href="#">Next</a>
             </li>

@@ -27,6 +27,9 @@
                     <a type="button" th:classappend="${#request.requestURI.startsWith('/me/cancel-item-list') ? 'active':''}" th:href="@{/me/cancel-item-list}" class="nav-link">취소/교환/반품 내역</a>
                 </li>
                 <li class="nav-item">
+                    <a type="button" th:classappend="${#request.requestURI.startsWith('/me/qnas') ? 'active':''}" th:href="@{/me/qnas}" class="nav-link">나의 QnA</a>
+                </li>
+                <li class="nav-item">
                     <a type="button" th:classappend="${#request.requestURI.startsWith('/me/reviews') ? 'active':''}" th:href="@{/me/reviews}" class="nav-link">나의 리뷰</a>
                 </li>
                 <li class="nav-item">

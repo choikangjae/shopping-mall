@@ -4,11 +4,12 @@ import lombok.*;
 import org.springframework.data.domain.Page;
 
 @Getter
-@Builder
+//@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class CustomPage {
 
+    private String targetPage;
     //총 개수
     private Long totalElements;
     //전체 페이지
@@ -20,7 +21,9 @@ public class CustomPage {
 
     private long offset;
 
-    public CustomPage(Page<?> page) {
+    //TODO layout + API + pagination 찾아볼것
+    public CustomPage(Page<?> page, String targetPage) {
+        this.targetPage = targetPage;
         this.offset = page.getPageable().getOffset();
         this.totalElements = page.getTotalElements();
         this.totalPages = page.getTotalPages();

@@ -19,6 +19,11 @@ import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockH
 import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistoryRepository;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporary;
 import com.jay.shoppingmall.domain.item.temporary.ItemTemporaryRepository;
+import com.jay.shoppingmall.domain.notification.NotificationRepository;
+import com.jay.shoppingmall.domain.notification.me_notification.MeNotification;
+import com.jay.shoppingmall.domain.notification.me_notification.MeNotificationRepository;
+import com.jay.shoppingmall.domain.notification.model.NotificationType;
+import com.jay.shoppingmall.domain.notification.qna_notification.QnaNotification;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.order.OrderRepository;
@@ -29,8 +34,6 @@ import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
 import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
-import com.jay.shoppingmall.domain.review.Review;
-import com.jay.shoppingmall.domain.review.ReviewRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistory;
@@ -41,23 +44,23 @@ import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.dto.request.*;
 import com.jay.shoppingmall.dto.request.qna.QnaAnswerRequest;
+import com.jay.shoppingmall.dto.response.item.ItemSimpleResponse;
+import com.jay.shoppingmall.dto.response.notification.NotificationResponse;
+import com.jay.shoppingmall.dto.response.notification.QnaNotificationResponse;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.OrderItemResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerResponse;
 import com.jay.shoppingmall.dto.response.order.payment.RecentPaymentPerSellerSimpleResponse;
-import com.jay.shoppingmall.dto.response.review.ReviewResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerBankAccountHistoryResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerBankResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerDefaultSettingsResponse;
-import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.item.ItemTemporaryResponse;
 import com.jay.shoppingmall.dto.response.seller.StatisticsResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,26 +96,11 @@ public class SellerService {
     private final PaymentPerSellerRepository paymentPerSellerRepository;
     private final OrderRepository orderRepository;
     private final SellerBankAccountHistoryRepository sellerBankAccountHistoryRepository;
-    private final ReviewRepository reviewRepository;
+    private final NotificationRepository<?> notificationRepository;
+    private final MeNotificationRepository meNotificationRepository;
 
-    private final PaymentService paymentService;
-    private final ZzimService zzimService;
+
     private final FileHandler fileHandler;
-
-    public Page<ItemResponse> showItemsBySeller(User user, Pageable pageable) {
-        Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
-                .orElseThrow(() -> new SellerNotFoundException("판매자 권한이 없습니다"));
-
-        return itemRepository.findBySellerId(seller.getId(), pageable)
-                .map(item -> ItemResponse.builder()
-                        .itemId(item.getId())
-                        .name(item.getName())
-                        .zzim(item.getZzim())
-                        .mainImage(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, item.getId())))
-                        .isZzimed(zzimService.isZzimed(user.getId(), item.getId()))
-                        .build());
-
-    }
 
     public Long writeItem(WriteItemRequest writeItemRequest, final MultipartFile file, final List<MultipartFile> files, final User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
@@ -258,17 +246,31 @@ public class SellerService {
         if (isAnswered) {
             throw new AlreadyExistsException("답변이 이미 존재합니다");
         }
-        Long itemId = qnaRepository.findById(qnaId)
+        Item item = qnaRepository.findById(qnaId)
                 .map(Qna::getItem)
-                .map(Item::getId)
                 .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지 않습니다"));
 
-        if (this.sellerCheck(itemId, user)) {
+        if (this.sellerCheck(item.getId(), user)) {
             Qna qna = qnaRepository.findById(qnaId)
                     .orElseThrow(() -> new QnaException("QnA가 존재하지 않습니다"));
             qna.answerUpdate(qnaAnswerRequest.getAnswer());
         }
+        //QnA 답변에 대한 notification to user
+        final QnaNotification qnaNotification = notificationRepository.findByQnaId(qnaId);
+        if (qnaNotification != null) {
+            qnaNotification.answerUpdate(qnaAnswerRequest.getAnswer());
 
+            MeNotification meNotification = MeNotification.builder()
+                    .notificationType(NotificationType.QNA_ANSWER_TO_USER)
+                    .originalMessage(qnaNotification.getMessage())
+                    .sender(qnaNotification.getReceiver())
+                    .receiver(qnaNotification.getSender())
+                    .message(qnaAnswerRequest.getAnswer())
+                    .item(item)
+                    .build();
+
+            meNotificationRepository.save(meNotification);
+        }
     }
 
     public void temporarySave(final WriteItemRequest writeItemRequest, final User user) {
@@ -571,4 +573,5 @@ public class SellerService {
         //Review나 QnA가 작성이 될때 메시지큐를 이용해서 셀러에게 알림을 준다. 이때 아이템 아이디와 유저명 등을 같이 보냄.
         //TODO RabbitMQ 공부 후 구현할 것.
     }
+
 }

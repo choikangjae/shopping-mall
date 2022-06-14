@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @Entity
-//TODO delete 플래그 여부가 qna에서만 작동하지 않는 이유 확인할 것
 @Where(clause = "is_deleted = 0")
 @SQLDelete(sql = "UPDATE qna SET is_deleted = 1, deleted_date = NOW() WHERE id = ?")
 public class Qna extends BaseTimeEntity {
@@ -42,8 +41,10 @@ public class Qna extends BaseTimeEntity {
     @Size(min = 4, max = 500)
     private String answer;
 
+    private LocalDateTime answeredAt;
+
     @Column(columnDefinition = "boolean default 0")
-    private final Boolean isDeleted = false;
+    private Boolean isDeleted;
 
     private LocalDateTime deletedDate;
 
@@ -65,5 +66,15 @@ public class Qna extends BaseTimeEntity {
     public void answerUpdate(final String answer) {
         this.answer = answer;
         this.isAnswered = true;
+        this.answeredAt = LocalDateTime.now();
     }
+
+    @PrePersist
+    public void prePersist() {
+        this.isSecret = this.isSecret != null && this.isSecret;
+        this.isAnswered = this.isAnswered != null && this.isAnswered;
+        this.isEmailNotification = this.isEmailNotification != null && this.isEmailNotification;
+        this.isDeleted = this.isDeleted != null && this.isDeleted;
+    }
+
 }

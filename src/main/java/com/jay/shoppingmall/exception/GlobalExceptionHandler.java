@@ -141,4 +141,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+    @ExceptionHandler(QnaException.class)
+    public ResponseEntity<?> handleQnaException(QnaException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("QNA_ERROR")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
 }

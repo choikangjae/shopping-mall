@@ -4,9 +4,11 @@ import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.model.page.CustomPage;
 import com.jay.shoppingmall.domain.model.page.PageDto;
+import com.jay.shoppingmall.domain.notification.model.NotificationType;
+import com.jay.shoppingmall.domain.notification.qna_notification.QnaNotification;
+import com.jay.shoppingmall.domain.notification.qna_notification.QnaNotificationRepository;
 import com.jay.shoppingmall.domain.qna.Qna;
 import com.jay.shoppingmall.domain.qna.QnaRepository;
-import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.dto.request.qna.QnaWriteRequest;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,8 +38,9 @@ public class QnaService {
 
     private final QnaRepository qnaRepository;
     private final ItemRepository itemRepository;
-    private final SellerRepository sellerRepository;
+    private final QnaNotificationRepository qnaNotificationRepository;
     private final UserRepository userRepository;
+
     private final SellerService sellerService;
     private final CommonService commonService;
 
@@ -48,7 +52,7 @@ public class QnaService {
             throw new QnaException("답변된 질문은 수정하실 수 없습니다");
         }
 
-        QnaResponse qnaResponse = QnaResponse.builder()
+        return QnaResponse.builder()
                 .email(qna.getUser().getEmail())
                 .answer(qna.getAnswer())
                 .isAnswered(qna.getIsAnswered())
@@ -59,8 +63,6 @@ public class QnaService {
                 .question(qna.getQuestion())
                 .isEmailNotification(qna.getIsEmailNotification())
                 .build();
-
-        return qnaResponse;
     }
 
     public QnaResponse qnaWrite(final QnaWriteRequest qnaWriteRequest, User user) {
@@ -68,7 +70,6 @@ public class QnaService {
                 .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
 
         Qna qna;
-
         if (qnaWriteRequest.getQnaId() != null) {
             qna = qnaRepository.findById(qnaWriteRequest.getQnaId())
                     .orElseThrow(() -> new QnaException("QnA가 존재하지 않습니다"));
@@ -84,6 +85,26 @@ public class QnaService {
                     .build();
             qnaRepository.save(qna);
         }
+        final User receiver = userRepository.findById(item.getSeller().getUserId())
+                .orElseThrow(() -> new UserNotFoundException("해당 사용자가 없습니다"));
+
+        if (qnaNotificationRepository.findByQnaId(qna.getId()) != null) {
+            qnaNotificationRepository.deleteByQnaId(qna.getId());
+        }
+
+        QnaNotification qnaNotification = QnaNotification.builder()
+                .notificationType(NotificationType.QNA_TO_SELLER)
+                .receiver(receiver)
+                .sender(user)
+                .qnaCategory(qna.getQnaCategory())
+                .message(qna.getQuestion())
+                .answer(qna.getAnswer())
+                .qna(qna)
+                .isAnswered(qna.getIsAnswered())
+                .item(item)
+                .answeredAt(qna.getAnsweredAt())
+                .build();
+        qnaNotificationRepository.save(qnaNotification);
 
         return QnaResponse.builder()
                 .username(qna.getUser().getUsername())
@@ -104,10 +125,7 @@ public class QnaService {
 
         List<QnaResponse> qnaResponses = new ArrayList<>();
         for (Qna qna : qnas) {
-            Boolean isQnaOwner = false;
-            if (user != null && user.getEmail().equals(qna.getUser().getEmail())) {
-                isQnaOwner = true;
-            }
+            boolean isQnaOwner = user != null && user.getEmail().equals(qna.getUser().getEmail());
 
             StringBuilder username = new StringBuilder(qna.getUser().getUsername());
             username.delete(username.length() / 2, username.length());
@@ -151,7 +169,7 @@ public class QnaService {
 
     public PageDto getQnas(Long itemId, User user, Pageable pageable) {
         Page<Qna> qnaPage = qnaRepository.findAllByItemId(itemId, pageable);
-        CustomPage customPage = new CustomPage(qnaPage);
+        CustomPage customPage = new CustomPage(qnaPage, "qna");
         List<Qna> qnas = qnaPage.getContent();
         final Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
 

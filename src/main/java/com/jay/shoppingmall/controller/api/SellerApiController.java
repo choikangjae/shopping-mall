@@ -12,6 +12,7 @@ import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.exception.exceptions.AgreeException;
 import com.jay.shoppingmall.exception.exceptions.NotValidException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
+import com.jay.shoppingmall.service.NotificationService;
 import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -35,8 +36,10 @@ import java.util.List;
 public class SellerApiController {
 
     private final SellerService sellerService;
-    private final AuthenticationManager authenticationManager;
     private final ObjectMapper objectMapper;
+    private final NotificationService notificationService;
+
+    private final AuthenticationManager authenticationManager;
 
     @PostMapping(value = "/write", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> sellerOptionItemWrite(@Valid @RequestPart ApiWriteItemRequest apiWriteItemRequest,

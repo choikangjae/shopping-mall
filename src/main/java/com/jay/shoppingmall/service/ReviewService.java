@@ -170,7 +170,7 @@ public class ReviewService {
 
     public PageDto getItemReviews(Long itemId, Pageable pageable) {
         final Page<Review> reviewPage = reviewRepository.findAllByItemIdOrderByCreatedDateDesc(itemId, pageable);
-        CustomPage customPage = new CustomPage(reviewPage);
+        CustomPage customPage = new CustomPage(reviewPage, "review");
         final List<ReviewResponse> reviewResponses = getReviewResponses(reviewPage.getContent());
 
         return PageDto.builder()
