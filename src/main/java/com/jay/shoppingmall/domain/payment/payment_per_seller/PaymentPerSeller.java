@@ -25,13 +25,13 @@ public class PaymentPerSeller extends BaseTimeEntity {
 
     private Long itemTotalPricePerSeller;
     @Column(columnDefinition = "boolean default 0")
-    private Boolean isMoneyTransferredToSeller = false;
+    private Boolean isMoneyTransferredToSeller;
 
     private Integer itemTotalQuantityPerSeller;
 
     private Integer itemShippingFeePerSeller;
     @Column(columnDefinition = "boolean default 0")
-    private Boolean isMoneyTransferredToDeliveryCompany = false;
+    private Boolean isMoneyTransferredToDeliveryCompany;
 
 //    @OneToMany(mappedBy = "paymentPerSeller")
 //    @Builder.Default
@@ -58,6 +58,12 @@ public class PaymentPerSeller extends BaseTimeEntity {
         this.order = order;
 //        this.orderItems = orderItems;
         paymentPerSeller(payment);
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.isMoneyTransferredToSeller = this.isMoneyTransferredToSeller != null && this.isMoneyTransferredToSeller;
+        this.isMoneyTransferredToDeliveryCompany = this.isMoneyTransferredToDeliveryCompany != null && this.isMoneyTransferredToDeliveryCompany;
     }
 
     //조회하기 위해 추가

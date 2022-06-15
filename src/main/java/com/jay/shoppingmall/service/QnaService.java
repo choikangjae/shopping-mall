@@ -167,9 +167,9 @@ public class QnaService {
                 .build();
     }
 
-    public PageDto getQnas(Long itemId, User user, Pageable pageable) {
+    public PageDto getQnas(Long itemId, String targetPage, User user, Pageable pageable) {
         Page<Qna> qnaPage = qnaRepository.findAllByItemId(itemId, pageable);
-        CustomPage customPage = new CustomPage(qnaPage, "qna");
+        CustomPage customPage = new CustomPage(qnaPage, targetPage);
         List<Qna> qnas = qnaPage.getContent();
         final Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
 

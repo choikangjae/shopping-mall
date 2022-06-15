@@ -73,7 +73,7 @@ public class PaymentService {
         final Seller seller = orderItem.getSeller();
 
         final PaymentPerSeller paymentPerSeller = paymentPerSellerRepository.findByOrderIdAndSellerId(orderItem.getOrder().getId(), seller.getId());
-        if (paymentPerSeller.getIsMoneyTransferredToSeller()) {
+        if (paymentPerSeller.getIsMoneyTransferredToSeller() != null && paymentPerSeller.getIsMoneyTransferredToSeller()) {
             throw new MoneyTransactionException("이미 정산이 완료된 주문입니다");
         }
 

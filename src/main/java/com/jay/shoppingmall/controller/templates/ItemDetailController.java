@@ -38,10 +38,11 @@ public class ItemDetailController {
     public String itemDetailByItemId(@PathVariable(name = "id",required = false) Long itemId,
                                      @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable,
                                      Model model, @CurrentUser User user, HttpServletRequest request) {
+        String targetPage = "qna";
 
         ItemDetailResponse response = itemService.itemDetail(user, itemId);
         final PageDto sellerOtherItems = itemService.getSellerOtherItems(itemId);
-        PageDto itemQnas = qnaService.getQnas(itemId, user, pageable);
+        PageDto itemQnas = qnaService.getQnas(itemId, targetPage, user, pageable);
         final PageDto itemReviews = reviewService.getItemReviews(itemId, pageable);
 
         model.addAttribute("itemReviews", itemReviews);

@@ -10,16 +10,19 @@ import org.springframework.data.domain.Page;
 public class CustomPage {
 
     private String targetPage;
-    //총 개수
+
     private Long totalElements;
-    //전체 페이지
     private int totalPages;
 
     private int number;
-
     private int size;
 
     private long offset;
+
+    private boolean previousPage;
+    private boolean firstPage;
+    private boolean nextPage;
+    private boolean lastPage;
 
     //TODO layout + API + pagination 찾아볼것
     public CustomPage(Page<?> page, String targetPage) {
