@@ -308,8 +308,8 @@ public class ItemService {
     }
 
     public PageDto getAllMeZzim(User user, Pageable pageable) {
-        Page<Zzim> zzims = zzimRepository.findByUser(user, pageable)
-                .orElseThrow(() -> new ItemNotFoundException("아이디에 상품이 없습니다"));
+        Page<Zzim> zzims = zzimRepository.findByUser(user, pageable);
+
         final List<Item> items = zzims.stream().map(Zzim::getItem).collect(Collectors.toList());
         CustomPage customPage = new CustomPage(zzims, "");
 
@@ -322,7 +322,6 @@ public class ItemService {
                 .customPage(customPage)
                 .build();
     }
-
 
     public PageDto getMyBrowseHistories(final User user, Pageable pageable) {
         final Page<BrowseHistory> browseHistoryPage = browseHistoryRepository.findAllByUserIdOrderByBrowseAtDesc(user.getId(), pageable);

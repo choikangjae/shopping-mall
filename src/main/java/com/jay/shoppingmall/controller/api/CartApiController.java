@@ -2,14 +2,11 @@ package com.jay.shoppingmall.controller.api;
 
 import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.CartRequest;
 import com.jay.shoppingmall.dto.request.CartManipulationRequest;
 import com.jay.shoppingmall.dto.response.cart.CartPriceResponse;
 import com.jay.shoppingmall.dto.response.cart.CartPriceTotalResponse;
-import com.jay.shoppingmall.dto.response.cart.CartResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
-import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +47,7 @@ public class CartApiController {
         if (itemOptions == null) {
             throw new ItemNotFoundException("옵션을 선택해주세요");
         }
-        cartService.addItemOptionsToCart(itemOptions, user);
+        cartService.addOptionItemsToCart(itemOptions, user);
 
         return ResponseEntity.ok().body(null);
     }

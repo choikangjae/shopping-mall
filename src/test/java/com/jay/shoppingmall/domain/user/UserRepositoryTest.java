@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.domain.user;
 
+import com.jay.shoppingmall.domain.entitybuilder.EntityBuilder;
 import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.domain.user.model.Agree;
 import com.jay.shoppingmall.domain.user.model.Name;
@@ -28,30 +29,11 @@ class UserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        User user = User.builder()
-                .email("qwe@qwe")
-                .role(Role.ROLE_USER)
-                .password(("qweqweqwe1"))
-                .build();
-        Address address = Address.builder()
-                .address("서울시 종로")
-                .detailAddress("집")
-                .zipcode("01010")
-                .extraAddress("")
-                .build();
-        PhoneNumber phoneNumber = PhoneNumber.builder()
-                .first("010")
-                .middle("1234")
-                .last("5678")
-                .build();
-        Name name = Name.builder()
-                .last("홍")
-                .first("길동")
-                .build();
-        Agree agree = Agree.builder()
-                .isMandatoryAgree(true)
-                .isMarketingAgree(true)
-                .build();
+        final User user = EntityBuilder.getUser();
+        final Address address = EntityBuilder.getAddress();
+        final Name name = EntityBuilder.getName();
+        final Agree agree = EntityBuilder.getAgree();
+        final PhoneNumber phoneNumber = EntityBuilder.getPhoneNumber();
         user.userUpdate(address, name, agree, phoneNumber);
 
         userRepository.save(user);

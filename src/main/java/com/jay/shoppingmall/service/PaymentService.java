@@ -113,8 +113,8 @@ public class PaymentService {
                 .build();
         orderRepository.save(order);
 
-        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user)
-                .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
+        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
+//                .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
 
         final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
         //판매자별 개별 결제 정보 저장
@@ -197,8 +197,8 @@ public class PaymentService {
     }
 
     public PaymentResponse paymentRecordGenerateBeforePg(final PaymentRequest paymentRequest, final User user) {
-        List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user)
-                .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
+        List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
+//                .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
         String merchantUid = merchantUidGenerator.generateMerchantUid();
 
         long totalQuantity = carts.stream().mapToLong(Cart::getQuantity).sum();

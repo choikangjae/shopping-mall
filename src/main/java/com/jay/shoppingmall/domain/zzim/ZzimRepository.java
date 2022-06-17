@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ZzimRepository extends JpaRepository<Zzim, Long> {
-    Optional<Page<Zzim>> findByUser(User user, Pageable pageable);
+    Page<Zzim> findByUser(User user, Pageable pageable);
 
     Zzim findByUserIdAndItemId(Long userId, Long itemId);
 

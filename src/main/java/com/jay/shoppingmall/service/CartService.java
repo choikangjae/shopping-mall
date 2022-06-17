@@ -25,7 +25,6 @@ import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,8 +50,8 @@ public class CartService {
     //TODO 밑의 코드들로 리팩토링 하기
     public Map<SellerResponse, List<ItemAndQuantityResponse>> showCartItemsList(User user) {
         //유저를 기준으로 장바구니 물품 가져오기
-        final List<Cart> carts = cartRepository.findByUser(user)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
+        final List<Cart> carts = cartRepository.findByUser(user);
+//                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
 
         Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = new ConcurrentHashMap<>();
         final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
@@ -108,7 +107,7 @@ public class CartService {
         return sellerResponseListMap;
     }
 
-    public void addItemOptionsToCart(final List<ItemOptionResponse> itemOptions, final User user) {
+    public void addOptionItemsToCart(final List<ItemOptionResponse> itemOptions, final User user) {
         for (ItemOptionResponse itemOptionResponse : itemOptions) {
             Item item = itemRepository.findById(itemOptionResponse.getItemId())
                     .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
@@ -164,8 +163,8 @@ public class CartService {
 
     //장바구니 전체 가격, 총 배송비, 개수
     public CartPriceTotalResponse cartPriceTotal(User user) {
-        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user)
-                .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
+        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
+//                .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
 
         long cartTotalPrice = 0;
         int cartTotalQuantity = 0;
@@ -189,8 +188,8 @@ public class CartService {
 
     //판매자별 가격, 개수, 배송비
     public CartPricePerSellerResponse cartPricePerSeller(User user, Seller seller) {
-        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user)
-                .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
+        final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
+//                .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
 
         final List<Cart> cartList = carts.stream().filter(cart -> cart.getItem().getSeller().equals(seller)).collect(Collectors.toList());
         long cartTotalPricePerSeller = 0;
@@ -225,8 +224,8 @@ public class CartService {
                 .build();
     }
     public CartPriceResponse cartSelect(final String check, final User user) {
-        List<Cart> carts = cartRepository.findByUser(user)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
+        List<Cart> carts = cartRepository.findByUser(user);
+//                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
         List<CartPricePerSellerResponse> cartPricePerSellerResponses = new ArrayList<>();
 
         for (Cart cart : carts) {
@@ -281,8 +280,8 @@ public class CartService {
     }
 
     public Integer getTotalQuantity(final User user) {
-        List<Cart> carts = cartRepository.findByUser(user)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
+        List<Cart> carts = cartRepository.findByUser(user);
+//                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
         Integer totalQuantity = 0;
         for (Cart cart : carts) {
             totalQuantity += cart.getQuantity();

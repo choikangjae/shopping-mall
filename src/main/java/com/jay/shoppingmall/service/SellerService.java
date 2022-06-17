@@ -323,7 +323,7 @@ public class SellerService {
             throw new SellerNotFoundException("판매자가 아닙니다");
         }
         itemRepository.deleteById(itemId);
-        cartRepository.deleteByItemId(itemId);
+        cartRepository.deleteByUserIdAndItemId(user.getId(), itemId);
     }
 
     public void sellerDefaultSettingSave(SellerDefaultSettingsRequest request, User user) {
