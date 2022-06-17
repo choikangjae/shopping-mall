@@ -48,8 +48,8 @@ public class AdminService {
         return userDetailResponses;
     }
     public List<UserDetailResponse> searchUsersByEmail(String email) {
-        List<User> users = userRepository.findByEmailContaining(email)
-                .orElseThrow(() -> new UserNotFoundException("유저가 존재하지 않습니다"));
+        List<User> users = userRepository.findByEmailContaining(email);
+//                .orElseThrow(() -> new UserNotFoundException("유저가 존재하지 않습니다"));
 
         List<UserDetailResponse> userDetailResponses = new ArrayList<>();
         for (User user : users) {
