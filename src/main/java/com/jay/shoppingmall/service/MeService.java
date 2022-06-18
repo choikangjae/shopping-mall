@@ -68,7 +68,6 @@ public class MeService {
         if (!agreeRequest.getIsMandatoryAgree()) {
             throw new AgreeException("필수 항목을 반드시 동의하셔야 합니다");
         }
-
         Agree agree = Agree.builder()
                 .isMandatoryAgree(agreeRequest.getIsMandatoryAgree())
                 .isMarketingAgree(agreeRequest.getIsMarketingAgree())

@@ -4,6 +4,8 @@ import com.jay.shoppingmall.domain.category.Category;
 import com.jay.shoppingmall.domain.category.CategoryRepository;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.model.page.CustomPage;
+import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.dto.request.admin.category.CategoryAddRequest;
@@ -29,12 +31,12 @@ public class AdminService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
-    public List<UserDetailResponse> showUserList(Pageable pageable) {
+    public PageDto showUserList(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
+        CustomPage customPage = new CustomPage(users, "");
 
         List<UserDetailResponse> userDetailResponses = new ArrayList<>();
         for (User user : users) {
-
             userDetailResponses.add(UserDetailResponse.builder()
                     .email(user.getEmail())
                     .fullName(user.getName().getFullName())
@@ -45,7 +47,10 @@ public class AdminService {
                     .isMarketingAgree(user.getAgree().getIsMarketingAgree())
                     .build());
         }
-        return userDetailResponses;
+        return PageDto.builder()
+                .customPage(customPage)
+                .content(userDetailResponses)
+                .build();
     }
     public List<UserDetailResponse> searchUsersByEmail(String email) {
         List<User> users = userRepository.findByEmailContaining(email);

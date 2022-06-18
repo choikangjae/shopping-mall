@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.controller.templates;
 
+import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.dto.response.item.ItemResponse;
@@ -37,9 +38,9 @@ public class AdminController {
 
     @GetMapping("/management/users")
     public String showUsers(Pageable pageable, Model model) {
-        List<UserDetailResponse> userDetailResponses = adminService.showUserList(pageable);
+        PageDto pageDto = adminService.showUserList(pageable);
 
-        model.addAttribute("users", userDetailResponses);
+        model.addAttribute("pageDto", pageDto);
         return "admin/admin-users";
     }
     @GetMapping("/management/sellers")

@@ -18,10 +18,7 @@ import com.jay.shoppingmall.dto.response.cart.CartPriceTotalResponse;
 import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerResponse;
-import com.jay.shoppingmall.exception.exceptions.AlreadyExistsException;
-import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
-import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
-import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -99,9 +96,6 @@ public class CartService {
             sellerResponse.setShippingFee(shippingFeeCheck(seller.getId(), itemTotalPricePerSeller));
             sellerResponse.updateTotal(itemTotalPricePerSeller, itemTotalQuantityPerSeller);
 
-//            if (itemTotalPricePerSeller == 0) {
-//                sellerResponse.setShippingFee(0);
-//            }
             sellerResponseListMap.put(sellerResponse, itemAndQuantityResponses);
         }
         return sellerResponseListMap;
@@ -189,7 +183,6 @@ public class CartService {
     //판매자별 가격, 개수, 배송비
     public CartPricePerSellerResponse cartPricePerSeller(User user, Seller seller) {
         final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
-//                .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
 
         final List<Cart> cartList = carts.stream().filter(cart -> cart.getItem().getSeller().equals(seller)).collect(Collectors.toList());
         long cartTotalPricePerSeller = 0;
@@ -225,7 +218,6 @@ public class CartService {
     }
     public CartPriceResponse cartSelect(final String check, final User user) {
         List<Cart> carts = cartRepository.findByUser(user);
-//                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
         List<CartPricePerSellerResponse> cartPricePerSellerResponses = new ArrayList<>();
 
         for (Cart cart : carts) {
@@ -268,10 +260,13 @@ public class CartService {
     public CartPriceResponse deleteCart(final CartManipulationRequest request, final User user) {
         final Cart cart = cartRepository.findById(request.getCartId())
                 .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
+        if (!cart.getUser().getId().equals(user.getId())) {
+            throw new UserNotFoundException("잘못된 접근입니다");
+        }
         cartRepository.delete(cart);
 
-        final CartPricePerSellerResponse cartPricePerSellerResponse = cartPricePerSeller(user, cart.getItem().getSeller());
-        final CartPriceTotalResponse cartPriceTotalResponse = cartPriceTotal(user);
+        final CartPricePerSellerResponse cartPricePerSellerResponse = this.cartPricePerSeller(user, cart.getItem().getSeller());
+        final CartPriceTotalResponse cartPriceTotalResponse = this.cartPriceTotal(user);
 
         return CartPriceResponse.builder()
                 .cartPricePerSellerResponse(cartPricePerSellerResponse)
@@ -281,7 +276,7 @@ public class CartService {
 
     public Integer getTotalQuantity(final User user) {
         List<Cart> carts = cartRepository.findByUser(user);
-//                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
+
         Integer totalQuantity = 0;
         for (Cart cart : carts) {
             totalQuantity += cart.getQuantity();

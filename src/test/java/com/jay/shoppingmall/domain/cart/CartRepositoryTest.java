@@ -7,18 +7,24 @@ import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.DirtiesContext;
 
+import javax.persistence.NonUniqueResultException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 @DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class CartRepositoryTest {
 
     @Autowired
@@ -97,8 +103,8 @@ class CartRepositoryTest {
         assertThat(carts.get(0).getQuantity()).isGreaterThan(0);
     }
     @Test
-    void itShouldNotReturn_CartIsEmpty_findByUser() {
-        final List<Cart> carts = cartRepository.findByUser(user2);
+    void cartIsEmpty_findByUser() {
+        final List<Cart> carts = cartRepository.findByUser(any(User.class));
 
         assertThat(carts).isEmpty();
     }
@@ -111,6 +117,19 @@ class CartRepositoryTest {
         assertThat(carts.size()).isEqualTo(1);
     }
 
+    @Test
+    void shouldUnique_ButDuplicated_findByUserAndItemAndItemOption() {
+        Cart dupCart = Cart.builder()
+                .user(user)
+                .item(item)
+                .itemOption(itemOption)
+                .isSelected(true)
+                .quantity(5)
+                .build();
+        cartRepository.save(dupCart);
+
+        assertThrows(RuntimeException.class, () -> cartRepository.findByUserAndItemAndItemOption(user, item, itemOption));
+    }
     @Test
     void findByUserAndItemAndItemOption() {
         final Optional<Cart> cart = cartRepository.findByUserAndItemAndItemOption(user, item, itemOption);
