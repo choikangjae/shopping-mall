@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    Optional<Page<Item>> findByNameContaining(@Param("q") String name, Pageable pageable);
+    Page<Item> findByNameContaining(@Param("q") String name, Pageable pageable);
 
     Page<Item> findBySellerId(Long id, Pageable pageable);
 
@@ -19,8 +19,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     //JPQL로 최적화 필요.
     List<Item> findAllBySellerId(Long sellerId);
-
-//    Optional<List<Item>> findByUserId(Long id);
 
 //    Slice<Item> findAll(Pageable pageable);
 }

@@ -1,10 +1,14 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.category.Category;
 import com.jay.shoppingmall.domain.category.CategoryRepository;
 import com.jay.shoppingmall.domain.entitybuilder.EntityBuilder;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
+import com.jay.shoppingmall.dto.request.admin.category.CategoryAddRequest;
+import com.jay.shoppingmall.dto.response.admin.category.CategoryResponse;
+import com.jay.shoppingmall.dto.response.user.UserDetailResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +51,7 @@ class AdminServiceTest {
     }
 
     @Test
-    void showUserList() {
+    void retrieveAllUsers_showUserList() {
         List<User> userList = new ArrayList<>();
         userList.add(user);
         userList.add(user2);
@@ -64,14 +68,53 @@ class AdminServiceTest {
 
     @Test
     void searchUsersByEmail() {
-        adminService.searchUsersByEmail("");
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        userList.add(user2);
+
+        when(userRepository.findByEmailContaining("qwe")).thenReturn(userList);
+
+        final List<UserDetailResponse> userDetailResponses = adminService.searchUsersByEmail("qwe");
+
+        assertThat(userDetailResponses.size()).isEqualTo(2);
+        assertThat(userDetailResponses.get(0).getEmail()).contains("qwe");
     }
 
     @Test
-    void categoryAppend() {
+    void whenParentIsNull_ChildWillBeAdded_categoryAppend() {
+        CategoryAddRequest request = new CategoryAddRequest(null, "영화");
+
+        final CategoryResponse categoryResponse = adminService.categoryAppend(request);
+
+        assertThat(categoryResponse.getChildCategory()).isEqualTo("영화");
+        assertThat(categoryResponse.getParentCategory()).isNull();
+    }
+    @Test
+    void whenParentIsNotNull_ChildWillBeAddedToParent_categoryAppend() {
+        CategoryAddRequest request = new CategoryAddRequest("영화", "액션");
+
+        final CategoryResponse categoryResponse = adminService.categoryAppend(request);
+
+        assertThat(categoryResponse.getChildCategory()).isEqualTo("액션");
+        assertThat(categoryResponse.getParentCategory()).isEqualTo("영화");
     }
 
     @Test
     void getCategoryByParent() {
+        List<Category> categories = new ArrayList<>();
+        Category category1 = Category.builder()
+                .categoryName("영화")
+                .build();
+        Category category2 = Category.builder()
+                .categoryName("책")
+                .build();
+        categories.add(category1);
+        categories.add(category2);
+
+        when(categoryRepository.findAllByParentIdIsNull()).thenReturn(categories);
+
+        final List<CategoryResponse> allRootCategories = adminService.getAllRootCategories();
+
+        assertThat(allRootCategories.size()).isEqualTo(2);
     }
 }

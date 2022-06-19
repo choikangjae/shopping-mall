@@ -54,11 +54,9 @@ public class AdminService {
     }
     public List<UserDetailResponse> searchUsersByEmail(String email) {
         List<User> users = userRepository.findByEmailContaining(email);
-//                .orElseThrow(() -> new UserNotFoundException("유저가 존재하지 않습니다"));
 
         List<UserDetailResponse> userDetailResponses = new ArrayList<>();
         for (User user : users) {
-
             userDetailResponses.add(UserDetailResponse.builder()
                     .email(user.getEmail())
                     .fullName(user.getName().getFullName())
@@ -95,7 +93,7 @@ public class AdminService {
                 .build();
     }
 
-    public List<CategoryResponse> getCategoryByParent() {
+    public List<CategoryResponse> getAllRootCategories() {
         final List<Category> categories = categoryRepository.findAllByParentIdIsNull();
 
         List<CategoryResponse> categoryResponses = new ArrayList<>();

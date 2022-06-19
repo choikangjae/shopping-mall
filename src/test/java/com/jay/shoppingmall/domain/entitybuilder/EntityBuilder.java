@@ -37,18 +37,21 @@ public class EntityBuilder {
             .build();
 
     static User user = User.builder()
+            .id(1L)
             .email("qwe@qwe")
             .role(Role.ROLE_USER)
             .password(("qweqweqwe1"))
             .build();
 
     static User user2 = User.builder()
+            .id(2L)
             .email("123@123")
             .role(Role.ROLE_USER)
             .password(("ewqefewqfqwfe123"))
             .build();
 
     static Seller seller = Seller.builder()
+            .id(3L)
             .shippingFeeDefault(3000)
             .returnShippingFeeDefault(3000)
             .shippingFeeFreePolicy(30000)
@@ -74,6 +77,7 @@ public class EntityBuilder {
             .seller(seller)
             .build();
 
+
     static ItemPrice itemPrice = ItemPrice.builder()
             .priceNow(3000L)
             .originalPrice(5000L)
@@ -93,6 +97,14 @@ public class EntityBuilder {
             .option2("option2")
             .build();
 
+    public static ItemPrice getItemPrice() {
+        return itemPrice;
+    }
+
+    public static ItemStock getItemStock() {
+        return itemStock;
+    }
+
 
     public static ItemOption getItemOption() {
         return itemOption;
@@ -103,7 +115,7 @@ public class EntityBuilder {
         return user;
     }
     public static User getUser2() {
-        user.userUpdate(address, name, agree, phoneNumber);
+        user2.userUpdate(address, name, agree, phoneNumber);
         return user2;
     }
 

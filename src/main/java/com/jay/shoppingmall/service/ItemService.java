@@ -230,8 +230,8 @@ public class ItemService {
     }
 
     public PageDto searchItemsByKeyword(String keyword, final User user, Pageable pageable) {
-        final Page<Item> itemPage = itemRepository.findByNameContaining(keyword, pageable)
-                .orElseThrow(() -> new ItemNotFoundException("키워드에 해당하는 상품이 없습니다"));
+        final Page<Item> itemPage = itemRepository.findByNameContaining(keyword, pageable);
+//                .orElseThrow(() -> new ItemNotFoundException("키워드에 해당하는 상품이 없습니다"));
         final List<ItemResponse> itemResponses = getItemResponses(itemPage.getContent());
         setItemsZzimBoolean(user, itemResponses);
         CustomPage customPage = new CustomPage(itemPage, "search");

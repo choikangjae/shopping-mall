@@ -5,6 +5,10 @@ import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
+import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
+import com.jay.shoppingmall.domain.item.item_price.ItemPriceRepository;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStockRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import org.junit.jupiter.api.AfterAll;
@@ -35,12 +39,18 @@ class CartRepositoryTest {
     private ItemRepository itemRepository;
     @Autowired
     private ItemOptionRepository itemOptionRepository;
+    @Autowired
+    private ItemPriceRepository itemPriceRepository;
+    @Autowired
+    private ItemStockRepository itemStockRepository;
 
     User user;
     User user2;
     Item item;
     Item item2;
     ItemOption itemOption;
+    ItemStock itemStock;
+    ItemPrice itemPrice;
     Cart cart;
     Cart cart2;
     Cart cart3;
@@ -53,6 +63,8 @@ class CartRepositoryTest {
         item = EntityBuilder.getItem();
         item2 = EntityBuilder.getItem2();
         itemOption = EntityBuilder.getItemOption();
+        itemPrice = EntityBuilder.getItemPrice();
+        itemStock = EntityBuilder.getItemStock();
 
 
         cart = Cart.builder()
@@ -86,6 +98,8 @@ class CartRepositoryTest {
 
         itemRepository.save(item);
         itemRepository.save(item2);
+        itemPriceRepository.save(itemPrice);
+        itemStockRepository.save(itemStock);
         itemOptionRepository.save(itemOption);
         userRepository.save(user);
         userRepository.save(user2);
@@ -93,6 +107,7 @@ class CartRepositoryTest {
         cartRepository.save(cart2);
         cartRepository.save(cart3);
         cartRepository.save(cart4);
+
     }
 
     @Test
@@ -111,10 +126,12 @@ class CartRepositoryTest {
 
     @Test
     void isShouldReturnCartList_findByUserAndIsSelectedTrue() {
+
         final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
 
         assertThat(carts).isNotEmpty();
         assertThat(carts.size()).isEqualTo(1);
+        assertThat(carts.get(0).getIsSelected()).isTrue();
     }
 
     @Test

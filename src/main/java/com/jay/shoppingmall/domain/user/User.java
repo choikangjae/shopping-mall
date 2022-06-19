@@ -14,8 +14,8 @@ import java.util.Optional;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-//@Builder
-//@AllArgsConstructor
+@Builder
+@AllArgsConstructor
 @Where(clause = "is_deleted = 0")
 public class User extends BaseTimeEntity {
 

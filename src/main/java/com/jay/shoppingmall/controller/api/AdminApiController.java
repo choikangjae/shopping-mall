@@ -26,7 +26,7 @@ public class AdminApiController {
     }
     @GetMapping("/category")
     public ResponseEntity<?> categoryAdd() {
-        final List<CategoryResponse> categoryResponses = adminService.getCategoryByParent();
+        final List<CategoryResponse> categoryResponses = adminService.getAllRootCategories();
 
         return ResponseEntity.ok(categoryResponses);
     }

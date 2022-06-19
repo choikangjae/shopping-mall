@@ -48,12 +48,13 @@ public class CartService {
     public Map<SellerResponse, List<ItemAndQuantityResponse>> showCartItemsList(User user) {
         //유저를 기준으로 장바구니 물품 가져오기
         final List<Cart> carts = cartRepository.findByUser(user);
-//                .orElseThrow(() -> new UsernameNotFoundException("해당 유저가 없습니다"));
 
         Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = new ConcurrentHashMap<>();
         final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
+
         //판매자를 기준으로 상품 정렬
         for (Seller seller : sellers) {
+            this.cartPricePerSeller(user, seller);
             final List<Cart> cartList = carts.stream().filter(cart -> cart.getItem().getSeller().equals(seller)).collect(Collectors.toList());
             long itemTotalPricePerSeller = 0;
             int itemTotalQuantityPerSeller = 0;
@@ -158,7 +159,6 @@ public class CartService {
     //장바구니 전체 가격, 총 배송비, 개수
     public CartPriceTotalResponse cartPriceTotal(User user) {
         final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
-//                .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
 
         long cartTotalPrice = 0;
         int cartTotalQuantity = 0;
@@ -189,8 +189,10 @@ public class CartService {
         int cartTotalQuantityPerSeller = 0;
 
         for (Cart cart : cartList) {
-            cartTotalPricePerSeller += cart.getItemOption().getItemPrice().getPriceNow() * cart.getQuantity();
-            cartTotalQuantityPerSeller += cart.getQuantity();
+            if (cart.getIsSelected()) {
+                cartTotalPricePerSeller += cart.getItemOption().getItemPrice().getPriceNow() * cart.getQuantity();
+                cartTotalQuantityPerSeller += cart.getQuantity();
+            }
         }
         return CartPricePerSellerResponse.builder()
                 .sellerId(seller.getId())
@@ -216,13 +218,21 @@ public class CartService {
                 .cartPriceTotalResponse(cartPriceTotalResponse)
                 .build();
     }
-    public CartPriceResponse cartSelect(final String check, final User user) {
+    public CartPriceResponse cartSelectAll(final String check, final User user) {
         List<Cart> carts = cartRepository.findByUser(user);
         List<CartPricePerSellerResponse> cartPricePerSellerResponses = new ArrayList<>();
 
+        //TODO 리팩토링 이후 동작 체크.
         for (Cart cart : carts) {
-            cart.setIsSelected(check.equals("true"));
-            cartPricePerSellerResponses.add(cartPricePerSeller(user, cart.getItem().getSeller()));
+            if (check.equals("true")) {
+                cart.setIsSelected(true);
+                cartPricePerSellerResponses.add(cartPricePerSeller(user, cart.getItem().getSeller()));
+            } else if (check.equals("false")) {
+                cart.setIsSelected(false);
+            } else {
+                throw new NotValidException("잘못된 요청입니다");
+            }
+//            cart.setIsSelected(check.equals("true"));
         }
         final CartPriceTotalResponse cartPriceTotalResponse = cartPriceTotal(user);
 

@@ -15,7 +15,9 @@ import com.jay.shoppingmall.dto.request.CartManipulationRequest;
 import com.jay.shoppingmall.dto.response.cart.CartPricePerSellerResponse;
 import com.jay.shoppingmall.dto.response.cart.CartPriceResponse;
 import com.jay.shoppingmall.dto.response.cart.CartPriceTotalResponse;
+import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
+import com.jay.shoppingmall.dto.response.seller.SellerResponse;
 import com.jay.shoppingmall.exception.exceptions.AlreadyExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -29,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +58,7 @@ class CartServiceTest {
 
     User user;
     Item item;
+    Item item2;
     ItemOption itemOption;
     List<ItemOptionResponse> list;
     ItemOptionResponse itemOptionResponse;
@@ -67,6 +71,7 @@ class CartServiceTest {
 
         user = EntityBuilder.getUser();
         item = EntityBuilder.getItem();
+        item2 = EntityBuilder.getItem2();
         itemOption = EntityBuilder.getItemOption();
         seller = EntityBuilder.getSeller();
 
@@ -101,7 +106,7 @@ class CartServiceTest {
     }
 
     @Test
-    void cartSavedFailed_CartAlreadyExists_addItemOptionsToCart() {
+    void cartSaveFailed_CartAlreadyExists_addItemOptionsToCart() {
         when(itemRepository.findById(itemOptionResponse.getItemId())).thenReturn(Optional.of(item));
         when(itemOptionRepository.findById(itemOptionResponse.getItemOptionId())).thenReturn(Optional.of(itemOption));
         when(cartRepository.findByUserAndItemAndItemOption(user, item, itemOption)).thenThrow(new AlreadyExistsException(""));
@@ -120,6 +125,7 @@ class CartServiceTest {
                 .cartId(cart.getId())
                 .build();
         when(cartRepository.findById(request.getCartId())).thenReturn(Optional.of(cart));
+        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
 
         cartService.deleteCart(request, user);
 
@@ -128,6 +134,9 @@ class CartServiceTest {
 
     @Test
     void showCartItemsList() {
+
+        final Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = cartService.showCartItemsList(user);
+
     }
 
 
@@ -187,25 +196,53 @@ class CartServiceTest {
     }
 
     @Test
-    void cartSelect() {
+    void whenCheckIsTrue_SelectAll_cartSelectAll() {
         Cart cart1 = Cart.builder()
                 .quantity(5)
+                .item(item)
+                .itemOption(itemOption)
                 .build();
         Cart cart2 = Cart.builder()
                 .quantity(3)
+                .item(item2)
+                .itemOption(itemOption)
                 .build();
         List<Cart> cartList = new ArrayList<>();
         cartList.add(cart1);
         cartList.add(cart2);
 
         when(cartRepository.findByUser(user)).thenReturn(cartList);
+        when(sellerRepository.findById(any())).thenReturn(Optional.of(seller));
+        when(cartRepository.findByUserAndIsSelectedTrue(user)).thenReturn(cartList);
 
-        final CartPriceResponse cartPriceResponse = cartService.cartSelect("true", user);
+        final CartPriceResponse cartPriceResponse = cartService.cartSelectAll("true", user);
 
+        assertThat(cartPriceResponse.getCartPriceTotalResponse().getCartTotalQuantity()).isEqualTo(8);
     }
-
     @Test
-    void testDeleteCart() {
+    void whenCheckIsFalse_DeselectAll_cartSelectAll() {
+        Cart cart1 = Cart.builder()
+                .quantity(5)
+                .item(item)
+                .itemOption(itemOption)
+                .build();
+        Cart cart2 = Cart.builder()
+                .quantity(3)
+                .item(item2)
+                .itemOption(itemOption)
+                .build();
+        List<Cart> cartList = new ArrayList<>();
+        cartList.add(cart1);
+        cartList.add(cart2);
+
+        when(cartRepository.findByUser(user)).thenReturn(cartList);
+        when(sellerRepository.findById(any())).thenReturn(Optional.of(seller));
+        when(cartRepository.findByUserAndIsSelectedTrue(user)).thenReturn(cartList);
+
+        final CartPriceResponse cartPriceResponse = cartService.cartSelectAll("false", user);
+
+        assertThat(cartPriceResponse.getCartPriceTotalResponse().getCartTotalQuantity()).isEqualTo(0);
+        assertThat(cartPriceResponse.getCartPricePerSellerResponses()).isEmpty();
     }
 
     @Test

@@ -1,15 +1,19 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.seller.Seller;
+import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.token.password.PasswordResetTokenRepository;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.token.password.PasswordResetToken;
+import com.jay.shoppingmall.domain.user.model.Agree;
 import com.jay.shoppingmall.dto.request.password.PasswordChangeRequest;
 import com.jay.shoppingmall.dto.request.password.PasswordResetRequest;
 import com.jay.shoppingmall.dto.request.UserValidationRequest;
 import com.jay.shoppingmall.exception.exceptions.PasswordInvalidException;
 import com.jay.shoppingmall.exception.exceptions.TokenExpiredException;
+import com.jay.shoppingmall.exception.exceptions.UserDuplicatedException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,11 +29,12 @@ import java.util.UUID;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final SellerRepository sellerRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public User userRegistration(UserValidationRequest userValidationRequest) {
+    public void userRegistration(UserValidationRequest userValidationRequest) {
         String encryptedPassword = passwordEncoder.encode(userValidationRequest.getPassword());
 
         User user = User.builder()
@@ -38,19 +43,32 @@ public class AuthService {
                 .role(Role.ROLE_USER)
                 .build();
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
-    public User sellerSignup(final UserValidationRequest userValidationRequest) {
+    public void sellerSignup(final UserValidationRequest userValidationRequest) {
         String password = passwordEncoder.encode(userValidationRequest.getPassword());
+
+        Agree agree = Agree.builder()
+                .isMandatoryAgree(true)
+                .isMarketingAgree(false)
+                .build();
 
         User user = User.builder()
                 .email(userValidationRequest.getEmail())
                 .password(password)
                 .role(Role.ROLE_SELLER)
+                .agree(agree)
                 .build();
+        userRepository.save(user);
 
-        return userRepository.save(user);
+        Seller seller = Seller.builder()
+                .isLawAgree(true)
+                .isSellerAgree(true)
+                .isActivated(true)
+                .userId(user.getId())
+                .build();
+        sellerRepository.save(seller);
     }
     public void passwordTokenSender(PasswordResetRequest passwordResetRequest) {
         User user = userRepository.findByEmail(passwordResetRequest.getEmail())

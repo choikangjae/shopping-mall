@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ZzimService {
 
     private final ZzimRepository zzimRepository;
+
     public boolean isZzimed(Long userId, Long itemId) {
         boolean isZzimed = false;
 
