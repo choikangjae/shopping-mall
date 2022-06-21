@@ -29,6 +29,7 @@ import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRe
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistory;
 import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistoryRepository;
+import com.jay.shoppingmall.domain.seller.seller_bank_account_history.TransactionType;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
 import com.jay.shoppingmall.dto.response.cart.CartPricePerSellerResponse;
@@ -70,6 +71,7 @@ public class PaymentService {
 
     public void moneyTransactionToSeller(final OrderItem orderItem) {
         orderItem.getOrderDelivery().paymentDone();
+
         final Seller seller = orderItem.getSeller();
 
         final PaymentPerSeller paymentPerSeller = paymentPerSellerRepository.findByOrderIdAndSellerId(orderItem.getOrder().getId(), seller.getId());
@@ -80,6 +82,7 @@ public class PaymentService {
         final Long moneyToSellerBankAccount = paymentPerSeller.getItemTotalPricePerSeller();
         SellerBankAccountHistory sellerBankAccountHistory = SellerBankAccountHistory.builder()
                 .transactionMoney(moneyToSellerBankAccount)
+                .transactionType(TransactionType.DEPOSIT)
                 .seller(seller)
                 .build();
         sellerBankAccountHistoryRepository.save(sellerBankAccountHistory);

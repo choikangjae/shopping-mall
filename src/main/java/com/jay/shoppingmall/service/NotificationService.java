@@ -54,7 +54,6 @@ public class NotificationService {
         List<QnaNotificationResponse> qnaNotificationResponses = new ArrayList<>();
         for (QnaNotification qnaNotification : notifications) {
 
-
             final String notificationType = NotificationType.QNA_TO_SELLER.getValue();
             NotificationResponse notificationResponse = getNotificationResponse(notificationType, qnaNotification.getMessage(), qnaNotification.getSentAt(), qnaNotification.getId());
 

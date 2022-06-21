@@ -88,10 +88,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .invalidateHttpSession(true);
     }
 
-//    @Bean
-//    public ObjectMapper objectMapper() {
-//        return new ObjectMapper();
-//    }
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();

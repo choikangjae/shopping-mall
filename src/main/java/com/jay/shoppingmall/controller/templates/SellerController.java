@@ -1,9 +1,13 @@
 package com.jay.shoppingmall.controller.templates;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jay.shoppingmall.common.CurrentUser;
+import com.jay.shoppingmall.common.model.OptionValue;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.request.ApiWriteItemRequest;
 import com.jay.shoppingmall.dto.request.WriteItemRequest;
 import com.jay.shoppingmall.dto.response.notification.QnaNotificationResponse;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
@@ -38,6 +42,8 @@ public class SellerController {
     private final SellerService sellerService;
     private final ItemService itemService;
     private final NotificationService notificationService;
+
+    private final ObjectMapper objectMapper;
 
     @GetMapping
     public String sellerHome(@CurrentUser User user, Model model, @PageableDefault(size = 5) Pageable pageable) {
@@ -98,10 +104,14 @@ public class SellerController {
         sellerService.writeItem(writeItemRequest, file, files, user);
         return "redirect:/";
     }
+    //TODO API쪽으로 변경하기.
     @PostMapping("/temporary-save")
-    public String sellerItemTemporarySave(WriteItemRequest writeItemRequest, @CurrentUser User user) {
+    public String sellerItemTemporarySave(ApiWriteItemRequest apiWriteItemRequest, @CurrentUser User user) {
 
-        sellerService.temporarySave(writeItemRequest, user);
+        final List<OptionValue> optionValues = objectMapper.convertValue(apiWriteItemRequest.getOptionArray(), new TypeReference<List<OptionValue>>() {
+        });
+
+        sellerService.temporarySave(apiWriteItemRequest, optionValues, user);
 
         return "redirect:/";
     }
@@ -151,7 +161,7 @@ public class SellerController {
     }
     @GetMapping("/order/{id}")
     public String showSellerOrderDetail(@PathVariable("id") Long orderId, Model model, @CurrentUser User user) {
-        final OrderDetailResponse orderDetailResponse = sellerService.treatOrders(orderId, user);
+        final OrderDetailResponse orderDetailResponse = sellerService.showOrderDetail(orderId, user);
 
         model.addAttribute("orderDetailResponse", orderDetailResponse);
         return "/seller/order-detail";

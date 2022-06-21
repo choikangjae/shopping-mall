@@ -2,9 +2,8 @@ package com.jay.shoppingmall.controller.api;
 
 import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.request.ApiWriteItemRequest;
 import com.jay.shoppingmall.dto.request.ReviewWriteRequest;
-import com.jay.shoppingmall.dto.response.review.ReviewAvailableCheckResponse;
+import com.jay.shoppingmall.dto.response.review.OrderItemForReviewResponse;
 import com.jay.shoppingmall.dto.response.review.ReviewResponse;
 import com.jay.shoppingmall.exception.exceptions.ReviewException;
 import com.jay.shoppingmall.service.ReviewService;
@@ -39,8 +38,8 @@ public class ReviewApiController {
     }
     @GetMapping("/write/{orderItemId}")
     public ResponseEntity<?> reviewWrite(@PathVariable Long orderItemId, @CurrentUser User user) {
-        final ReviewAvailableCheckResponse reviewAvailableCheckResponse = reviewService.reviewWriteAvailableCheck(orderItemId, user);
+        final OrderItemForReviewResponse orderItemForReviewResponse = reviewService.orderItemRequestForReview(orderItemId, user);
 
-        return ResponseEntity.ok(reviewAvailableCheckResponse);
+        return ResponseEntity.ok(orderItemForReviewResponse);
     }
 }

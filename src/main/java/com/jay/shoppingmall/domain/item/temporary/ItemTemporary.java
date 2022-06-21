@@ -25,15 +25,23 @@ public class ItemTemporary extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private String brandName;
+
     private String name;
 
     private String description;
 
-    private Long price;
+    private Long originalPrice;
 
     private Long salePrice;
 
     private Integer stock;
+
+    private String option1;
+
+    private String option2;
+
+    private Boolean isOptionMainItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")

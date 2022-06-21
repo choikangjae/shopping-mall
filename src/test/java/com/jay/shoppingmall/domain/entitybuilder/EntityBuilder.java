@@ -51,12 +51,16 @@ public class EntityBuilder {
             .build();
 
     static Seller seller = Seller.builder()
-            .id(3L)
+//            .id(3L)
             .shippingFeeDefault(3000)
             .returnShippingFeeDefault(3000)
             .shippingFeeFreePolicy(30000)
             .defaultDeliveryCompany("배송사")
             .companyName("컴퍼니")
+
+            .itemReturnAddress(address)
+            .itemReleaseAddress(address)
+
             .isSellerAgree(true)
             .isActivated(true)
             .isLawAgree(true)
@@ -96,6 +100,14 @@ public class EntityBuilder {
             .option1("option1")
             .option2("option2")
             .build();
+    static ItemOption itemOption2 = ItemOption.builder()
+            .item(item)
+            .itemPrice(itemPrice)
+            .itemStock(itemStock)
+            .isOptionMainItem(false)
+            .option1("option1")
+            .option2("option2-1")
+            .build();
 
     public static ItemPrice getItemPrice() {
         return itemPrice;
@@ -108,6 +120,9 @@ public class EntityBuilder {
 
     public static ItemOption getItemOption() {
         return itemOption;
+    }
+    public static ItemOption getItemOption2() {
+        return itemOption2;
     }
 
     public static User getUser() {

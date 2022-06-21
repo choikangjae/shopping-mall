@@ -21,6 +21,8 @@ public class SellerBankAccountHistory extends BaseTimeEntity {
 
     private Long transactionMoney;
 
+    private TransactionType transactionType;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;

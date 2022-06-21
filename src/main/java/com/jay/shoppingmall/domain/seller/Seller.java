@@ -21,6 +21,7 @@ public class Seller {
 
     private Long bankAccount;
 
+    @Column(unique = true)
     private String companyName;
 
     private String contactNumber;

@@ -36,13 +36,14 @@ import java.util.List;
 @ToString
 public class MeService {
 
-    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
     private final ZzimRepository zzimRepository;
     private final ItemRepository itemRepository;
-    private final FileHandler fileHandler;
     private final ImageRepository imageRepository;
     private final BrowseHistoryRepository browseHistoryRepository;
+
+    private final FileHandler fileHandler;
 
     public Boolean passwordCheck(String password, User user) {
 

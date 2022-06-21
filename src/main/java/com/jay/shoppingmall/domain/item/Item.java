@@ -82,7 +82,8 @@ public class Item extends BaseTimeEntity {
     }
 
     @Builder
-    public Item(String name, String brandName, String description, Seller seller) {
+    public Item(Long id, String name, String brandName, String description, Seller seller) {
+        this.id = id;
         this.name = name;
         this.brandName = brandName;
         this.description = description;

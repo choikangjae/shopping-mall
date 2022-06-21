@@ -11,4 +11,6 @@ public class SellerBankAccountHistoryResponse {
     private Long id;
 
     private Long transactionMoney;
+
+    private String transactionType;
 }

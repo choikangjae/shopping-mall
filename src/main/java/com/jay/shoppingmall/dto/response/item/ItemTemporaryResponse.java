@@ -8,13 +8,22 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ItemTemporaryResponse {
 
+    private String brandName;
+
     private String name;
 
     private String description;
 
-    private Long price;
+    private Long originalPrice;
 
     private Long salePrice;
 
     private Integer stock;
+
+    private String option1;
+
+    private String option2;
+
+    private Boolean isOptionMainItem;
+
 }

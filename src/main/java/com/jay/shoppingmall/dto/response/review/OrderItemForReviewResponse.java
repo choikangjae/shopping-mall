@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReviewAvailableCheckResponse {
+public class OrderItemForReviewResponse {
 
     private Long orderItemId;
     private String name;

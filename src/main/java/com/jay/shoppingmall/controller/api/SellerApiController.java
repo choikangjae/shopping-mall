@@ -103,7 +103,6 @@ public class SellerApiController {
         if (user == null) {
             throw new UserNotFoundException("잘못된 요청입니다");
         }
-        Long id = user.getId();
 
         //TODO 데모용
         if (user.getEmail().equals("demo@user")) {
@@ -117,7 +116,7 @@ public class SellerApiController {
             throw new AgreeException("필수 항목을 동의하셔야 합니다");
         }
 
-        if (!sellerService.sellerAgreeCheck(sellerAgreeRequest, id)) {
+        if (!sellerService.sellerAgreeCheck(sellerAgreeRequest, user)) {
             throw new AgreeException("잘못된 요청입니다");
         }
         Authentication oldAuthentication = SecurityContextHolder.getContext().getAuthentication();

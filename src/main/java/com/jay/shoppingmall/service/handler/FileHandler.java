@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -38,7 +40,6 @@ public class FileHandler {
             throw new FileException("확장자가 필요합니다");
         }
         if (!multipartFile.getContentType().equals("image/png") && !multipartFile.getContentType().equals("image/jpeg")) {
-            System.out.println(multipartFile.getContentType());
             throw new FileException("JPEG, PNG 파일만 업로드해주세요");
         }
 
@@ -101,6 +102,19 @@ public class FileHandler {
         }
         return image;
     }
+
+    public List<String> getStringImages(final List<MultipartFile> files, final ImageRelation imageRelation, final Long foreignId) {
+        List<String> stringImages = new ArrayList<>();
+        if (files != null) {
+            for (MultipartFile file : files) {
+                final Image image = parseFilesInfo(file, imageRelation, foreignId);
+                imageRepository.save(image);
+                stringImages.add(getStringImage(image));
+            }
+        }
+        return stringImages;
+    }
+
 
     public String getStringImage(Image image) {
         String absolutePath = new File("").getAbsolutePath() + File.separator;

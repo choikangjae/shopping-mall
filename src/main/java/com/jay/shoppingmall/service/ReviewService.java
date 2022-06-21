@@ -4,15 +4,11 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
-import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.model.page.CustomPage;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
-import com.jay.shoppingmall.domain.order.OrderRepository;
 import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.order.order_item.OrderItemRepository;
-import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
-import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.point.Point;
 import com.jay.shoppingmall.domain.point.PointRepository;
 import com.jay.shoppingmall.domain.point.point_history.PointHistory;
@@ -23,15 +19,11 @@ import com.jay.shoppingmall.domain.point.point_history.model.PointType;
 import com.jay.shoppingmall.domain.review.Review;
 import com.jay.shoppingmall.domain.review.ReviewRepository;
 import com.jay.shoppingmall.domain.review.Star;
-import com.jay.shoppingmall.domain.seller.Seller;
-import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistory;
-import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistoryRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.ReviewWriteRequest;
-import com.jay.shoppingmall.dto.response.review.ReviewAvailableCheckResponse;
+import com.jay.shoppingmall.dto.response.review.OrderItemForReviewResponse;
 import com.jay.shoppingmall.dto.response.review.ReviewResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
-import com.jay.shoppingmall.exception.exceptions.MoneyTransactionException;
 import com.jay.shoppingmall.exception.exceptions.ReviewException;
 import com.jay.shoppingmall.service.common.CommonService;
 import com.jay.shoppingmall.service.handler.FileHandler;
@@ -60,12 +52,9 @@ public class ReviewService {
     private final PaymentService paymentService;
     private final CommonService commonService;
 
-    public ReviewAvailableCheckResponse reviewWriteAvailableCheck(final Long orderItemId, final User user) {
-        if (reviewRepository.findByUserIdAndOrderItemId(user.getId(), orderItemId).isPresent()) {
-            throw new ReviewException("리뷰를 이미 작성하셨습니다");
-        }
-        final OrderItem orderItem = orderItemRepository.findById(orderItemId)
-                .orElseThrow(() -> new ItemNotFoundException("주문이 존재하지 않습니다"));
+    @Transactional(readOnly = true)
+    public OrderItemForReviewResponse orderItemRequestForReview(final Long orderItemId, final User user) {
+        final OrderItem orderItem = reviewAvailableCheck(orderItemId, user);
 
         final String name = orderItem.getItem().getName();
         final Long priceAtPurchase = orderItem.getPriceAtPurchase();
@@ -73,7 +62,7 @@ public class ReviewService {
         final int pointOnlyText = (int) ((priceAtPurchase * quantity) * PointPercentage.ONLY_TEXT.getPercentage());
         final int pointWithPicture = (int) ((priceAtPurchase * quantity) * PointPercentage.TEXT_AND_PICTURE.getPercentage());
 
-        return ReviewAvailableCheckResponse.builder()
+        return OrderItemForReviewResponse.builder()
                 .orderItemId(orderItem.getId())
                 .name(name)
                 .pointOnlyText(pointOnlyText)
@@ -81,22 +70,14 @@ public class ReviewService {
                 .build();
     }
 
-    //배송 확인. 유저의 권한 확인. 리뷰 내용에 따른 포인트 다르게. 포인트 히스토리. 포인트 적용.
     public ReviewResponse reviewWrite(final ReviewWriteRequest request, final User user, final List<MultipartFile> files) {
-        final OrderItem orderItem = orderItemRepository.findById(request.getOrderItemId())
-                .orElseThrow(() -> new ReviewException("이미 리뷰를 작성하셨습니다"));
+        final OrderItem orderItem = reviewAvailableCheck(request.getOrderItemId(), user);
 
-        if (!orderItem.getOrderDelivery().getDeliveryStatus().equals(DeliveryStatus.DELIVERED)) {
-            throw new ReviewException("배송이 완료되지 않았습니다");
-        }
-
-        //포인트 계산
         double pointPercentage = PointPercentage.ONLY_TEXT.getPercentage();
-        if (files == null) {
+        if (files != null) {
             pointPercentage = PointPercentage.TEXT_AND_PICTURE.getPercentage();
         }
         pointCalculation(user, orderItem, pointPercentage);
-        //포인트 계산 끝
 
         final Star star = Star.getByValue(request.getStar());
 
@@ -115,7 +96,7 @@ public class ReviewService {
         Long foreignId = review.getId();
         ImageRelation imageRelation = ImageRelation.REVIEW;
 
-        List<String> stringImages = getStringImages(files, imageRelation, foreignId);
+        List<String> stringImages = fileHandler.getStringImages(files, imageRelation, foreignId);
 
         final Item item = orderItem.getItem();
         item.reviewAverageCalculation((double) star.value());
@@ -130,17 +111,69 @@ public class ReviewService {
                 .build();
     }
 
-    private List<String> getStringImages(final List<MultipartFile> files, final ImageRelation imageRelation, final Long foreignId) {
-        List<String> stringImages = new ArrayList<>();
-        if (files != null) {
-            for (MultipartFile file : files) {
-                final Image image = fileHandler.parseFilesInfo(file, imageRelation, foreignId);
-                imageRepository.save(image);
-                stringImages.add(fileHandler.getStringImage(image));
+    @Transactional(readOnly = true)
+    public PageDto getItemReviews(Long itemId, Pageable pageable) {
+        final Page<Review> reviewPage = reviewRepository.findAllByItemIdOrderByCreatedDateDesc(itemId, pageable);
+        CustomPage customPage = new CustomPage(reviewPage, "review");
+        final List<ReviewResponse> reviewResponses = getReviewResponses(reviewPage.getContent());
+
+        for (ReviewResponse reviewResponse : reviewResponses) {
+            final List<Image> images = imageRepository.findAllByImageRelationAndForeignId(ImageRelation.REVIEW, reviewResponse.getReviewId());
+
+            List<String> reviewImages = new ArrayList<>();
+            for (Image image : images) {
+                final String stringImage = fileHandler.getStringImage(image);
+                reviewImages.add(stringImage);
             }
+            reviewResponse.setReviewImages(reviewImages);
         }
-        return stringImages;
+
+        return PageDto.builder()
+                .customPage(customPage)
+                .content(reviewResponses)
+                .build();
     }
+
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> getMyRecentReviews(final User user) {
+
+        final List<Review> recent10Reviews = reviewRepository.findFirst10ByUserIdOrderByCreatedDateDesc(user.getId());
+        final List<ReviewResponse> reviewResponses = getReviewResponses(recent10Reviews);
+
+        for (ReviewResponse reviewResponse : reviewResponses) {
+            final String itemImage = fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, reviewResponse.getItemId()));
+            reviewResponse.setItemImage(itemImage);
+        }
+        return reviewResponses;
+    }
+
+    private OrderItem reviewAvailableCheck(final Long orderItemId, final User user) {
+        if (reviewRepository.findByUserIdAndOrderItemId(user.getId(), orderItemId).isPresent()) {
+            throw new ReviewException("리뷰를 이미 작성하셨습니다");
+        }
+        final OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new ItemNotFoundException("주문이 존재하지 않습니다"));
+        if (!orderItem.getOrder().getUser().getId().equals(user.getId())) {
+            throw new ReviewException("리뷰 작성이 불가능합니다");
+        }
+        if (!orderItem.getOrderDelivery().getDeliveryStatus().equals(DeliveryStatus.DELIVERED)) {
+            throw new ReviewException("배송이 완료되지 않았습니다");
+        }
+        return orderItem;
+    }
+
+
+//    private List<String> getStringImages(final List<MultipartFile> files, final ImageRelation imageRelation, final Long foreignId) {
+//        List<String> stringImages = new ArrayList<>();
+//        if (files != null) {
+//            for (MultipartFile file : files) {
+//                final Image image = fileHandler.parseFilesInfo(file, imageRelation, foreignId);
+//                imageRepository.save(image);
+//                stringImages.add(fileHandler.getStringImage(image));
+//            }
+//        }
+//        return stringImages;
+//    }
 
     private void pointCalculation(final User user, final OrderItem orderItem, final double pointPercentage) {
         final Long priceAtPurchase = orderItem.getPriceAtPurchase();
@@ -168,41 +201,18 @@ public class ReviewService {
         pointHistoryRepository.save(pointHistory);
     }
 
-    public PageDto getItemReviews(Long itemId, Pageable pageable) {
-        final Page<Review> reviewPage = reviewRepository.findAllByItemIdOrderByCreatedDateDesc(itemId, pageable);
-        CustomPage customPage = new CustomPage(reviewPage, "review");
-        final List<ReviewResponse> reviewResponses = getReviewResponses(reviewPage.getContent());
-
-        return PageDto.builder()
-                .customPage(customPage)
-                .content(reviewResponses)
-                .build();
-    }
-
-    public List<ReviewResponse> getMyRecentReviews(final User user) {
-
-        final List<Review> recent10Reviews = reviewRepository.findFirst10ByUserIdOrderByCreatedDateDesc(user.getId());
-        final List<ReviewResponse> reviewResponses = getReviewResponses(recent10Reviews);
-
-        for (ReviewResponse reviewResponse : reviewResponses) {
-            final String itemImage = fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, reviewResponse.getItemId()));
-            reviewResponse.setItemImage(itemImage);
-        }
-        return reviewResponses;
-    }
-
     private List<ReviewResponse> getReviewResponses(final List<Review> reviews) {
         List<ReviewResponse> reviewResponses = new ArrayList<>();
         for (Review review : reviews) {
-            final List<Image> images = imageRepository.findAllByImageRelationAndForeignId(ImageRelation.REVIEW, review.getId());
+//            final List<Image> images = imageRepository.findAllByImageRelationAndForeignId(ImageRelation.REVIEW, review.getId());
+//
+//            List<String> reviewImages = new ArrayList<>();
+//            for (Image image : images) {
+//                final String stringImage = fileHandler.getStringImage(image);
+//                reviewImages.add(stringImage);
+//            }
 
-            List<String> reviewImages = new ArrayList<>();
-            for (Image image : images) {
-                final String stringImage = fileHandler.getStringImage(image);
-                reviewImages.add(stringImage);
-            }
-
-            final Item item = review.getOrderItem().getItem();
+            final Item item = review.getItem();
             final String anonymousName = commonService.anonymousName(review.getUser().getUsername());
 
             ReviewResponse reviewResponse = ReviewResponse.builder()
@@ -213,7 +223,7 @@ public class ReviewService {
                     .userName(anonymousName)
                     .reviewId(review.getId())
                     .reviewWrittenDate(review.getCreatedDate())
-                    .reviewImages(reviewImages)
+//                    .reviewImages(reviewImages)
                     .star(review.getStar().value())
                     .text(review.getText())
                     .build();
