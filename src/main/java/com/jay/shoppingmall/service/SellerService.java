@@ -328,6 +328,7 @@ public class SellerService {
                 .map(Item::getSeller)
                 .map(Seller::getId)
                 .orElse(-2L);
+
         return Objects.equals(sellerId, sellerId2);
     }
 

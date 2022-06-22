@@ -1,8 +1,10 @@
-package com.jay.shoppingmall.domain.item.item_option;
+package com.jay.shoppingmall.domain.image;
 
 import com.jay.shoppingmall.domain.entitybuilder.EntityBuilder;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
+import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
 import com.jay.shoppingmall.domain.item.item_price.ItemPriceRepository;
 import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
@@ -12,7 +14,7 @@ import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
-import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
+import com.jay.shoppingmall.exception.exceptions.ImageNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +23,17 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ItemOptionRepositoryTest {
+class ImageRepositoryTest {
 
+    @Autowired
+    ImageRepository imageRepository;
     @Autowired
     ItemOptionRepository itemOptionRepository;
     @Autowired
@@ -41,6 +46,7 @@ class ItemOptionRepositoryTest {
     SellerRepository sellerRepository;
     @Autowired
     UserRepository userRepository;
+
     Item item;
     ItemPrice itemPrice;
 
@@ -68,29 +74,50 @@ class ItemOptionRepositoryTest {
 
         final ItemOption itemOption = EntityBuilder.getItemOption();
         itemOptionRepository.save(itemOption);
+
+        Image image1 = Image.builder()
+                .originalFileName("메인 이미지")
+                .imageRelation(ImageRelation.ITEM_MAIN)
+                .foreignId(0L)
+                .build();
+        Image image2 = Image.builder()
+                .originalFileName("설명 이미지1")
+                .imageRelation(ImageRelation.ITEM_DESCRIPTION)
+                .foreignId(0L)
+                .build();
+        Image image3 = Image.builder()
+                .originalFileName("메인 이미지2")
+                .imageRelation(ImageRelation.ITEM_DESCRIPTION)
+                .foreignId(0L)
+                .build();
+        imageRepository.save(image1);
+        imageRepository.save(image2);
+        imageRepository.save(image3);
     }
 
     @Test
-    void findByOption1AndOption2AndItemId() {
-        final ItemOption itemOption = itemOptionRepository.findByOption1AndOption2AndItemId("option1", "option2", item.getId())
-                        .orElseThrow(() -> new ItemNotFoundException(""));
+    void findAllByForeignId() {
+        final List<Image> images = imageRepository.findAllByForeignId(0L);
 
-        assertThat(itemOption.getOption1()).isEqualTo("option1");
-        assertThat(itemOption.getOption2()).isEqualTo("option2");
+        final Image mainImage = images.stream().filter(x -> x.getImageRelation().equals(ImageRelation.ITEM_MAIN)).findFirst()
+                        .orElseThrow(() -> new ImageNotFoundException(""));
+        final List<Image> descriptionImages = images.stream().filter(x -> x.getImageRelation().equals(ImageRelation.ITEM_DESCRIPTION)).collect(Collectors.toList());
+
+        assertThat(mainImage).isNotNull();
+        assertThat(descriptionImages.size()).isEqualTo(2);
+        assertThat(images.size()).isEqualTo(3);
     }
 
     @Test
-    void findByItemIdAndIsOptionMainItemTrue() {
-        final ItemOption itemOption = itemOptionRepository.findByItemIdAndIsOptionMainItemTrue(item.getId());
-
-        assertThat(itemOption.getIsOptionMainItem()).isTrue();
-
+    void findByImageRelationAndId() {
     }
 
     @Test
-    void findByItemPriceId() {
-        final ItemOption itemOption = itemOptionRepository.findByItemPriceId(itemPrice.getId());
-
-        assertThat(itemOption).isNotNull();
+    void findByImageRelationAndForeignId() {
     }
+
+    @Test
+    void findAllByImageRelationAndForeignId() {
+    }
+
 }

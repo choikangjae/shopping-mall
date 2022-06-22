@@ -5,6 +5,7 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
@@ -25,6 +26,7 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.ReviewWriteRequest;
 import com.jay.shoppingmall.dto.response.review.OrderItemForReviewResponse;
 import com.jay.shoppingmall.dto.response.review.ReviewResponse;
+import com.jay.shoppingmall.dto.response.review.ReviewStarCalculationResponse;
 import com.jay.shoppingmall.exception.exceptions.ReviewException;
 import com.jay.shoppingmall.service.common.CommonService;
 import com.jay.shoppingmall.service.handler.FileHandler;
@@ -66,6 +68,8 @@ class ReviewServiceTest {
     PointRepository pointRepository;
     @Mock
     ImageRepository imageRepository;
+    @Mock
+    ItemRepository itemRepository;
 
     @Mock
     PaymentService paymentService;
@@ -203,6 +207,7 @@ class ReviewServiceTest {
         verify(pointHistoryRepository).save(any());
         assertThat(point.getPointNow()).isEqualTo(750);
     }
+
     @Test
     void whenNoPointEntityExists_PointEntityWillBeCreated_reviewWrite() {
         ReviewWriteRequest reviewWriteRequest = ReviewWriteRequest.builder()
@@ -218,6 +223,7 @@ class ReviewServiceTest {
 
         verify(pointRepository).save(any());
     }
+
     @Test
     void whenWithReviewImage_PointOnePercent_reviewWrite() {
         List<MultipartFile> fileList = new ArrayList<>();
@@ -302,5 +308,71 @@ class ReviewServiceTest {
 
         assertThat(reviewResponses.get(0).getReviewImages()).isNull();
         assertThat(reviewResponses.get(0).getItemImage()).isEqualTo("BASE64 Encoded Image");
+    }
+
+    @Test
+    @DisplayName("리뷰 점수가 3.8점일때 꽉찬별4개 빈별 1개")
+    void reviewStarCalculation1() {
+        Item item = Item.builder()
+                .reviewAverageRating(3.8)
+                .reviewCount(5)
+                .build();
+
+        final ReviewStarCalculationResponse reviewStarCalculationResponse = reviewService.reviewStarCalculation(item);
+
+        assertThat(reviewStarCalculationResponse).isNotNull();
+        assertThat(reviewStarCalculationResponse.getReviewCount()).isEqualTo(5);
+        assertThat(reviewStarCalculationResponse.getEmptyStar()).isEqualTo(1);
+        assertThat(reviewStarCalculationResponse.getHalfStar()).isEqualTo(0);
+        assertThat(reviewStarCalculationResponse.getFullStar()).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("리뷰 점수가 2.4점일때 꽉찬별 2개 반별 1개 빈별 2개")
+    void reviewStarCalculation2() {
+        Item item = Item.builder()
+                .reviewAverageRating(2.4)
+                .reviewCount(5)
+                .build();
+
+        final ReviewStarCalculationResponse reviewStarCalculationResponse = reviewService.reviewStarCalculation(item);
+
+        assertThat(reviewStarCalculationResponse).isNotNull();
+        assertThat(reviewStarCalculationResponse.getReviewCount()).isEqualTo(5);
+        assertThat(reviewStarCalculationResponse.getFullStar()).isEqualTo(2);
+        assertThat(reviewStarCalculationResponse.getHalfStar()).isEqualTo(1);
+        assertThat(reviewStarCalculationResponse.getEmptyStar()).isEqualTo(2);
+    }
+    @Test
+    @DisplayName("리뷰 점수가 1점일때 꽉찬별 1개 빈별 4개")
+    void reviewStarCalculation3() {
+        Item item = Item.builder()
+                .reviewAverageRating(1.0)
+                .reviewCount(5)
+                .build();
+
+        final ReviewStarCalculationResponse reviewStarCalculationResponse = reviewService.reviewStarCalculation(item);
+
+        assertThat(reviewStarCalculationResponse).isNotNull();
+        assertThat(reviewStarCalculationResponse.getReviewCount()).isEqualTo(5);
+        assertThat(reviewStarCalculationResponse.getFullStar()).isEqualTo(1);
+        assertThat(reviewStarCalculationResponse.getHalfStar()).isEqualTo(0);
+        assertThat(reviewStarCalculationResponse.getEmptyStar()).isEqualTo(4);
+    }
+    @Test
+    @DisplayName("리뷰 점수가 5점일때 꽉찬별 5개 빈별 0개")
+    void reviewStarCalculation4() {
+        Item item = Item.builder()
+                .reviewAverageRating(5.0)
+                .reviewCount(5)
+                .build();
+
+        final ReviewStarCalculationResponse reviewStarCalculationResponse = reviewService.reviewStarCalculation(item);
+
+        assertThat(reviewStarCalculationResponse).isNotNull();
+        assertThat(reviewStarCalculationResponse.getReviewCount()).isEqualTo(5);
+        assertThat(reviewStarCalculationResponse.getFullStar()).isEqualTo(5);
+        assertThat(reviewStarCalculationResponse.getHalfStar()).isEqualTo(0);
+        assertThat(reviewStarCalculationResponse.getEmptyStar()).isEqualTo(0);
     }
 }

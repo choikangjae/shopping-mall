@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.zzim.Zzim;
 import com.jay.shoppingmall.domain.zzim.ZzimRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +14,13 @@ public class ZzimService {
 
     private final ZzimRepository zzimRepository;
 
-    public boolean isZzimed(Long userId, Long itemId) {
+    public boolean isZzimed(User user, Long itemId) {
+        if (user == null) {
+            return false;
+        }
         boolean isZzimed = false;
 
-        Zzim zzim = zzimRepository.findByUserIdAndItemId(userId, itemId);
+        Zzim zzim = zzimRepository.findByUserIdAndItemId(user.getId(), itemId);
 
         if (zzim != null) {
             isZzimed = zzim.getIsZzimed();

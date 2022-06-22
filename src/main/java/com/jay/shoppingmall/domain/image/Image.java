@@ -53,7 +53,7 @@ public class Image extends BaseTimeEntity {
 //    private Review review;
 
     @Builder
-    public Image(String originalFileName, String filePath, Long fileSize, String fileExtension, boolean isMainImage, Item item, ImageRelation imageRelation, Long foreignId) {
+    public Image(String originalFileName, String filePath, Long fileSize, String fileExtension, ImageRelation imageRelation, Long foreignId) {
         this.originalFileName = originalFileName;
         this.filePath = filePath;
         this.fileSize = fileSize;

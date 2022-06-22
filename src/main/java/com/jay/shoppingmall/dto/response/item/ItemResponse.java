@@ -13,6 +13,7 @@ public class ItemResponse {
 
     private Long itemId;
 
+    @Setter
     private String mainImage;
 
     private String option1;

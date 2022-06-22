@@ -4,6 +4,7 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.model.page.CustomPage;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
@@ -23,6 +24,7 @@ import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.ReviewWriteRequest;
 import com.jay.shoppingmall.dto.response.review.OrderItemForReviewResponse;
 import com.jay.shoppingmall.dto.response.review.ReviewResponse;
+import com.jay.shoppingmall.dto.response.review.ReviewStarCalculationResponse;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import com.jay.shoppingmall.exception.exceptions.ReviewException;
 import com.jay.shoppingmall.service.common.CommonService;
@@ -47,6 +49,7 @@ public class ReviewService {
     private final PointHistoryRepository pointHistoryRepository;
     private final PointRepository pointRepository;
     private final ImageRepository imageRepository;
+    private final ItemRepository itemRepository;
 
     private final FileHandler fileHandler;
     private final PaymentService paymentService;
@@ -69,6 +72,32 @@ public class ReviewService {
                 .pointWithPicture(pointWithPicture)
                 .build();
     }
+
+    public ReviewStarCalculationResponse reviewStarCalculation(Item item) {
+
+        double reviewAverageRating = item.getReviewAverageRating() == null ? 0.0 : item.getReviewAverageRating();
+        double fullStar = Math.floor(reviewAverageRating);
+        double halfStar = Math.round((reviewAverageRating - fullStar) * 100) / 100.0;
+        double emptyStar = 5 - Math.ceil(reviewAverageRating);
+
+        if (halfStar < 0.4 && halfStar > 0.0) {
+            halfStar = 0.0;
+            emptyStar++;
+        } else if (halfStar >= 0.8) {
+            halfStar = 0.0;
+            fullStar++;
+        } else if (halfStar >= 0.4) {
+            halfStar = 1.0;
+        }
+        return ReviewStarCalculationResponse.builder()
+                .reviewCount(item.getReviewCount() == null ? 0 : item.getReviewCount())
+                .reviewAverageRating(reviewAverageRating)
+                .fullStar(fullStar)
+                .halfStar(halfStar)
+                .emptyStar(emptyStar)
+                .build();
+    }
+
 
     public ReviewResponse reviewWrite(final ReviewWriteRequest request, final User user, final List<MultipartFile> files) {
         final OrderItem orderItem = reviewAvailableCheck(request.getOrderItemId(), user);

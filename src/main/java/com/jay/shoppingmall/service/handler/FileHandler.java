@@ -87,7 +87,7 @@ public class FileHandler {
                 .fileExtension(originalFileExtension)
                 .imageRelation(imageRelation)
                 .foreignId(foreignId)
-                .isMainImage(false)
+//                .isMainImage(false)
                 .build();
 
         //업로드 한 파일 데이터를 지정한 파일에 저장.

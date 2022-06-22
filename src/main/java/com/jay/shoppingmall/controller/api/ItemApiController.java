@@ -41,7 +41,7 @@ public class ItemApiController {
         if (user == null) {
             throw new UserNotFoundException("로그인이 필요한 서비스입니다");
         }
-        final ItemOptionResponse itemOptionResponse = itemService.itemOptionAddToList(request, user);
+        final ItemOptionResponse itemOptionResponse = itemService.itemOptionAddToList(request);
 
         if (session.getAttribute("itemOptions") == null) {
             List<ItemOptionResponse> itemOptionResponses = new ArrayList<>();
@@ -51,7 +51,7 @@ public class ItemApiController {
             @SuppressWarnings("unchecked")
             final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
             for (ItemOptionResponse optionResponse : itemOptions) {
-                if (optionResponse.getOption2().equals(itemOptionResponse.getOption2()) && optionResponse.getOption1().equals(itemOptionResponse.getOption1())) {
+                if (optionResponse.getItemId().equals(itemOptionResponse.getItemId()) && optionResponse.getOption2().equals(itemOptionResponse.getOption2()) && optionResponse.getOption1().equals(itemOptionResponse.getOption1())) {
                     throw new OptionDuplicatedException("같은 옵션이 선택되어 있습니다");
                 }
             }
@@ -64,19 +64,19 @@ public class ItemApiController {
 
     @PostMapping("/option/delete")
     public ResponseEntity<?> deleteOption(@Valid @RequestBody ItemOptionRequest request, HttpSession session) {
+        final Long itemId = request.getItemId();
         final String option1 = request.getOption1();
         final String option2 = request.getOption2();
 
         @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
         if (!itemOptions.isEmpty()) {
-            itemOptions.removeIf(itemOptionResponse -> option1.equals(itemOptionResponse.getOption1()) && option2.equals(itemOptionResponse.getOption2()));
+            itemOptions.removeIf(itemOptionResponse -> itemId.equals(itemOptionResponse.getItemId()) && option1.equals(itemOptionResponse.getOption1()) && option2.equals(itemOptionResponse.getOption2()));
         }
-        ItemOptionResponse itemOptionResponse = ItemOptionResponse.builder().build();
         setItemTotals(session);
 
         session.setAttribute("itemOptions", itemOptions);
-        return ResponseEntity.ok(itemOptionResponse);
+        return ResponseEntity.ok(null);
     }
     @PostMapping("/option/update")
     public ResponseEntity<?> updateOption(@Valid @RequestBody ItemOptionRequest request, HttpSession session) {
@@ -110,7 +110,7 @@ public class ItemApiController {
     }
 
     private void setItemTotals(final HttpSession session) {
-//        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         final List<ItemOptionResponse> itemOptions = (List<ItemOptionResponse>) session.getAttribute("itemOptions");
 
         final long itemTotalPrice = itemOptions.stream().mapToLong(ItemOptionResponse::getItemPrice).sum();
