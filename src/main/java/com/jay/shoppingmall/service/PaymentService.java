@@ -75,11 +75,12 @@ public class PaymentService {
         final Seller seller = orderItem.getSeller();
 
         final PaymentPerSeller paymentPerSeller = paymentPerSellerRepository.findByOrderIdAndSellerId(orderItem.getOrder().getId(), seller.getId());
-        if (paymentPerSeller.getIsMoneyTransferredToSeller() != null && paymentPerSeller.getIsMoneyTransferredToSeller()) {
+        if (paymentPerSeller.getIsMoneyTransferredToSeller()) {
             throw new MoneyTransactionException("이미 정산이 완료된 주문입니다");
         }
 
         final Long moneyToSellerBankAccount = paymentPerSeller.getItemTotalPricePerSeller();
+
         SellerBankAccountHistory sellerBankAccountHistory = SellerBankAccountHistory.builder()
                 .transactionMoney(moneyToSellerBankAccount)
                 .transactionType(TransactionType.DEPOSIT)
@@ -117,7 +118,6 @@ public class PaymentService {
         orderRepository.save(order);
 
         final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
-//                .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
 
         final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
         //판매자별 개별 결제 정보 저장
@@ -302,7 +302,7 @@ public class PaymentService {
      *
      * @param imp_uid
      * @param access_token
-     * @return 총액
+     * @return Paid total amount
      * @throws IOException
      */
     private Long getPaymentInfoByToken(String imp_uid, String access_token) throws IOException {

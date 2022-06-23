@@ -90,9 +90,7 @@ public class MeController {
     }
     @GetMapping("/zzim")
     public String showMeZzim(@CurrentUser User user, Model model, Pageable pageable) {
-        if (user == null) {
-            return "redirect:/";
-        }
+
         PageDto itemResponses = itemService.getAllMeZzim(user, pageable);
         model.addAttribute("items", itemResponses);
         return "me/zzim";

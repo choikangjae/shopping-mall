@@ -36,7 +36,7 @@ public class Item extends BaseTimeEntity {
     private String description;
 
     @Setter
-    private Integer zzim;
+    private int zzim;
 
     private Integer viewCount;
 

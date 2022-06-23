@@ -28,6 +28,7 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	testImplementation.exclude group: 'com.vaadin.external.google', module: 'android-json'
 }
 
 repositories {

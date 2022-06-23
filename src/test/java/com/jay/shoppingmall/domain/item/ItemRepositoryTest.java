@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +32,6 @@ class ItemRepositoryTest {
 
     Seller seller;
     Seller seller2;
-
 
     Pageable pageable;
 
@@ -64,7 +64,6 @@ class ItemRepositoryTest {
         itemRepository.save(item3);
         pageable = PageRequest.of(0, 5);
     }
-
     @Test
     void findByNameContaining() {
         final Page<Item> items = itemRepository.findByNameContaining("상품명", Pageable.unpaged());
@@ -101,4 +100,25 @@ class ItemRepositoryTest {
         assertThat(items.size()).isEqualTo(3);
         assertThat(itemAll.size()).isGreaterThan(3);
     }
+//    @Test
+//    void findFirst3BySellerIdAndNot() {
+//        Item moreItem1 = Item.builder()
+//                .name("상품명")
+//                .seller(seller)
+//                .build();
+//        Item moreItem2 = Item.builder()
+//                .name("상품명2")
+//                .seller(seller)
+//                .build();
+//
+//        itemRepository.save(moreItem1);
+//        itemRepository.save(moreItem2);
+//
+//        final List<Item> items = itemRepository.findFirst3BySellerIdAndIdNot(1L, moreItem1.getId());
+//        final List<Item> itemAll = itemRepository.findAllBySellerId(1L);
+//
+//        assertThat(items.size()).isEqualTo(3);
+//        assertThat(items).doesNotContain(moreItem1);
+//        assertThat(itemAll.size()).isGreaterThan(3);
+//    }
 }

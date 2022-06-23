@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ZzimResponse {
+
     private Integer zzimPerItem;
 
     private Boolean isZzimed;

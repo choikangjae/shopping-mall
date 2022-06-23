@@ -12,6 +12,8 @@ import com.jay.shoppingmall.domain.seller.SellerRepository;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
+import com.jay.shoppingmall.domain.zzim.Zzim;
+import com.jay.shoppingmall.domain.zzim.ZzimRepository;
 import com.jay.shoppingmall.exception.exceptions.ItemNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,12 +44,15 @@ class ItemOptionRepositoryTest {
     SellerRepository sellerRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    ZzimRepository zzimRepository;
     Item item;
     ItemPrice itemPrice;
+    User user;
 
     @BeforeEach
     void setUp() {
-        User user = User.builder()
+        user = User.builder()
                 .id(1L)
                 .email("qwe@qwe")
                 .role(Role.ROLE_USER)
@@ -68,12 +74,19 @@ class ItemOptionRepositoryTest {
 
         final ItemOption itemOption = EntityBuilder.getItemOption();
         itemOptionRepository.save(itemOption);
+
+        Zzim zzim = Zzim.builder()
+                .isZzimed(false)
+                .item(item)
+                .user(user)
+                .build();
+        zzimRepository.save(zzim);
     }
 
     @Test
     void findByOption1AndOption2AndItemId() {
         final ItemOption itemOption = itemOptionRepository.findByOption1AndOption2AndItemId("option1", "option2", item.getId())
-                        .orElseThrow(() -> new ItemNotFoundException(""));
+                .orElseThrow(() -> new ItemNotFoundException(""));
 
         assertThat(itemOption.getOption1()).isEqualTo("option1");
         assertThat(itemOption.getOption2()).isEqualTo("option2");
@@ -92,5 +105,33 @@ class ItemOptionRepositoryTest {
         final ItemOption itemOption = itemOptionRepository.findByItemPriceId(itemPrice.getId());
 
         assertThat(itemOption).isNotNull();
+    }
+
+    @Test
+    void deleteByUserIdAndItemId() {
+        int numberOfDeleted = zzimRepository.deleteByUserIdAndItemId(user.getId(), item.getId());
+
+        assertThat(numberOfDeleted).isEqualTo(1);
+    }
+
+    @Test
+    void findByItemIds() {
+        List<Long> itemIds = new ArrayList<>();
+        for (long i = 0; i < 1000; i++) {
+
+            Item item = Item.builder()
+                    .name("상품명" + i)
+                    .build();
+            itemRepository.save(item);
+
+            Zzim zzim = Zzim.builder()
+                    .item(item)
+                    .build();
+            zzimRepository.save(zzim);
+            itemIds.add(item.getId());
+        }
+
+        final List<Zzim> zzims = zzimRepository.findByItemIdIn(itemIds);
+        assertThat(zzims.size()).isEqualTo(10);
     }
 }

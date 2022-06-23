@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -14,17 +16,16 @@ public class ZzimService {
 
     private final ZzimRepository zzimRepository;
 
+    @Transactional(readOnly = true)
     public boolean isZzimed(User user, Long itemId) {
         if (user == null) {
             return false;
         }
-        boolean isZzimed = false;
-
         Zzim zzim = zzimRepository.findByUserIdAndItemId(user.getId(), itemId);
 
         if (zzim != null) {
-            isZzimed = zzim.getIsZzimed();
+            return zzim.getIsZzimed();
         }
-        return isZzimed;
+        return false;
     }
 }

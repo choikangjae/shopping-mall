@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,41 +76,25 @@ public class ItemService {
                 .build();
     }
 
-    private void setIsZzimed(final User user, final List<ItemResponse> itemResponses) {
-        if (user != null)
+    public void setIsZzimed(final User user, final List<ItemResponse> itemResponses) {
+        if (user != null) {
+            final List<Long> itemIds = itemResponses.stream().map(ItemResponse::getItemId).collect(Collectors.toList());
+
+            final List<Zzim> zzims = zzimRepository.findByItemIdIn(itemIds);
+
             for (ItemResponse itemResponse : itemResponses) {
-                itemResponse.setIsZzimed(zzimService.isZzimed(user, itemResponse.getItemId()));
+                for (Zzim zzim : zzims) {
+                    if (itemResponse.getItemId().equals(zzim.getItem().getId())) {
+                        itemResponse.setIsZzimed(zzim.getIsZzimed());
+                        break;
+                    }
+                }
             }
+
+        }
     }
 
-//    private ReviewStarCalculationResponse reviewStarCalculation(Long itemId) {
-//        Item item = itemRepository.findById(itemId).orElseThrow(
-//                () -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
-//
-//        double reviewAverageRating = item.getReviewAverageRating() == null ? 0.0 : item.getReviewAverageRating();
-//        double fullStar = Math.floor(reviewAverageRating);
-//        double halfStar = Math.round((reviewAverageRating - fullStar) * 100) / 100.0;
-//        double emptyStar = 5 - Math.ceil(reviewAverageRating);
-//
-//        if (halfStar < 0.4 && halfStar > 0.0) {
-//            halfStar = 0.0;
-//            emptyStar++;
-//        } else if (halfStar >= 0.8) {
-//            halfStar = 0.0;
-//            fullStar++;
-//        } else if (halfStar >= 0.4) {
-//            halfStar = 1.0;
-//        }
-//        return ReviewStarCalculationResponse.builder()
-//                .reviewCount(item.getReviewCount() == null ? 0 : item.getReviewCount())
-//                .reviewAverageRating(reviewAverageRating)
-//                .fullStar(fullStar)
-//                .halfStar(halfStar)
-//                .emptyStar(emptyStar)
-//                .build();
-//    }
-
-    private List<ItemResponse> getItemResponses(final List<Item> items) {
+    public List<ItemResponse> getItemResponses(final List<Item> items) {
         List<ItemResponse> itemResponses = new ArrayList<>();
         for (Item item : items) {
             final ReviewStarCalculationResponse reviewStarCalculationResponse = reviewService.reviewStarCalculation(item);
@@ -156,6 +141,16 @@ public class ItemService {
                 .orElseThrow(() -> new ItemNotFoundException("해당 옵션이 존재하지 않습니다"));
         Map<String, List<String>> optionMap = getOptionMap(itemOptions);
 
+        final StringImageResponse stringImageResponse = getItemDetailStringImages(item);
+
+        //상품 누적 조회수
+        item.viewCountUp();
+
+        //상품 조회 기록 저장/ 캐시 메모리로 전환 필요 ?
+        setBrowseHistories(user, item);
+
+        final boolean isZzimed = zzimService.isZzimed(user, item.getId());
+
         //리팩토링 전
 //        final ItemOption mainOptionItem = itemOptionRepository.findByItemIdAndIsOptionMainItemTrue(itemId);
 //        Map<String, List<String>> optionMap = new HashMap<>();
@@ -166,10 +161,6 @@ public class ItemService {
 //            final List<String> option2list = option2.stream().map(ItemOption::getOption2).collect(Collectors.toList());
 //            optionMap.put(option1, option2list);
 //        }
-
-        //리팩토링 이후.
-
-        final StringImageResponse stringImageResponse = getItemDetailStringImages(item);
 
 //        final List<Image> images = imageRepository.findAllByForeignId(item.getId());
 //        final Image mainImage = images.stream()
@@ -190,7 +181,6 @@ public class ItemService {
 //                .descriptionImageList(stringDescriptionImages)
 //                .build();
 
-        //리팩토링 전.
 //        List<Image> descriptionImages = imageRepository.findAllByImageRelationAndForeignId(ImageRelation.ITEM_DESCRIPTION, item.getId());
 //        for (Image image : descriptionImages) {
 //            stringDescriptionImages.add(fileHandler.getStringImage(image));
@@ -198,8 +188,6 @@ public class ItemService {
 //        Image mainImage = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, item.getId());
 //        String stringMainImage = fileHandler.getStringImage(mainImage);
 
-        //상품 누적 조회수
-        item.viewCountUp();
 
         //TODO 상품에 대한 조회수를 매일 그리고 시간별로 저장하는 최적화 방법 찾아보기.
         //상품 일자별 조회수
@@ -218,10 +206,6 @@ public class ItemService {
 //            itemViewHistoryRepository.save(itemViewHistory);
 //        }
 
-        //상품 조회 기록 저장/ 캐시 메모리로 전환 필요 ?
-        setBrowseHistories(user, item);
-
-        final boolean isZzimed = zzimService.isZzimed(user, item.getId());
 
         return ItemDetailResponse.builder()
                 .id(item.getId())
@@ -266,14 +250,14 @@ public class ItemService {
         if (user != null) {
             final List<BrowseHistory> browseHistories = browseHistoryRepository.findFirst20ByUserIdOrderByBrowseAtDesc(user.getId());
 
-            if (browseHistories.size() >= 20) {
-                final BrowseHistory history = browseHistories.get(browseHistories.size() - 1);
-                browseHistoryRepository.delete(history);
-            }
             for (BrowseHistory browseHistory : browseHistories) {
                 if (Objects.equals(browseHistory.getItem().getId(), item.getId())) {
                     browseHistoryRepository.delete(browseHistory);
                 }
+            }
+            if (browseHistories.size() >= 20) {
+                final BrowseHistory history = browseHistories.get(browseHistories.size() - 1);
+                browseHistoryRepository.delete(history);
             }
             BrowseHistory browseHistory = BrowseHistory.builder()
                     .item(item)
@@ -314,34 +298,31 @@ public class ItemService {
     }
 
     public ZzimResponse itemZzim(final ItemZzimRequest request, final User user) {
-        Item item = itemRepository.findById(request.getItemId()).orElseThrow(() -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
-        Zzim zzim;
-        if (zzimRepository.findByUserIdAndItemId(user.getId(), item.getId()) == null) {
-            zzim = Zzim.builder()
-                    .user(user)
-                    .item(item)
+        Item item = itemRepository.findById(request.getItemId())
+                .orElseThrow(() -> new ItemNotFoundException("해당 상품을 찾을 수 없습니다"));
+
+        final int numberOfZzimDeleted = zzimRepository.deleteByUserIdAndItemId(user.getId(), item.getId());
+        if (numberOfZzimDeleted == 1) {
+            item.setZzim(item.getZzim() - 1);
+
+            return ZzimResponse.builder()
+                    .zzimPerItem(item.getZzim())
                     .isZzimed(false)
                     .build();
-            zzimRepository.saveAndFlush(zzim);
-        } else {
-            zzim = zzimRepository.findByUserIdAndItemId(user.getId(), item.getId());
         }
 
-        if (!zzim.getIsZzimed() || zzim.getIsZzimed() == null) {
-            zzim.setIsZzimed(true);
-            item.setZzim(item.getZzim() == null ? 1 : item.getZzim() + 1);
-        } else {
-            zzim.setIsZzimed(false);
-            if (item.getZzim() == 0) {
-                item.setZzim(0);
-            } else {
-                item.setZzim(item.getZzim() == null ? 0 : item.getZzim() - 1);
-            }
-        }
+        Zzim zzim = Zzim.builder()
+                .user(user)
+                .item(item)
+                .isZzimed(true)
+                .build();
+        zzimRepository.save(zzim);
+
+        item.setZzim(item.getZzim() + 1);
 
         return ZzimResponse.builder()
                 .zzimPerItem(item.getZzim())
-                .isZzimed(zzim.getIsZzimed())
+                .isZzimed(true)
                 .build();
     }
 
@@ -364,7 +345,6 @@ public class ItemService {
         final ItemOption itemOption = itemOptionRepository.findByOption1AndOption2AndItemId(request.getOption1(), request.getOption2(), request.getItemId())
                 .orElseThrow(() -> new ItemNotFoundException("잘못된 상품 접근입니다"));
 
-
         if (itemOption.getItemStock().getStock() < request.getOptionQuantity()) {
             throw new StockInvalidException("해당 상품의 재고는 " + itemOption.getItemStock().getStock() + " 개 입니다");
         }
@@ -385,11 +365,12 @@ public class ItemService {
         CustomPage customPage = new CustomPage(zzims, "");
 
         final List<ItemResponse> itemResponses = getItemResponses(items);
-        setIsZzimed(user, itemResponses);
-        final List<ItemResponse> responses = itemResponses.stream().filter(ItemResponse::getIsZzimed).collect(Collectors.toList());
+        for (ItemResponse itemResponse : itemResponses) {
+            itemResponse.setIsZzimed(true);
+        }
 
         return PageDto.builder()
-                .content(responses)
+                .content(itemResponses)
                 .customPage(customPage)
                 .build();
     }
@@ -402,21 +383,15 @@ public class ItemService {
         final List<Item> items = browseHistories.stream().map(BrowseHistory::getItem).collect(Collectors.toList());
         final List<ItemResponse> itemResponses = getItemResponses(items);
 
-        //리팩토링하기.
-        for (ItemResponse itemResponse : itemResponses) {
-            for (BrowseHistory browseHistory : browseHistories) {
-                if (Objects.equals(itemResponse.getItemId(), browseHistory.getItem().getId())) {
-                    itemResponse.setDateAt(browseHistory.getBrowseAt());
-                }
-            }
+        for (int i = 0; i < itemResponses.size(); i++) {
+            itemResponses.get(i).setDateAt(browseHistories.get(i).getBrowseAt());
         }
         setIsZzimed(user, itemResponses);
 
         return PageDto.builder()
                 .content(itemResponses)
                 .customPage(customPage)
-                .build()
-                ;
+                .build();
     }
 
     public PageDto showItemsBySeller(final User user, final Pageable pageable) {
@@ -431,8 +406,7 @@ public class ItemService {
         return PageDto.builder()
                 .content(itemResponses)
                 .customPage(customPage)
-                .build()
-                ;
+                .build();
     }
 
     public PageDto getSellerOtherItems(final Long itemId) {
@@ -443,8 +417,6 @@ public class ItemService {
         return PageDto.builder()
                 .content(getItemResponses(items))
                 .customPage(new CustomPage())
-                .build()
-                ;
-
+                .build();
     }
 }

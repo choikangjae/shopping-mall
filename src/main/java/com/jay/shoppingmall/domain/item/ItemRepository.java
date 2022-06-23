@@ -17,6 +17,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findFirst3BySellerId(Long sellerId);
 
+    List<Item> findFirst3BySellerIdAndIdNot(Long sellerId, Long itemId);
+
     //JPQL로 최적화 필요.
     List<Item> findAllBySellerId(Long sellerId);
 

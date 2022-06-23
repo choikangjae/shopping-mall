@@ -75,4 +75,10 @@ public class Seller {
         }
         this.bankAccount += bankAccount;
     }
+
+    @PrePersist
+    public void prePersist() {
+        this.bankAccount = this.bankAccount == null ? 0L : this.bankAccount;
+    }
+
 }
