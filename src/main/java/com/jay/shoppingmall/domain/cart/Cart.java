@@ -1,8 +1,10 @@
 package com.jay.shoppingmall.domain.cart;
 
 import com.jay.shoppingmall.common.BaseTimeEntity;
+import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
+import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
 import com.jay.shoppingmall.exception.exceptions.QuantityException;
@@ -12,6 +14,8 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -65,10 +69,17 @@ public class Cart extends BaseTimeEntity {
     }
 
     public Integer manipulateQuantity(Integer quantity) {
-        if (quantity < 1 || quantity > itemOption.getItemStock().getStock()) {
-            throw new QuantityException("주문할 수 있는 재고 "+ itemOption.getItemStock().getStock() +"개를 넘어섰습니다.");
+        if (quantity < 1 || quantity > itemOption.getStockNow()) {
+            throw new QuantityException("주문할 수 있는 재고 "+ itemOption.getStockNow() +"개를 넘어섰습니다.");
         }
         this.quantity = quantity;
         return quantity;
+    }
+
+    public Long getPriceNow() {
+        return itemOption.getPriceNow();
+    }
+    public Seller getItemSeller() {
+        return item.getSeller();
     }
 }

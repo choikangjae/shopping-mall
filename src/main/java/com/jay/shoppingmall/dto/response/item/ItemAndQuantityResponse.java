@@ -13,6 +13,7 @@ public class ItemAndQuantityResponse {
 
     private Long itemId;
 
+    @Setter
     private String image;
 
     private String name;

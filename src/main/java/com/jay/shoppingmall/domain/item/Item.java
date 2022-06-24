@@ -48,9 +48,6 @@ public class Item extends BaseTimeEntity {
     @JoinColumn(name = "image_id")
     private Image image;
 
-//    @OneToMany(mappedBy = "item")
-//    private List<ItemOption> itemOptions = new ArrayList<>();
-
     @Column(columnDefinition = "boolean default 0")
     private Boolean isDeleted = false;
 
@@ -59,6 +56,10 @@ public class Item extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
+
+    public Long getSellerId() {
+        return seller.getId();
+    }
 
     public void viewCountUp() {
         if (this.getViewCount() == null) {

@@ -47,5 +47,10 @@ public class ItemOption extends BaseTimeEntity {
 
     private LocalDateTime deletedDate;
 
-
+    public Integer getStockNow() {
+        return itemStock.getStock();
+    }
+    public Long getPriceNow() {
+        return itemPrice.getPriceNow();
+    }
 }

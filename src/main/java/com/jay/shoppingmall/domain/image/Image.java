@@ -31,9 +31,6 @@ public class Image extends BaseTimeEntity {
 
     private String fileExtension;
 
-//    @Setter
-//    private Boolean isMainImage;
-
     @Column(columnDefinition = "boolean default 0")
     private Boolean isDeleted = false;
 
@@ -44,22 +41,12 @@ public class Image extends BaseTimeEntity {
 
     private Long foreignId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "item_id")
-//    private Item item;
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "review_id")
-//    private Review review;
-
     @Builder
     public Image(String originalFileName, String filePath, Long fileSize, String fileExtension, ImageRelation imageRelation, Long foreignId) {
         this.originalFileName = originalFileName;
         this.filePath = filePath;
         this.fileSize = fileSize;
         this.fileExtension = fileExtension;
-//        this.isMainImage = isMainImage;
-//        this.item = item;
         this.imageRelation = imageRelation;
         this.foreignId = foreignId;
     }

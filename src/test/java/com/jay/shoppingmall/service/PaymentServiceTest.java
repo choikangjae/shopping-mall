@@ -12,8 +12,11 @@ import com.jay.shoppingmall.domain.order.order_item.OrderItem;
 import com.jay.shoppingmall.domain.order.order_item.OrderItemRepository;
 import com.jay.shoppingmall.domain.order.order_item.order_delivery.OrderDelivery;
 import com.jay.shoppingmall.domain.order.order_item.order_delivery.OrderDeliveryRepository;
+import com.jay.shoppingmall.domain.payment.Payment;
 import com.jay.shoppingmall.domain.payment.PaymentRepository;
 import com.jay.shoppingmall.domain.payment.model.MerchantUidGenerator;
+import com.jay.shoppingmall.domain.payment.model.PayMethod;
+import com.jay.shoppingmall.domain.payment.model.Pg;
 import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSeller;
 import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRepository;
 import com.jay.shoppingmall.domain.seller.Seller;
@@ -21,6 +24,7 @@ import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBank
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.exception.exceptions.DeliveryException;
 import com.jay.shoppingmall.exception.exceptions.MoneyTransactionException;
+import com.jay.shoppingmall.exception.exceptions.PaymentFailedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +35,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,6 +80,8 @@ class PaymentServiceTest {
     PaymentPerSeller paymentPerSeller;
     Order order;
     Seller seller;
+    Payment payment;
+
     @BeforeEach
     void setUp() {
         seller = EntityBuilder.getSeller();
@@ -95,6 +102,13 @@ class PaymentServiceTest {
         paymentPerSeller = PaymentPerSeller.builder()
                 .itemTotalPricePerSeller(3000L)
                 .isMoneyTransferredToSeller(false)
+                .build();
+
+        payment = Payment.builder()
+                .payMethod(PayMethod.CARD)
+                .pg(Pg.TOSSPAY)
+                .merchantUid("123")
+                .amount(10000L)
                 .build();
     }
 
@@ -139,16 +153,26 @@ class PaymentServiceTest {
     }
 
     @Test
-    void paymentTotal() throws IOException {
+    void whenBeforeAmountIsNotEqualToAfterAmount_ThrowPaymentFailedException_paymentTotal() throws IOException {
 
-//        Long paidTotal = 10000L;
-//        try (MockedStatic<PaymentService> mockedPaymentService = mockStatic(PaymentService.class)) {
-//            mockedPaymentService.when(PaymentService::)
-//            mockedLocalDateTime.when(LocalDateTime::now).thenReturn(defaultTime);
-//        }
-//        doReturn(true).when(paymentService).getPaymentInfoByToken(any(), any());
+        doReturn("토큰").when(paymentService).getAccessToken();
+        doReturn(5000L).when(paymentService).getPaymentInfoByToken(any(), any());
+        when(paymentRepository.findByMerchantUid(any())).thenReturn(Optional.ofNullable(payment));
+
+        assertThrows(PaymentFailedException.class, () -> paymentService.paymentTotal(any(), any(), any()));
+    }
+    @Test
+    void happyPath_paymentTotal() throws IOException {
+
+        doReturn("토큰").when(paymentService).getAccessToken();
+        doReturn(10000L).when(paymentService).getPaymentInfoByToken(any(), any());
+        when(paymentRepository.findByMerchantUid(any())).thenReturn(Optional.ofNullable(payment));
 
         paymentService.paymentTotal(any(), any(), any());
+
+        assertThat(payment.getIsValidated()).isTrue();
+        assertThat(payment.getIsAmountManipulated()).isNull();
+        verify(orderRepository).save(any());
     }
 
     @Test

@@ -3,6 +3,8 @@ package com.jay.shoppingmall.service;
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.entitybuilder.EntityBuilder;
+import com.jay.shoppingmall.domain.image.Image;
+import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
@@ -19,6 +21,8 @@ import com.jay.shoppingmall.dto.response.item.ItemAndQuantityResponse;
 import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
 import com.jay.shoppingmall.dto.response.seller.SellerResponse;
 import com.jay.shoppingmall.exception.exceptions.AlreadyExistsException;
+import com.jay.shoppingmall.exception.exceptions.NotValidException;
+import com.jay.shoppingmall.service.handler.FileHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -52,17 +56,22 @@ class CartServiceTest {
     @Mock
     ItemRepository itemRepository;
     @Mock
-    UserRepository userRepository;
+    FileHandler fileHandler;
     @Mock
-    SellerRepository sellerRepository;
+            ImageRepository imageRepository;
 
     User user;
     Item item;
     Item item2;
+
     ItemOption itemOption;
     List<ItemOptionResponse> list;
     ItemOptionResponse itemOptionResponse;
+
     Cart cart;
+    Cart cart2;
+    Cart cart3;
+
     Seller seller;
     List<Cart> carts;
 
@@ -70,10 +79,15 @@ class CartServiceTest {
     void setup() {
 
         user = EntityBuilder.getUser();
-        item = EntityBuilder.getItem();
+
         item2 = EntityBuilder.getItem2();
         itemOption = EntityBuilder.getItemOption();
         seller = EntityBuilder.getSeller();
+
+        item = Item.builder()
+                .seller(seller)
+                .id(0L)
+                .build();
 
         list = new ArrayList<>();
         itemOptionResponse = ItemOptionResponse.builder()
@@ -85,12 +99,29 @@ class CartServiceTest {
 
         carts = new ArrayList<>();
         cart = Cart.builder()
+                .isSelected(true)
+                .itemOption(itemOption)
+                .user(user)
+                .item(item)
+                .quantity(itemOptionResponse.getItemQuantity())
+                .build();
+        cart2 = Cart.builder()
+                .isSelected(true)
+                .itemOption(itemOption)
+                .user(user)
+                .item(item)
+                .quantity(itemOptionResponse.getItemQuantity())
+                .build();
+        cart3 = Cart.builder()
+                .isSelected(false)
                 .itemOption(itemOption)
                 .user(user)
                 .item(item)
                 .quantity(itemOptionResponse.getItemQuantity())
                 .build();
         carts.add(cart);
+        carts.add(cart2);
+        carts.add(cart3);
     }
 
 
@@ -125,7 +156,6 @@ class CartServiceTest {
                 .cartId(cart.getId())
                 .build();
         when(cartRepository.findById(request.getCartId())).thenReturn(Optional.of(cart));
-        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
 
         cartService.deleteCart(request, user);
 
@@ -135,32 +165,63 @@ class CartServiceTest {
     @Test
     void showCartItemsList() {
 
+        Image image = mock(Image.class);
+        List<Image> images = new ArrayList<>();
+        images.add(image);
+        images.add(image);
+        when(cartRepository.findByUser(any())).thenReturn(carts);
+        when(imageRepository.findByImageRelationAndForeignIdIn(any(), any())).thenReturn(images);
+        when(fileHandler.getStringImage(any(Image.class))).thenReturn("이미지");
+
         final Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = cartService.showCartItemsList(user);
 
+        assertThat(sellerResponseListMap.size()).isGreaterThan(0);
     }
 
 
     @Test
     void shouldReturn_CartPriceTotalResponse_cartPriceTotal() {
-        when(cartRepository.findByUserAndIsSelectedTrue(user)).thenReturn(carts);
-        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
+        when(cartRepository.findByUser(any())).thenReturn(carts);
 
         final CartPriceTotalResponse cartPriceTotalResponse = cartService.cartPriceTotal(user);
 
-        assertThat(cartPriceTotalResponse.getCartTotalPrice()).isGreaterThan(0);
-        assertThat(cartPriceTotalResponse.getCartTotalQuantity()).isGreaterThan(0);
+        assertThat(cartPriceTotalResponse.getCartTotalPrice()).isEqualTo(30000);
+        assertThat(cartPriceTotalResponse.getCartTotalQuantity()).isEqualTo(10);
     }
-
     @Test
-    void shouldReturn_cartPricePerSellerResponse_cartPricePerSeller() {
-        when(cartRepository.findByUserAndIsSelectedTrue(user)).thenReturn(carts);
-        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
+    void whenCartIsSelectedFalse_NotIncluded_cartPriceTotal() {
+        Cart cart = Cart.builder()
+                .isSelected(false)
+                .itemOption(itemOption)
+                .user(user)
+                .item(item)
+                .quantity(itemOptionResponse.getItemQuantity())
+                .build();
+        Cart cart2 = Cart.builder()
+                .isSelected(false)
+                .itemOption(itemOption)
+                .user(user)
+                .item(item)
+                .quantity(itemOptionResponse.getItemQuantity())
+                .build();
+        Cart cart3 = Cart.builder()
+                .isSelected(false)
+                .itemOption(itemOption)
+                .user(user)
+                .item(item)
+                .quantity(itemOptionResponse.getItemQuantity())
+                .build();
+        List<Cart> carts = new ArrayList<>();
+        carts.add(cart);
+        carts.add(cart2);
+        carts.add(cart3);
 
-        final CartPricePerSellerResponse cartPricePerSellerResponse = cartService.cartPricePerSeller(user, seller);
+        when(cartRepository.findByUser(any())).thenReturn(carts);
 
-        assertThat(cartPricePerSellerResponse.getSellerId()).isGreaterThan(0);
-        assertThat(cartPricePerSellerResponse.getItemTotalPricePerSeller()).isGreaterThan(0);
-        assertThat(cartPricePerSellerResponse.getItemTotalQuantityPerSeller()).isGreaterThan(0);
+        final CartPriceTotalResponse cartPriceTotalResponse = cartService.cartPriceTotal(user);
+
+        assertThat(cartPriceTotalResponse.getCartTotalPrice()).isZero();
+        assertThat(cartPriceTotalResponse.getCartTotalQuantity()).isZero();
     }
 
     @Test
@@ -171,7 +232,6 @@ class CartServiceTest {
                 .cartQuantity(5)
                 .build();
         when(cartRepository.findById(request.getCartId())).thenReturn(Optional.ofNullable(cart));
-        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
 
         final CartPriceResponse cartPriceResponse = cartService.changeQuantity(request, user);
 
@@ -187,7 +247,6 @@ class CartServiceTest {
                 .cartQuantity(5)
                 .build();
         when(cartRepository.findById(request.getCartId())).thenReturn(Optional.ofNullable(cart));
-        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
 
         final CartPriceResponse cartPriceResponse = cartService.changeQuantity(request, user);
 
@@ -195,6 +254,11 @@ class CartServiceTest {
         assertThat(cartPriceResponse.getCartManipulatedPrice()).isGreaterThan(0);
     }
 
+    @Test
+    void whenCheckIsElseThanTrueOrFalse_ThrowNotValidException_cartSelectAll() {
+
+        assertThrows(NotValidException.class, () -> cartService.cartSelectAll("notTrueNotFalse", user));
+    }
     @Test
     void whenCheckIsTrue_SelectAll_cartSelectAll() {
         Cart cart1 = Cart.builder()
@@ -212,8 +276,6 @@ class CartServiceTest {
         cartList.add(cart2);
 
         when(cartRepository.findByUser(user)).thenReturn(cartList);
-        when(sellerRepository.findById(any())).thenReturn(Optional.of(seller));
-        when(cartRepository.findByUserAndIsSelectedTrue(user)).thenReturn(cartList);
 
         final CartPriceResponse cartPriceResponse = cartService.cartSelectAll("true", user);
 
@@ -236,13 +298,11 @@ class CartServiceTest {
         cartList.add(cart2);
 
         when(cartRepository.findByUser(user)).thenReturn(cartList);
-        when(sellerRepository.findById(any())).thenReturn(Optional.of(seller));
-        when(cartRepository.findByUserAndIsSelectedTrue(user)).thenReturn(cartList);
 
         final CartPriceResponse cartPriceResponse = cartService.cartSelectAll("false", user);
 
         assertThat(cartPriceResponse.getCartPriceTotalResponse().getCartTotalQuantity()).isEqualTo(0);
-        assertThat(cartPriceResponse.getCartPricePerSellerResponses()).isEmpty();
+        assertThat(cartPriceResponse.getCartPricePerSellerResponses().get(0).getItemTotalPricePerSeller()).isEqualTo(0);
     }
 
     @Test
@@ -288,9 +348,7 @@ class CartServiceTest {
                 .shippingFeeDefault(SHIPPING_FEE_DEFAULT)
                 .build();
 
-        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
-
-        final Integer shippingFee = cartService.shippingFeeCheck(1L, 30000L);
+        final Integer shippingFee = cartService.shippingFeeCheck(seller, 30000L);
 
         assertThat(shippingFee).isEqualTo(0);
     }
@@ -306,9 +364,7 @@ class CartServiceTest {
                 .shippingFeeDefault(SHIPPING_FEE_DEFAULT)
                 .build();
 
-        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
-
-        final Integer shippingFee = cartService.shippingFeeCheck(1L, 29999L);
+        final Integer shippingFee = cartService.shippingFeeCheck(seller, 29999L);
 
         assertThat(shippingFee).isEqualTo(SHIPPING_FEE_DEFAULT);
     }
@@ -324,10 +380,30 @@ class CartServiceTest {
                 .shippingFeeDefault(SHIPPING_FEE_DEFAULT)
                 .build();
 
-        when(sellerRepository.findById(any())).thenReturn(Optional.ofNullable(seller));
-
-        final Integer shippingFee = cartService.shippingFeeCheck(1L, Long.MAX_VALUE);
+        final Integer shippingFee = cartService.shippingFeeCheck(seller, Long.MAX_VALUE);
 
         assertThat(shippingFee).isEqualTo(SHIPPING_FEE_DEFAULT);
+    }
+
+    @Test
+    void whenDistinctSellerIsTwo_SizeIsTwo_cartPricePerSeller() {
+        Seller seller2 = Seller.builder()
+                .build();
+        Item seller2Item = Item.builder()
+                .seller(seller2)
+                .build();
+        Cart seller2ItemCart = Cart.builder()
+                .isSelected(true)
+                .itemOption(itemOption)
+                .quantity(10)
+                .item(seller2Item)
+                .build();
+
+        carts.add(seller2ItemCart);
+        when(cartRepository.findByUser(any())).thenReturn(carts);
+
+        final List<CartPricePerSellerResponse> cartPricePerSellerResponses = cartService.cartPricePerSeller(user);
+
+        assertThat(cartPricePerSellerResponses.size()).isEqualTo(2);
     }
 }
