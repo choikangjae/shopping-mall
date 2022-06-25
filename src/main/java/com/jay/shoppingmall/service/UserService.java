@@ -16,18 +16,4 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User getCurrentlyLoggedInUser(Authentication authentication) {
-        if (authentication == null) {
-            return null;
-        }
-
-        User user = null;
-        Object principal = authentication.getPrincipal();
-
-        if (principal instanceof UserAdapter) {
-            user = ((UserAdapter) principal).getUser();
-        }
-
-        return user;
-    }
 }

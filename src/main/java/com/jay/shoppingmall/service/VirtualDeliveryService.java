@@ -55,7 +55,6 @@ public class VirtualDeliveryService {
         final Order order = new ArrayList<>(orderSet).get(0);
         final ReceiverInfo receiverInfo = order.getPayment().getReceiverInfo();
 
-
         for (Long orderItemId : orderItemIds) {
             final OrderItem orderItem = orderItemRepository.findById(orderItemId)
                     .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
@@ -73,14 +72,12 @@ public class VirtualDeliveryService {
                     .receiverPostcode(receiverInfo.getReceiverPostcode())
                     .seller(seller)
                     .user(order.getUser())
+                    .orderItem(orderItem)
                     .build();
 
-            virtualDeliveryCompany.setOrderItem(orderItem);
-
+//            virtualDeliveryCompany.setOrderItem(orderItem);
             virtualDeliveryCompanyRepository.save(virtualDeliveryCompany);
         }
-
-//        return getVirtualDeliveryResponseForAnonymous(trackingNumber, virtualDeliveryCompany);
     }
 
     public TrackPackageResponse trackMyPackages(final String trackingNumber, final User user) {

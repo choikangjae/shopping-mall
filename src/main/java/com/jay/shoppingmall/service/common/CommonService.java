@@ -11,8 +11,10 @@ public class CommonService {
 
     public String anonymousName(String name) {
         StringBuilder stringBuilder = new StringBuilder(name);
-        stringBuilder.delete(stringBuilder.length() / 2, stringBuilder.length());
-        stringBuilder.append("*".repeat(stringBuilder.length() / 2 + 1));
+        final int length = stringBuilder.length() / 2;
+
+        stringBuilder.delete(length, stringBuilder.length());
+        stringBuilder.append("*".repeat(length));
         return stringBuilder.toString();
     }
 

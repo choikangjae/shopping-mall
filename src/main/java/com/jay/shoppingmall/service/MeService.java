@@ -36,13 +36,14 @@ import java.util.List;
 @ToString
 public class MeService {
 
-    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
     private final ZzimRepository zzimRepository;
     private final ItemRepository itemRepository;
-    private final FileHandler fileHandler;
     private final ImageRepository imageRepository;
     private final BrowseHistoryRepository browseHistoryRepository;
+
+    private final FileHandler fileHandler;
 
     public Boolean passwordCheck(String password, User user) {
 
@@ -68,7 +69,6 @@ public class MeService {
         if (!agreeRequest.getIsMandatoryAgree()) {
             throw new AgreeException("필수 항목을 반드시 동의하셔야 합니다");
         }
-
         Agree agree = Agree.builder()
                 .isMandatoryAgree(agreeRequest.getIsMandatoryAgree())
                 .isMarketingAgree(agreeRequest.getIsMarketingAgree())

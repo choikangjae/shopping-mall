@@ -2,6 +2,8 @@ package com.jay.shoppingmall.domain.entitybuilder;
 
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
+import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.user.Role;
 import com.jay.shoppingmall.domain.user.User;
@@ -11,41 +13,6 @@ import com.jay.shoppingmall.domain.user.model.Name;
 import com.jay.shoppingmall.domain.user.model.PhoneNumber;
 
 public class EntityBuilder {
-    static Item item = Item.builder()
-            .brandName("나이키")
-            .name("상품명")
-            .description("설명")
-            .build();
-
-    static Item item2 = Item.builder()
-            .brandName("나이키")
-            .name("상품명")
-            .description("설명")
-            .build();
-
-    static User user = User.builder()
-            .email("qwe@qwe")
-            .role(Role.ROLE_USER)
-            .password(("qweqweqwe1"))
-            .build();
-
-    static User user2 = User.builder()
-            .email("123@123")
-            .role(Role.ROLE_USER)
-            .password(("ewqefewqfqwfe123"))
-            .build();
-
-    static Seller seller = Seller.builder()
-
-            .build();
-
-    static ItemOption itemOption = ItemOption.builder()
-            .isOptionMainItem(true)
-            .item(item)
-            .option1("option1")
-            .option2("option2")
-            .build();
-
     static Address address = Address.builder()
             .address("서울시 종로")
             .detailAddress("집")
@@ -69,14 +36,101 @@ public class EntityBuilder {
             .isMarketingAgree(true)
             .build();
 
+    static User user = User.builder()
+            .id(1L)
+            .email("qwe@qwe")
+            .role(Role.ROLE_USER)
+            .password(("qweqweqwe1"))
+            .build();
+
+    static User user2 = User.builder()
+            .id(2L)
+            .email("123@123")
+            .role(Role.ROLE_USER)
+            .password(("ewqefewqfqwfe123"))
+            .build();
+
+    static Seller seller = Seller.builder()
+//            .id(3L)
+            .shippingFeeDefault(3000)
+            .returnShippingFeeDefault(3000)
+            .shippingFeeFreePolicy(30000)
+            .defaultDeliveryCompany("배송사")
+            .companyName("컴퍼니")
+
+            .itemReturnAddress(address)
+            .itemReleaseAddress(address)
+
+            .isSellerAgree(true)
+            .isActivated(true)
+            .isLawAgree(true)
+            .bankAccount(10000L)
+            .build();
+
+    static Item item = Item.builder()
+            .brandName("나이키")
+            .name("상품명")
+            .description("설명")
+            .seller(seller)
+            .build();
+
+    static Item item2 = Item.builder()
+            .brandName("나이키")
+            .name("상품명")
+            .description("설명")
+            .seller(seller)
+            .build();
+
+
+    static ItemPrice itemPrice = ItemPrice.builder()
+            .priceNow(3000L)
+            .originalPrice(5000L)
+            .isOnSale(false)
+            .build();
+
+    static ItemStock itemStock = ItemStock.builder()
+            .stock(50)
+            .build();
+
+    static ItemOption itemOption = ItemOption.builder()
+            .item(item)
+            .itemPrice(itemPrice)
+            .itemStock(itemStock)
+            .isOptionMainItem(true)
+            .option1("option1")
+            .option2("option2")
+            .build();
+    static ItemOption itemOption2 = ItemOption.builder()
+            .item(item)
+            .itemPrice(itemPrice)
+            .itemStock(itemStock)
+            .isOptionMainItem(false)
+            .option1("option1")
+            .option2("option2-1")
+            .build();
+
+    public static ItemPrice getItemPrice() {
+        return itemPrice;
+    }
+
+    public static ItemStock getItemStock() {
+        return itemStock;
+    }
+
+
     public static ItemOption getItemOption() {
         return itemOption;
     }
+    public static ItemOption getItemOption2() {
+        return itemOption2;
+    }
 
     public static User getUser() {
+        user.userUpdate(address, name, agree, phoneNumber);
         return user;
     }
     public static User getUser2() {
+        user2.userUpdate(address, name, agree, phoneNumber);
         return user2;
     }
 

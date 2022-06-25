@@ -29,6 +29,7 @@ import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRe
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistory;
 import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistoryRepository;
+import com.jay.shoppingmall.domain.seller.seller_bank_account_history.TransactionType;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.request.PaymentRequest;
 import com.jay.shoppingmall.dto.response.cart.CartPricePerSellerResponse;
@@ -70,16 +71,19 @@ public class PaymentService {
 
     public void moneyTransactionToSeller(final OrderItem orderItem) {
         orderItem.getOrderDelivery().paymentDone();
+
         final Seller seller = orderItem.getSeller();
 
         final PaymentPerSeller paymentPerSeller = paymentPerSellerRepository.findByOrderIdAndSellerId(orderItem.getOrder().getId(), seller.getId());
-        if (paymentPerSeller.getIsMoneyTransferredToSeller() != null && paymentPerSeller.getIsMoneyTransferredToSeller()) {
+        if (paymentPerSeller.getIsMoneyTransferredToSeller()) {
             throw new MoneyTransactionException("이미 정산이 완료된 주문입니다");
         }
 
         final Long moneyToSellerBankAccount = paymentPerSeller.getItemTotalPricePerSeller();
+
         SellerBankAccountHistory sellerBankAccountHistory = SellerBankAccountHistory.builder()
                 .transactionMoney(moneyToSellerBankAccount)
+                .transactionType(TransactionType.DEPOSIT)
                 .seller(seller)
                 .build();
         sellerBankAccountHistoryRepository.save(sellerBankAccountHistory);
@@ -90,37 +94,38 @@ public class PaymentService {
 
 
     public PaymentDetailResponse paymentTotal(String imp_uid, final String merchant_uid, User user) throws IOException {
-        String accessToken = getAccessToken();
+        Payment paymentRecord = validationPayment(imp_uid, merchant_uid);
 
-        //PG사에 의해 실제로 결제된 금액
-        Long amountByPg = getPaymentInfoByToken(imp_uid, accessToken);
+        Order order = getOrder(user, paymentRecord);
 
-        //결제 금액과 레코드 검증.
-        Payment paymentRecord = paymentRepository.findByMerchantUid(merchant_uid)
-                .orElseThrow(() -> new PaymentFailedException("결제 정보가 없습니다"));
+        final List<Cart> carts = setPaymentPerSellerFromCarts(user, paymentRecord, order);
 
-        if (!amountByPg.equals(paymentRecord.getAmount())) {
-            paymentRecord.isAmountManipulatedTrue();
-            throw new PaymentFailedException("결제 정보가 올바르지 않습니다.");
-        }
+        moveCartToOrderItem(order, carts);
 
-        //검증 완료
-        paymentRecord.isValidatedTrue();
+        cartsStockManipulation(carts);
 
-        Order order = Order.builder()
-                .user(user)
-                .payment(paymentRecord)
+        return PaymentDetailResponse.builder()
+                .pg(paymentRecord.getPg().getName())
+                .payMethod(paymentRecord.getPayMethod().getName())
+                .amount(paymentRecord.getAmount())
+                .buyerAddr(paymentRecord.getBuyerAddr())
+                .buyerEmail(paymentRecord.getBuyerEmail())
+                .buyerName(paymentRecord.getBuyerName())
+                .buyerPostcode(paymentRecord.getBuyerPostcode())
+                .buyerTel(paymentRecord.getBuyerTel())
+                .merchantUid(paymentRecord.getMerchantUid())
                 .build();
-        orderRepository.save(order);
+    }
 
+    private List<Cart> setPaymentPerSellerFromCarts(final User user, final Payment paymentRecord, final Order order) {
         final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
-//                .orElseThrow(() -> new CartEmptyException("장바구니의 값이 올바르지 않습니다"));
 
-        final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
-        //판매자별 개별 결제 정보 저장
+        final List<Seller> sellers = carts.stream()
+                .map(Cart::getItem)
+                .map(Item::getSeller)
+                .distinct().collect(Collectors.toList());
 
         for (Seller seller : sellers) {
-
             final CartPricePerSellerResponse cartPricePerSellerResponse = cartService.cartPricePerSeller(user, seller);
 
             PaymentPerSeller paymentPerSeller = PaymentPerSeller
@@ -131,40 +136,24 @@ public class PaymentService {
                     .seller(seller)
                     .payment(paymentRecord)
                     .order(order)
-//                    .orderItems(orderItemsPerSeller)
                     .build();
 
             paymentPerSellerRepository.save(paymentPerSeller);
         }
+        return carts;
+    }
 
+    private Order getOrder(final User user, final Payment paymentRecord) {
+        Order order = Order.builder()
+                .user(user)
+                .payment(paymentRecord)
+                .build();
+        orderRepository.save(order);
 
-        //상품 주문 테이블로 정보 옮기고 장바구니 비우기
-        for (Cart cart : carts) {
-            OrderDelivery orderDelivery = OrderDelivery.builder()
-                    .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
-                    .build();
-            orderDeliveryRepository.save(orderDelivery);
+        return order;
+    }
 
-            //대표 사진 관리에 대한 주체를 OrderItem에게 넘김. 상품이 삭제될 수 있으므로.
-            //나중에 썸네일로 로직바꿀 것.
-            final Long mainImageId = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, cart.getItem().getId()).getId();
-            OrderItem orderItem = OrderItem.builder()
-                    .mainImageId(mainImageId)
-                    .order(order)
-                    .priceAtPurchase(cart.getItemOption().getItemPrice().getPriceNow())
-                    .quantity(cart.getQuantity())
-                    .itemOption(cart.getItemOption())
-                    .item(cart.getItem())
-                    .seller(cart.getItem().getSeller())
-                    .orderDelivery(orderDelivery)
-                    .build();
-
-            orderItemRepository.save(orderItem);
-
-            cartRepository.delete(cart);
-        }
-
-        //재고 관리
+    private void cartsStockManipulation(final List<Cart> carts) {
         for (Cart cart : carts) {
             final ItemStock itemStock = cart.getItemOption().getItemStock();
             final Integer stockMinusQuantity = itemStock.stockMinusQuantity(cart.getQuantity());
@@ -182,18 +171,53 @@ public class PaymentService {
                 //seller에게 메시지 보내기
             }
         }
+    }
 
-        return PaymentDetailResponse.builder()
-                .pg(paymentRecord.getPg().getName())
-                .payMethod(paymentRecord.getPayMethod().getName())
-                .amount(paymentRecord.getAmount())
-                .buyerAddr(paymentRecord.getBuyerAddr())
-                .buyerEmail(paymentRecord.getBuyerEmail())
-                .buyerName(paymentRecord.getBuyerName())
-                .buyerPostcode(paymentRecord.getBuyerPostcode())
-                .buyerTel(paymentRecord.getBuyerTel())
-                .merchantUid(paymentRecord.getMerchantUid())
-                .build();
+    private void moveCartToOrderItem(final Order order, final List<Cart> carts) {
+        //상품 주문 테이블로 정보 옮기고 장바구니 비우기
+        for (Cart cart : carts) {
+            OrderDelivery orderDelivery = OrderDelivery.builder()
+                    .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
+                    .build();
+            orderDeliveryRepository.save(orderDelivery);
+
+            //대표 사진 관리에 대한 주체를 OrderItem에게 넘김. 상품이 삭제될 수 있으므로.
+            final Long mainImageId = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, cart.getItem().getId()).getId();
+            OrderItem orderItem = OrderItem.builder()
+                    .mainImageId(mainImageId)
+                    .order(order)
+                    .priceAtPurchase(cart.getItemOption().getItemPrice().getPriceNow())
+                    .quantity(cart.getQuantity())
+                    .itemOption(cart.getItemOption())
+                    .item(cart.getItem())
+                    .seller(cart.getItem().getSeller())
+                    .orderDelivery(orderDelivery)
+                    .build();
+
+            orderItemRepository.save(orderItem);
+
+            cartRepository.delete(cart);
+        }
+    }
+
+    private Payment validationPayment(final String imp_uid, final String merchant_uid) throws IOException {
+        String accessToken = getAccessToken();
+
+        //PG사에 의해 실제로 결제된 금액
+        Long amountByPg = getPaymentInfoByToken(imp_uid, accessToken);
+
+        //결제 금액과 레코드 검증.
+        Payment paymentRecord = paymentRepository.findByMerchantUid(merchant_uid)
+                .orElseThrow(() -> new PaymentFailedException("결제 정보가 없습니다"));
+
+        if (!amountByPg.equals(paymentRecord.getAmount())) {
+            paymentRecord.isAmountManipulatedTrue();
+            throw new PaymentFailedException("결제 정보가 올바르지 않습니다.");
+        }
+
+        //검증 완료
+        paymentRecord.isValidatedTrue();
+        return paymentRecord;
     }
 
     public PaymentResponse paymentRecordGenerateBeforePg(final PaymentRequest paymentRequest, final User user) {
@@ -262,7 +286,7 @@ public class PaymentService {
      * @return access_token
      * @throws IOException
      */
-    private String getAccessToken() throws IOException {
+    String getAccessToken() throws IOException {
 
         HttpsURLConnection conn = null;
         URL url = new URL("https://api.iamport.kr/users/getToken");
@@ -299,10 +323,10 @@ public class PaymentService {
      *
      * @param imp_uid
      * @param access_token
-     * @return 총액
+     * @return Paid total amount
      * @throws IOException
      */
-    private Long getPaymentInfoByToken(String imp_uid, String access_token) throws IOException {
+    Long getPaymentInfoByToken(String imp_uid, String access_token) throws IOException {
         HttpsURLConnection connection = null;
         URL url = new URL("https://api.iamport.kr/payments/" + imp_uid);
         connection = (HttpsURLConnection) url.openConnection();

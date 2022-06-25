@@ -3,12 +3,9 @@ package com.jay.shoppingmall.controller.templates;
 import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.User;
-import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
@@ -26,7 +23,7 @@ public class HomeController {
             produces = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE}
     )
     public String write(Model model, @PageableDefault(size = 3, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @CurrentUser User user) {
-        PageDto responses = itemService.itemAll(user, pageable);
+        PageDto responses = itemService.getAllItems(user, pageable);
         model.addAttribute("items", responses);
 
 //        System.out.println("------------------------------------------------------------------------------------");

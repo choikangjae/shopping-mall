@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
-
-//    Image findByItemId(Long id);
-
-//    Image findByItemIdAndIsMainImageTrue(Long id);
     Image findByImageRelationAndId(ImageRelation imageRelation, Long id);
 
     Image findByImageRelationAndForeignId(ImageRelation imageRelation, Long foreignId);
+
+    List<Image> findByImageRelationAndForeignIdIn(ImageRelation imageRelation, List<Long> foreignIds);
+
     List<Image> findAllByImageRelationAndForeignId(ImageRelation imageRelation, Long foreignId);
+
+    List<Image> findAllByForeignId(Long foreignId);
 }

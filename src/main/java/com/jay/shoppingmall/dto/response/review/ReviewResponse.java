@@ -32,5 +32,6 @@ public class ReviewResponse {
 
     private Integer star;
 
+    @Setter
     private List<String> reviewImages;
 }

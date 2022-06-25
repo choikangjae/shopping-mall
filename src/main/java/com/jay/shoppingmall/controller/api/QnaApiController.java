@@ -57,7 +57,7 @@ public class QnaApiController {
             throw new UserNotFoundException("잘못된 요청입니다");
         }
 
-        sellerService.qnaAnswer(qnaAnswerRequest, user);
+        sellerService.qnaAnswerRegister(qnaAnswerRequest, user);
 
         return ResponseEntity.ok().body(null);
     }

@@ -21,23 +21,16 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
-//    @Async
-//    public void sendMail(NotificationEmail notificationEmail) {
-//        MimeMessagePreparator messagePreparator = mimeMessage -> {
-//            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-//            messageHelper.setFrom("shoppingmall@email.com");
-//            messageHelper.setTo(notificationEmail.getRecipient());
-//            messageHelper.setSubject(notificationEmail.getSubject());
-//            messageHelper.setText(notificationEmail.getBody());
-//        };
-//        try {
-//            mailSender.send(messagePreparator);
-//            log.info("메일 전송 완료");
-//        } catch (MailException e) {
-//            log.error("메일 전송 오류 발생", e);
-//            throw new MailNotSentException("Exception occurred when sending mail to " + notificationEmail.getRecipient());
-//        }
-//    }
+    @Async
+    public void sendMail(NotificationEmail notificationEmail) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom("shoppingmall@email.com");
+            messageHelper.setTo(notificationEmail.getRecipient());
+            messageHelper.setSubject(notificationEmail.getSubject());
+            messageHelper.setText(notificationEmail.getBody());
+        };
+    }
 
     @Async
     public void sendMail(String email, String token) {
@@ -46,6 +39,12 @@ public class MailService {
         simpleMailMessage.setSubject("비밀번호 초기화");
         simpleMailMessage.setText("http://localhost:8080/auth/reset?email=" + email + "&token=" + token);
 
-        mailSender.send(simpleMailMessage);
+        try {
+            mailSender.send(simpleMailMessage);
+            log.info("메일 전송 완료");
+        } catch (MailException e) {
+            log.error("메일 전송 오류 발생", e);
+            throw new MailNotSentException("Exception occurred when sending mail to " + email);
+        }
     }
 }

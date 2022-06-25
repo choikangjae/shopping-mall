@@ -18,6 +18,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Where(clause = "is_deleted = 0")
@@ -35,7 +36,7 @@ public class Item extends BaseTimeEntity {
     private String description;
 
     @Setter
-    private Integer zzim;
+    private int zzim;
 
     private Integer viewCount;
 
@@ -47,9 +48,6 @@ public class Item extends BaseTimeEntity {
     @JoinColumn(name = "image_id")
     private Image image;
 
-//    @OneToMany(mappedBy = "item")
-//    private List<ItemOption> itemOptions = new ArrayList<>();
-
     @Column(columnDefinition = "boolean default 0")
     private Boolean isDeleted = false;
 
@@ -58,6 +56,10 @@ public class Item extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private Seller seller;
+
+    public Long getSellerId() {
+        return seller.getId();
+    }
 
     public void viewCountUp() {
         if (this.getViewCount() == null) {
@@ -82,7 +84,8 @@ public class Item extends BaseTimeEntity {
     }
 
     @Builder
-    public Item(String name, String brandName, String description, Seller seller) {
+    public Item(Long id, String name, String brandName, String description, Seller seller) {
+        this.id = id;
         this.name = name;
         this.brandName = brandName;
         this.description = description;

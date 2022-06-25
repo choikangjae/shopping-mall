@@ -4,12 +4,9 @@ import com.jay.shoppingmall.common.CurrentUser;
 import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.dto.response.item.ItemDetailResponse;
-import com.jay.shoppingmall.dto.response.QnaResponseWithPagination;
-import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.service.ItemService;
 import com.jay.shoppingmall.service.QnaService;
 import com.jay.shoppingmall.service.ReviewService;
-import com.jay.shoppingmall.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -40,7 +36,7 @@ public class ItemDetailController {
                                      Model model, @CurrentUser User user, HttpServletRequest request) {
         String targetPage = "qna";
 
-        ItemDetailResponse response = itemService.itemDetail(user, itemId);
+        ItemDetailResponse response = itemService.getItemDetail(user, itemId);
         final PageDto sellerOtherItems = itemService.getSellerOtherItems(itemId);
         PageDto itemQnas = qnaService.getQnas(itemId, targetPage, user, pageable);
         final PageDto itemReviews = reviewService.getItemReviews(itemId, pageable);

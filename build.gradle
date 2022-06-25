@@ -2,16 +2,33 @@ plugins {
 	id 'org.springframework.boot' version '2.6.7'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+//	id 'jacoco'
 }
 
 group = 'com.jay'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
+//test {
+////	finalizedBy jacocoTestReport // report is always generated after tests run
+//}
+//jacocoTestReport {
+//	reports {
+//		xml.required = false
+//		csv.required = false
+//		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+//	}
+//	dependsOn test // tests are required to run before generating the report
+//}
+//jacoco {
+//	toolVersion = "0.8.7"
+//}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	testImplementation.exclude group: 'com.vaadin.external.google', module: 'android-json'
 }
 
 repositories {
@@ -28,6 +45,9 @@ dependencies {
 	implementation group: 'nz.net.ultraq.thymeleaf', name: 'thymeleaf-layout-dialect', version: '2.4.1'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-java8time'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+	// https://mvnrepository.com/artifact/org.mockito/mockito-inline
+	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.6.1'
 
 	//ObjectMapper
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
@@ -54,7 +74,7 @@ dependencies {
 
 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
-//	I/O
+	//I/O
 	implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
 	implementation group: 'commons-io', name: 'commons-io', version: '2.10.0'
 	implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.14'

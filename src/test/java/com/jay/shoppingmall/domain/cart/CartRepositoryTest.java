@@ -5,20 +5,30 @@ import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
+import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
+import com.jay.shoppingmall.domain.item.item_price.ItemPriceRepository;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStockRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.DirtiesContext;
 
+import javax.persistence.NonUniqueResultException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 @DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class CartRepositoryTest {
 
     @Autowired
@@ -29,12 +39,18 @@ class CartRepositoryTest {
     private ItemRepository itemRepository;
     @Autowired
     private ItemOptionRepository itemOptionRepository;
+    @Autowired
+    private ItemPriceRepository itemPriceRepository;
+    @Autowired
+    private ItemStockRepository itemStockRepository;
 
     User user;
     User user2;
     Item item;
     Item item2;
     ItemOption itemOption;
+    ItemStock itemStock;
+    ItemPrice itemPrice;
     Cart cart;
     Cart cart2;
     Cart cart3;
@@ -47,6 +63,8 @@ class CartRepositoryTest {
         item = EntityBuilder.getItem();
         item2 = EntityBuilder.getItem2();
         itemOption = EntityBuilder.getItemOption();
+        itemPrice = EntityBuilder.getItemPrice();
+        itemStock = EntityBuilder.getItemStock();
 
 
         cart = Cart.builder()
@@ -80,6 +98,8 @@ class CartRepositoryTest {
 
         itemRepository.save(item);
         itemRepository.save(item2);
+        itemPriceRepository.save(itemPrice);
+        itemStockRepository.save(itemStock);
         itemOptionRepository.save(itemOption);
         userRepository.save(user);
         userRepository.save(user2);
@@ -87,6 +107,7 @@ class CartRepositoryTest {
         cartRepository.save(cart2);
         cartRepository.save(cart3);
         cartRepository.save(cart4);
+
     }
 
     @Test
@@ -97,20 +118,35 @@ class CartRepositoryTest {
         assertThat(carts.get(0).getQuantity()).isGreaterThan(0);
     }
     @Test
-    void itShouldNotReturn_CartIsEmpty_findByUser() {
-        final List<Cart> carts = cartRepository.findByUser(user2);
+    void cartIsEmpty_findByUser() {
+        final List<Cart> carts = cartRepository.findByUser(any(User.class));
 
         assertThat(carts).isEmpty();
     }
 
     @Test
     void isShouldReturnCartList_findByUserAndIsSelectedTrue() {
+
         final List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
 
         assertThat(carts).isNotEmpty();
         assertThat(carts.size()).isEqualTo(1);
+        assertThat(carts.get(0).getIsSelected()).isTrue();
     }
 
+    @Test
+    void shouldUnique_ButDuplicated_findByUserAndItemAndItemOption() {
+        Cart dupCart = Cart.builder()
+                .user(user)
+                .item(item)
+                .itemOption(itemOption)
+                .isSelected(true)
+                .quantity(5)
+                .build();
+        cartRepository.save(dupCart);
+
+        assertThrows(RuntimeException.class, () -> cartRepository.findByUserAndItemAndItemOption(user, item, itemOption));
+    }
     @Test
     void findByUserAndItemAndItemOption() {
         final Optional<Cart> cart = cartRepository.findByUserAndItemAndItemOption(user, item, itemOption);

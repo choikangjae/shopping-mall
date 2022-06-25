@@ -44,9 +44,6 @@ import com.jay.shoppingmall.domain.user.UserRepository;
 import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.dto.request.*;
 import com.jay.shoppingmall.dto.request.qna.QnaAnswerRequest;
-import com.jay.shoppingmall.dto.response.item.ItemSimpleResponse;
-import com.jay.shoppingmall.dto.response.notification.NotificationResponse;
-import com.jay.shoppingmall.dto.response.notification.QnaNotificationResponse;
 import com.jay.shoppingmall.dto.response.order.OrderDetailResponse;
 import com.jay.shoppingmall.dto.response.order.OrderItemResponse;
 import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
@@ -99,7 +96,6 @@ public class SellerService {
     private final NotificationRepository<?> notificationRepository;
     private final MeNotificationRepository meNotificationRepository;
 
-
     private final FileHandler fileHandler;
 
     public Long writeItem(WriteItemRequest writeItemRequest, final MultipartFile file, final List<MultipartFile> files, final User user) {
@@ -141,10 +137,14 @@ public class SellerService {
         return savedItem;
     }
 
-    //상품이 삭제되더라도 Image의 썸네일은 남아있어 썸네일로 접근하면 됨?
     public Long writeOptionItem(final ApiWriteItemRequest apiWriteItemRequest, final List<OptionValue> optionValues, final MultipartFile file, final List<MultipartFile> files, final User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
+        final long count = optionValues.stream().filter(OptionValue::getIsOptionMainItem).count();
+        if (count != 1) {
+            throw new NotValidException("메인 상품은 하나만 선택할 수 있습니다");
+        }
 
         Item item = Item.builder()
                 .description(apiWriteItemRequest.getDescription())
@@ -154,18 +154,19 @@ public class SellerService {
                 .build();
         Item savedItem = itemRepository.save(item);
 
-        //이미지의 아이디만 받아와서 아이디를 저장
         Image image = fileHandler.parseFilesInfo(file, ImageRelation.ITEM_MAIN, item.getId());
         imageRepository.save(image);
 
-        //REST API로 올때는 ''이 아니라 null!
+        //REST일 때 List<MultipartFile>가 empty면 null로 온다.
         if (files != null) {
             for (MultipartFile multipartFile : files) {
                 imageRepository.save(fileHandler.parseFilesInfo(multipartFile, ImageRelation.ITEM_DESCRIPTION, item.getId()));
             }
         }
-
         for (OptionValue optionValue : optionValues) {
+            if (itemOptionRepository.findByOption1AndOption2AndItemId(optionValue.getOption1(), optionValue.getOption2(), item.getId()).isPresent()) {
+                throw new AlreadyExistsException("이미 해당 옵션이 존재합니다");
+            }
             final Long salePrice = optionValue.getOptionSalePrice();
             final Long optionOriginalPrice = optionValue.getOptionOriginalPrice();
             final Integer optionStock = optionValue.getOptionStock();
@@ -217,11 +218,11 @@ public class SellerService {
     }
 
 
-    public Boolean sellerAgreeCheck(final SellerAgreeRequest sellerAgreeRequest, final Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("잘못된 요청입니다"));
-
-        if (sellerRepository.findByUserIdAndIsActivatedTrue(id).isPresent()) {
+    public Boolean sellerAgreeCheck(final SellerAgreeRequest sellerAgreeRequest, final User user) {
+        if (!sellerAgreeRequest.getIsSellerAgree() || !sellerAgreeRequest.getIsLawAgree()) {
+            throw new NotValidException("필수 항목에 동의해주세요");
+        }
+        if (sellerRepository.findByUserIdAndIsActivatedTrue(user.getId()).isPresent()) {
             throw new AlreadyExistsException("이미 판매자로 가입이 되어있습니다");
         }
 
@@ -233,27 +234,25 @@ public class SellerService {
                 .isSellerAgree(sellerAgreeRequest.getIsSellerAgree())
                 .isActivated(true)
                 .build();
-
         sellerRepository.save(seller);
+
         return true;
     }
 
-    public void qnaAnswer(final QnaAnswerRequest qnaAnswerRequest, final User user) {
+    public void qnaAnswerRegister(final QnaAnswerRequest qnaAnswerRequest, final User user) {
         Long qnaId = qnaAnswerRequest.getQnaId();
-        Boolean isAnswered = qnaRepository.findById(qnaId)
-                .map(Qna::getIsAnswered)
-                .orElse(false);
-        if (isAnswered) {
+
+        final Qna qna = qnaRepository.findById(qnaId)
+                .orElseThrow(() -> new QnaException("Q&A가 존재하지 않습니다"));
+
+        if (qna.getIsAnswered()) {
             throw new AlreadyExistsException("답변이 이미 존재합니다");
         }
-        Item item = qnaRepository.findById(qnaId)
-                .map(Qna::getItem)
-                .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지 않습니다"));
-
+        Item item = qna.getItem();
         if (this.sellerCheck(item.getId(), user)) {
-            Qna qna = qnaRepository.findById(qnaId)
-                    .orElseThrow(() -> new QnaException("QnA가 존재하지 않습니다"));
             qna.answerUpdate(qnaAnswerRequest.getAnswer());
+        } else {
+            throw new QnaException("접근할 수 없습니다");
         }
         //QnA 답변에 대한 notification to user
         final QnaNotification qnaNotification = notificationRepository.findByQnaId(qnaId);
@@ -273,20 +272,31 @@ public class SellerService {
         }
     }
 
-    public void temporarySave(final WriteItemRequest writeItemRequest, final User user) {
+    public void temporarySave(final ApiWriteItemRequest apiWriteItemRequest, final List<OptionValue> optionValues, final User user) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
-        ItemTemporary itemTemporary = ItemTemporary.builder()
-                .name(writeItemRequest.getItemName())
-                .description(writeItemRequest.getDescription())
-                .price(writeItemRequest.getOriginalPrice())
-                .salePrice(writeItemRequest.getSalePrice())
-                .stock(writeItemRequest.getStock())
-                .seller(seller)
-                .build();
+        final long count = optionValues.stream().filter(OptionValue::getIsOptionMainItem).count();
+        if (count != 1) {
+            throw new NotValidException("메인 상품은 하나만 선택할 수 있습니다");
+        }
 
-        itemTemporaryRepository.save(itemTemporary);
+        for (OptionValue optionValue : optionValues) {
+            ItemTemporary itemTemporary = ItemTemporary.builder()
+                    .brandName(apiWriteItemRequest.getItemBrandName())
+                    .name(apiWriteItemRequest.getItemName())
+                    .description(apiWriteItemRequest.getDescription())
+                    .originalPrice(optionValue.getOptionOriginalPrice())
+                    .salePrice(optionValue.getOptionSalePrice())
+                    .stock(optionValue.getOptionStock())
+                    .option1(optionValue.getOption1())
+                    .option2(optionValue.getOption2())
+                    .isOptionMainItem(optionValue.getIsOptionMainItem())
+                    .seller(seller)
+                    .build();
+
+            itemTemporaryRepository.save(itemTemporary);
+        }
     }
 
     public List<ItemTemporaryResponse> retrieveItemTemporaries(final User user) {
@@ -295,11 +305,15 @@ public class SellerService {
 
         return itemTemporaryRepository.findAllBySellerId(seller.getId()).stream()
                 .map(itemTemporary -> ItemTemporaryResponse.builder()
+                        .brandName(itemTemporary.getBrandName())
                         .name(itemTemporary.getName())
-                        .price(itemTemporary.getPrice())
+                        .originalPrice(itemTemporary.getOriginalPrice())
                         .description(itemTemporary.getDescription())
                         .stock(itemTemporary.getStock())
                         .salePrice(itemTemporary.getSalePrice())
+                        .option1(itemTemporary.getOption1())
+                        .option2(itemTemporary.getOption2())
+                        .isOptionMainItem(itemTemporary.getIsOptionMainItem())
                         .build()).collect(Collectors.toList());
     }
 
@@ -310,11 +324,11 @@ public class SellerService {
         Long sellerId = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .map(Seller::getId)
                 .orElse(-1L);
-
         Long sellerId2 = itemRepository.findById(itemId)
                 .map(Item::getSeller)
                 .map(Seller::getId)
                 .orElse(-2L);
+
         return Objects.equals(sellerId, sellerId2);
     }
 
@@ -372,6 +386,7 @@ public class SellerService {
         }
     }
 
+    @Transactional(readOnly = true)
     public SellerDefaultSettingsResponse sellerDefaultSettings(User user) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
@@ -400,11 +415,10 @@ public class SellerService {
     public boolean sellerDefaultSettingCheck(final User user) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
+
         return seller.getCompanyName() != null;
     }
 
-    //전체 상품 가격, 상품 옵션과 개수, 개별 가격,남은 재고, 결제 정보, 받을 사람 주소 => 주문 상세 조회에서
-    //세부적인 내용만 내려보내기
     public List<RecentPaymentPerSellerResponse> getSellerRecentOrders(final User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
@@ -415,21 +429,25 @@ public class SellerService {
         for (PaymentPerSeller paymentPerSeller : recentPayments) {
             final Integer itemTotalQuantityPerSeller = paymentPerSeller.getItemTotalQuantityPerSeller();
 
+            //주문당 판매자별 구분
             final PaymentPerSellerResponse paymentPerSellerResponse = PaymentPerSellerResponse.builder()
                     .paymentPerSellerId(paymentPerSeller.getId())
                     .itemShippingFeePerSeller(paymentPerSeller.getItemShippingFeePerSeller())
                     .itemTotalQuantityPerSeller(itemTotalQuantityPerSeller)
                     .itemTotalPricePerSeller(paymentPerSeller.getItemTotalPricePerSeller())
                     .build();
-            final Payment payment = paymentPerSeller.getPayment();
 
+            //주문 중 가장 비싼 상품의 사진과 이름.
             final List<OrderItem> orderItems = orderItemRepository.findByOrderIdAndSellerId(paymentPerSeller.getOrder().getId(), seller.getId());
             final OrderItem mostExpensiveOneAtOrder = orderItems.stream().max(Comparator.comparingLong(OrderItem::getPriceAtPurchase))
                     .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
+
             String mainImage = fileHandler.getStringImage(imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, mostExpensiveOneAtOrder.getMainImageId()));
             String mostExpensiveOne = mostExpensiveOneAtOrder.getItem().getName();
             String name = itemTotalQuantityPerSeller == 1 ? mostExpensiveOne : mostExpensiveOne + " 외 " + (itemTotalQuantityPerSeller - 1) + "건";
 
+            //간단한 주문 정보
+            final Payment payment = paymentPerSeller.getPayment();
             RecentPaymentPerSellerSimpleResponse recentPaymentPerSellerSimpleResponse = RecentPaymentPerSellerSimpleResponse.builder()
                     .orderId(paymentPerSeller.getOrder().getId())
                     .orderDate(paymentPerSeller.getOrder().getCreatedDate())
@@ -440,21 +458,23 @@ public class SellerService {
                     .name(name)
                     .build();
 
+            //주문당 판매자별 구분 + 주문 정보
             RecentPaymentPerSellerResponse recentPaymentPerSellerResponse = RecentPaymentPerSellerResponse.builder()
                     .recentPaymentPerSellerSimpleResponse(recentPaymentPerSellerSimpleResponse)
                     .paymentPerSellerResponse(paymentPerSellerResponse)
                     .build();
+
             recentPaymentPerSellerResponses.add(recentPaymentPerSellerResponse);
         }
         return recentPaymentPerSellerResponses;
     }
 
-    public OrderDetailResponse treatOrders(final Long orderId, final User user) {
+    public OrderDetailResponse showOrderDetail(final Long orderId, final User user) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
         final Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("해당하는 주문이 없습니다"));
-        Boolean isAllItemTrackingNumberIssued = true;
+        boolean isAllItemTrackingNumberIssued = true;
 
         LocalDateTime orderDate = order.getCreatedDate();
         //상품조회
@@ -491,9 +511,7 @@ public class SellerService {
         }
 
         final PaymentPerSeller paymentPerSeller = paymentPerSellerRepository.findByOrderIdAndSellerId(orderId, seller.getId());
-
         final Payment payment = order.getPayment();
-
         PaymentDetailResponse paymentDetailResponse = PaymentDetailResponse.builder()
                 .pg(payment.getPg().getName())
                 .payMethod(payment.getPayMethod().getName())
@@ -526,10 +544,10 @@ public class SellerService {
         final List<SellerBankAccountHistory> transactionHistories = sellerBankAccountHistoryRepository.findTop20BySellerIdOrderByCreatedDateDesc(seller.getId());
 
         List<SellerBankAccountHistoryResponse> sellerBankAccountHistoryResponses = new ArrayList<>();
-        //null 처리?
         for (SellerBankAccountHistory sellerBankAccountHistory : transactionHistories) {
             sellerBankAccountHistoryResponses.add(SellerBankAccountHistoryResponse.builder()
                     .transactionMoney(sellerBankAccountHistory.getTransactionMoney())
+                    .transactionType(sellerBankAccountHistory.getTransactionType().getValue())
                     .build());
         }
 
@@ -545,9 +563,9 @@ public class SellerService {
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
         List<StatisticsResponse> statisticsResponses = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-            LocalDateTime startDatetime = LocalDateTime.of(LocalDate.now().minusDays(i), LocalTime.of(0,0,0));
-            LocalDateTime endDatetime = LocalDateTime.of(LocalDate.now().minusDays(i), LocalTime.of(23,59,59));
+        for (int i = 0; i < 7; i++) {
+            LocalDateTime startDatetime = LocalDateTime.of(LocalDate.now().minusDays(i), LocalTime.of(0, 0, 0));
+            LocalDateTime endDatetime = LocalDateTime.of(LocalDate.now().minusDays(i), LocalTime.of(23, 59, 59));
 
             final List<PaymentPerSeller> perDay = paymentPerSellerRepository.findBySellerIdAndCreatedDateBetween(seller.getId(), startDatetime, endDatetime);
             final long totalPricePerDay = perDay.stream().mapToLong(PaymentPerSeller::getItemTotalPricePerSeller).sum();
@@ -571,7 +589,6 @@ public class SellerService {
 
         //Seller를 기준으로 Review를 가져오려면 어떻게 해야할까??
         //Review나 QnA가 작성이 될때 메시지큐를 이용해서 셀러에게 알림을 준다. 이때 아이템 아이디와 유저명 등을 같이 보냄.
-        //TODO RabbitMQ 공부 후 구현할 것.
     }
 
 }

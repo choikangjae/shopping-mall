@@ -7,14 +7,11 @@ import java.util.Optional;
 
 public interface ItemOptionRepository extends JpaRepository<ItemOption, Long> {
 
-    List<ItemOption> findByItemId(Long id);
-
-    List<ItemOption> findAllByOption1AndItemId(String option1, Long itemId);
+    List<ItemOption> findAllByItemId(Long itemId);
 
     Optional<ItemOption> findByOption1AndOption2AndItemId(String option1, String option2, Long id);
 
     ItemOption findByItemIdAndIsOptionMainItemTrue(Long itemId);
 
     ItemOption findByItemPriceId(Long itemPriceId);
-//    List<String> findOption2ByOption1AndItemId(String option1, Long id);
 }

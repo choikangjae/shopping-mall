@@ -72,7 +72,7 @@ public class CartApiController {
     }
     @GetMapping("/select/{boolean}")
     public ResponseEntity<?> getCartSelects(@PathVariable("boolean") String check, @CurrentUser User user) {
-        final CartPriceResponse cartPriceResponse = cartService.cartSelect(check, user);
+        final CartPriceResponse cartPriceResponse = cartService.cartSelectAll(check, user);
 
         return ResponseEntity.ok(cartPriceResponse);
     }

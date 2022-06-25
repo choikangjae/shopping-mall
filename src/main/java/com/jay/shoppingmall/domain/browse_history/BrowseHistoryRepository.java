@@ -12,7 +12,7 @@ public interface BrowseHistoryRepository extends JpaRepository<BrowseHistory, Lo
 
     BrowseHistory findByItemId(Long itemId);
 
-    List<BrowseHistory> findAllByUserIdOrderByBrowseAtDesc(Long userId);
+    List<BrowseHistory> findFirst20ByUserIdOrderByBrowseAtDesc(Long userId);
 
     Page<BrowseHistory> findAllByUserIdOrderByBrowseAtDesc(Long userId, Pageable pageable);
 

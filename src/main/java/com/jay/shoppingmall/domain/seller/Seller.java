@@ -21,6 +21,7 @@ public class Seller {
 
     private Long bankAccount;
 
+    @Column(unique = true)
     private String companyName;
 
     private String contactNumber;
@@ -74,4 +75,10 @@ public class Seller {
         }
         this.bankAccount += bankAccount;
     }
+
+    @PrePersist
+    public void prePersist() {
+        this.bankAccount = this.bankAccount == null ? 0L : this.bankAccount;
+    }
+
 }
