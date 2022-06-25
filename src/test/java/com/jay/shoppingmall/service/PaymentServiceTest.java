@@ -173,6 +173,8 @@ class PaymentServiceTest {
         assertThat(payment.getIsValidated()).isTrue();
         assertThat(payment.getIsAmountManipulated()).isNull();
         verify(orderRepository).save(any());
+
+        //테스트 코드 작성
     }
 
     @Test
