@@ -25,7 +25,7 @@ public class OrderDelivery {
     private LocalDateTime deliveryUpdateDate;
 
     public void deliveryStart() {
-        if (this.deliveryStatus.equals(DeliveryStatus.DELIVERING)) {
+        if (!this.deliveryStatus.equals(DeliveryStatus.PAYMENT_DONE)) {
             throw new DeliveryException("이미 배송이 출발한 상품입니다");
         }
         this.deliveryStatus = DeliveryStatus.DELIVERING;

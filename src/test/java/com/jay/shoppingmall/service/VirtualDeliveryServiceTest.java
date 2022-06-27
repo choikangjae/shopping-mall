@@ -112,7 +112,10 @@ class VirtualDeliveryServiceTest {
                 .payment(payment)
                 .build();
         OrderDelivery orderDelivery = OrderDelivery.builder()
-                .deliveryStatus(DeliveryStatus.DELIVERING)
+                .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
+                .build();
+        OrderDelivery orderDelivery2 = OrderDelivery.builder()
+                .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
                 .build();
 
         OrderItem orderItem = OrderItem.builder()
@@ -136,7 +139,7 @@ class VirtualDeliveryServiceTest {
                 .seller(seller)
                 .order(order2)
                 .mainImageId(0L)
-                .orderDelivery(orderDelivery)
+                .orderDelivery(orderDelivery2)
                 .build();
 
 
@@ -158,7 +161,10 @@ class VirtualDeliveryServiceTest {
                 .build();
 
         OrderDelivery orderDelivery = OrderDelivery.builder()
-                .deliveryStatus(DeliveryStatus.DELIVERING)
+                .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
+                .build();
+        OrderDelivery orderDelivery2 = OrderDelivery.builder()
+                .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
                 .build();
 
         OrderItem orderItem = OrderItem.builder()
@@ -172,9 +178,21 @@ class VirtualDeliveryServiceTest {
                 .mainImageId(0L)
                 .orderDelivery(orderDelivery)
                 .build();
+        OrderItem orderItem2 = OrderItem.builder()
+                .id(1L)
+                .priceAtPurchase(30000L)
+                .quantity(5)
+                .item(item)
+                .itemOption(itemOption)
+                .seller(seller)
+                .order(order)
+                .mainImageId(0L)
+                .orderDelivery(orderDelivery2)
+                .build();
 
         when(sellerRepository.findByUserIdAndIsActivatedTrue(any())).thenReturn(Optional.ofNullable(seller));
-        when(orderItemRepository.findById(any())).thenReturn(Optional.ofNullable(orderItem));
+        when(orderItemRepository.findById(0L)).thenReturn(Optional.ofNullable(orderItem));
+        when(orderItemRepository.findById(1L)).thenReturn(Optional.ofNullable(orderItem2));
 
         virtualDeliveryService.issueTrackingNumber(orderItemIds, user);
 
