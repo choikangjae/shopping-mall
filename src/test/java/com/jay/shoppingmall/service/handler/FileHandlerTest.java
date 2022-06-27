@@ -4,8 +4,6 @@ import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.exception.exceptions.FileException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,31 +11,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.LOCAL_DATE_TIME;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class FileHandlerTest {
 
     @InjectMocks
     FileHandler fileHandler;
-    @Mock
-    ImageRepository imageRepository;
+//    @Mock
+//    ImageRepository imageRepository;
 
     Image image;
 
@@ -60,7 +47,7 @@ class FileHandlerTest {
     }
 
     @Test
-    void whenUploadJpegImage_ImageWillBeSaved_parseFilesInfo() throws IOException {
+    void whenUploadJpegImage_ImageWillBeSaved_parseFilesInfo() {
         byte[] content = new byte['q'];
 
         MockMultipartFile file = new MockMultipartFile("file", "원본파일이름", "image/jpeg", content);
@@ -89,7 +76,7 @@ class FileHandlerTest {
     }
 
     @Test
-    void getStringImage() throws IOException {
+    void getStringImage() {
         byte[] content = new byte['q'];
         MockMultipartFile file = new MockMultipartFile("file", "원본파일이름", MediaType.IMAGE_PNG_VALUE, content);
         image = fileHandler.parseFilesInfo(file, ImageRelation.ITEM_MAIN, 0L);
