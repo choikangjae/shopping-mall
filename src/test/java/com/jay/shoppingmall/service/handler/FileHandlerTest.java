@@ -23,11 +23,11 @@ class FileHandlerTest {
 
     @InjectMocks
     FileHandler fileHandler;
-//    @Mock
-//    ImageRepository imageRepository;
+    @Mock
+    ImageRepository imageRepository;
 
     Image image;
-//웹훅테스트
+
     @Test
     void whenUploadPngImage_ImageWillBeSaved_parseFilesInfo() {
         byte[] content = new byte['q'];
