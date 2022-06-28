@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  api:
+    image: choikj33/shopping-mall
+    depends_on:
+      - db
+  db:
+    image: mariadb
