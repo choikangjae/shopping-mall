@@ -381,8 +381,16 @@ class ItemServiceTest {
         itemResponses.add(itemResponse);
         itemResponses.add(itemResponse);
 
+        List<Item> items = new ArrayList<>();
+        items.add(item);
+        items.add(item2);
+
+        PageImpl<Item> itemPage = new PageImpl<>(items, pageable, items.size());
+
+
         when(itemRepository.findById(any())).thenReturn(Optional.ofNullable(item));
         doReturn(itemResponses).when(itemService).getItemResponses(any());
+        when(itemRepository.findBySellerId(any(), any())).thenReturn(itemPage);
 
         final PageDto sellerOtherItems = itemService.getSellerOtherItems(0L);
 
