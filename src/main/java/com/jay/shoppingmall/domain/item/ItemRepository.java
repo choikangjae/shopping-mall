@@ -15,12 +15,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Page<Item> findBySellerId(Long id, Pageable pageable);
 
-    List<Item> findFirst3BySellerId(Long sellerId);
-
-    List<Item> findFirst3BySellerIdAndIdNot(Long sellerId, Long itemId);
-
-    //JPQL로 최적화 필요.
-    List<Item> findAllBySellerId(Long sellerId);
+//    List<Item> findFirst3BySellerId(Long sellerId);
 
 //    Slice<Item> findAll(Pageable pageable);
 }

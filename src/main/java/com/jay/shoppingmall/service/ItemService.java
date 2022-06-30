@@ -412,10 +412,12 @@ public class ItemService {
     public PageDto getSellerOtherItems(final Long itemId) {
         final Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
-        final List<Item> items = itemRepository.findFirst3BySellerId(item.getSeller().getId());
+//        final List<Item> items = itemRepository.findFirst3BySellerId(item.getSellerId());
+        final Page<Item> items = itemRepository.findBySellerId(item.getSellerId(), Pageable.unpaged());
+        final List<Item> itemsContent = items.getContent();
 
         return PageDto.builder()
-                .content(getItemResponses(items))
+                .content(getItemResponses(itemsContent))
                 .customPage(new CustomPage())
                 .build();
     }
