@@ -18,7 +18,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Where(clause = "is_deleted = 0")
 public class User extends BaseTimeEntity {
-
+ 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
