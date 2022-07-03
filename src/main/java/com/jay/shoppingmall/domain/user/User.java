@@ -80,4 +80,9 @@ public class User extends BaseTimeEntity {
         return email.substring(0, indexOfAt);
     }
 
+    @PrePersist
+    public void prePersist() {
+        this.isDeleted = this.isDeleted != null && this.isDeleted;
+    }
+
 }
