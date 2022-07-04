@@ -4,6 +4,7 @@ import com.jay.shoppingmall.domain.model.NotificationEmail;
 import com.jay.shoppingmall.exception.exceptions.MailNotSentException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,6 +22,9 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
+    @Value("${url}")
+    private String url;
+
     @Async
     public void sendMail(NotificationEmail notificationEmail) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
@@ -37,7 +41,7 @@ public class MailService {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(email);
         simpleMailMessage.setSubject("비밀번호 초기화");
-        simpleMailMessage.setText("http://localhost:8080/auth/reset?email=" + email + "&token=" + token);
+        simpleMailMessage.setText(url + "auth/reset?email=" + email + "&token=" + token);
 
         try {
             mailSender.send(simpleMailMessage);

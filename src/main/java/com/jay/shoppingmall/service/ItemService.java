@@ -33,6 +33,7 @@ import com.jay.shoppingmall.exception.exceptions.StockInvalidException;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.AllArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,10 +60,12 @@ public class ItemService {
     private final ZzimService zzimService;
     private final FileHandler fileHandler;
     private final SellerService sellerService;
+    @Value("${url}")
+    private String url;
 
     public PageDto getAllItems(User user, Pageable pageable) {
         final Page<Item> itemPage = itemRepository.findAll(pageable);
-        CustomPage customPage = new CustomPage(itemPage, "localhost:8080/");
+        CustomPage customPage = new CustomPage(itemPage, url);
 
         List<Item> items = itemPage.getContent();
         List<ItemResponse> itemResponses = getItemResponses(items);
