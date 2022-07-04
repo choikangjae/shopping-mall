@@ -2,7 +2,7 @@ package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.model.NotificationEmail;
 import com.jay.shoppingmall.exception.exceptions.MailNotSentException;
-import lombok.AllArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
@@ -15,14 +15,14 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 @EnableAsync
+@RequiredArgsConstructor
 public class MailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${url}")
+    @Value("${host.url}")
     private String url;
 
     @Async

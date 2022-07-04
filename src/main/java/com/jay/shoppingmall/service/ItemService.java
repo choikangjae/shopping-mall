@@ -33,6 +33,7 @@ import com.jay.shoppingmall.exception.exceptions.StockInvalidException;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.AllArgsConstructor;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ItemService {
 
     private final ItemRepository itemRepository;
@@ -60,7 +61,8 @@ public class ItemService {
     private final ZzimService zzimService;
     private final FileHandler fileHandler;
     private final SellerService sellerService;
-    @Value("${url}")
+
+    @Value("${host.url}")
     private String url;
 
     public PageDto getAllItems(User user, Pageable pageable) {
