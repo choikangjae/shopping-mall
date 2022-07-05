@@ -111,7 +111,7 @@ public class MeController {
             model.addAttribute("orders", simpleOrderResponses);
         }
 
-        return "/me/orders";
+        return "me/orders";
     }
     //TODO 기본 틀만 작성
     @GetMapping("/cancel-item-list")
