@@ -31,7 +31,7 @@ public class SearchController {
         final PageDto itemResponses = itemService.searchItemsByKeyword(keyword, user, pageable);
         model.addAttribute("items", itemResponses);
         model.addAttribute("result", keyword);
-        return "/item/search-result";
+        return "item/search-result";
     }
 
 }

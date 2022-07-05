@@ -77,7 +77,7 @@ public class AuthController {
         if (user != null) {
             return "redirect:/";
         }
-        return "/auth/forgot-password";
+        return "auth/forgot-password";
     }
 
     @GetMapping("/reset")
@@ -85,7 +85,7 @@ public class AuthController {
         authService.passwordTokenValidator(passwordResetRequest);
 
         model.addAttribute("email", passwordResetRequest.getEmail());
-        return "/auth/new-password";
+        return "auth/new-password";
     }
 
     @PostMapping("/reset")
@@ -107,10 +107,6 @@ public class AuthController {
 
     @GetMapping("/seller-signup")
     public String sellerSignup(UserValidationRequest userValidationRequest, @CurrentUser User user) {
-//        if (user == null) {
-//            return "redirect:/auth/login";
-//        }
-//        user.getAgree().getIsMandatoryAgree().equals(false);
         return "auth/seller-signup";
     }
 
@@ -119,7 +115,6 @@ public class AuthController {
         sellerValidator.validate(userValidationRequest, result);
 
         if (result.hasErrors()) {
-//            model.addAttribute("signupRequest", signupRequest);
             return "auth/seller-signup";
         }
 

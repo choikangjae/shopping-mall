@@ -28,12 +28,6 @@ public class UpdateValidator implements Validator {
     @Override
     public void validate(final Object target, final Errors errors) {
         UserUpdateRequest userUpdateRequest = (UserUpdateRequest) target;
-//        String compactedPhoneNumber = "";
-//
-//        //TODO 핸드폰 번호 형식 맞추기
-//        if (userUpdateRequest.getPhoneNumber().contains("-")) {
-//            compactedPhoneNumber = userUpdateRequest.getPhoneNumber().replace("-","");
-//        }
 
         if (!userUpdateRequest.getPhoneNumber().matches("^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$")) {
             errors.rejectValue("phoneNumber", "INVALID_PHONE_NUMBER", "전화번호가 형식에 맞지않습니다");

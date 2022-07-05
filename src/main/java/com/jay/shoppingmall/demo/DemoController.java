@@ -40,7 +40,7 @@ public class DemoController {
         final List<OrderItemResponse> orderItemResponses = demoService.deliveryChange(user, pageable);
         model.addAttribute("orderItemResponses", orderItemResponses);
 
-        return "/demo/delivery";
+        return "demo/delivery";
     }
     @PostMapping("/seller/delivery-status")
     public String demoDeliveryStatusAction(@RequestBody Map<String, Long> map, @CurrentUser User user) {
@@ -48,7 +48,7 @@ public class DemoController {
         System.out.println("orderItemId = " + orderItemId);
 
         demoService.deliveryDone(user, orderItemId);
-        return "/demo/delivery";
+        return "demo/delivery";
     }
 
     @PostMapping("/demo/login/user")

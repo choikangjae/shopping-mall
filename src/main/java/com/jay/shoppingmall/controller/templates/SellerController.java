@@ -87,18 +87,18 @@ public class SellerController {
                                    @CurrentUser User user) {
         if (writeItemRequest.getDescription().length() > 200) {
             result.rejectValue("description", "EXCEED_LIMIT","설명은 200글자까지만 가능합니다");
-            return "/seller/seller-write-item";
+            return "seller/seller-write-item";
         }
         if (file.isEmpty()) {
             result.rejectValue("mainImage", "MAIN_NOT_EXISTS","대표 사진을 첨부해주세요");
-            return "/seller/seller-write-item";
+            return "seller/seller-write-item";
         }
         if ((file.getSize() / (1024 * 1024)) >= 5) {
             result.rejectValue("mainImage", "EXCEED_MAXIMUM_SIZE", "대표 사진 용량은 5MB를 넘을 수 없습니다");
-            return "/seller/seller-write-item";
+            return "seller/seller-write-item";
         }
         if (result.hasErrors()) {
-            return "/seller/seller-write-item";
+            return "seller/seller-write-item";
         }
         //MultiPartFile이 들어오지 않으면 " " 공백 한칸만 들어온다.
         sellerService.writeItem(writeItemRequest, file, files, user);
@@ -120,7 +120,7 @@ public class SellerController {
         final SellerDefaultSettingsResponse sellerDefaultSettingsResponse = sellerService.sellerDefaultSettings(user);
         model.addAttribute("response", sellerDefaultSettingsResponse);
 
-        return "/seller/settings";
+        return "seller/settings";
     }
 
 
@@ -164,7 +164,7 @@ public class SellerController {
         final OrderDetailResponse orderDetailResponse = sellerService.showOrderDetail(orderId, user);
 
         model.addAttribute("orderDetailResponse", orderDetailResponse);
-        return "/seller/order-detail";
+        return "seller/order-detail";
     }
 
 }

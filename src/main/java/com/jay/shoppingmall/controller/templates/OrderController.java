@@ -43,7 +43,7 @@ public class OrderController {
         model.addAttribute("user", user);
         model.addAttribute("sellerResponseListMap", sellerResponseListMap);
 
-        return "/order/now";
+        return "order/now";
     }
 
     @GetMapping("/process")
@@ -64,7 +64,7 @@ public class OrderController {
         model.addAttribute("sellerResponseListMap", sellerResponseListMap);
         model.addAttribute("cartPriceTotalResponse", cartPriceTotalResponse);
 
-        return "/order/process";
+        return "order/process";
     }
 
     @PostMapping("/process")
@@ -92,26 +92,19 @@ public class OrderController {
         model.addAttribute("cartPriceTotalResponse", cartPriceTotalResponse);
 
 
-        return "/order/payment";
+        return "order/payment";
     }
 
     @PostMapping("/payment")
     public String paymentAction(@Valid PaymentRequest paymentRequest, @CurrentUser User user, RedirectAttributes redirectAttributes) {
-//        OrderResultResponse response = orderService.doOrderPaymentProcess(paymentRequest, user);
-
-        //redirect 작동하지 않음. 다른 방법 생각해볼 것.
-//        redirectAttributes.addFlashAttribute("status", "success");
         return "redirect:/order/payment-result";
     }
 
     @GetMapping("/payment-result")
     public String paymentResult(@ModelAttribute OrderResultResponse response, Model model) {
 
-//        if (model.getAttribute("status") == null) {
-//            return "redirect:/";
-//        }
         model.addAttribute("response", response);
 
-        return "/order/payment-result";
+        return "order/payment-result";
     }
 }

@@ -56,7 +56,7 @@ public class AdminController {
         final List<UserDetailResponse> userDetailResponses = adminService.searchUsersByEmail(email);
         model.addAttribute("users", userDetailResponses);
         model.addAttribute("result", email);
-        return "/admin/search-result";
+        return "admin/search-result";
     }
 
 }

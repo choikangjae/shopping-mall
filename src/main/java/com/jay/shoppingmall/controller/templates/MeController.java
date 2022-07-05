@@ -101,7 +101,7 @@ public class MeController {
         final OrderDetailResponse orderDetailResponse = orderService.showOrderDetail(orderId, user);
 
         model.addAttribute("orderDetailResponse", orderDetailResponse);
-        return "/order/detail";
+        return "order/detail";
     }
     //TODO 기본 틀만 작성
     @GetMapping("/orders")
@@ -121,7 +121,7 @@ public class MeController {
             model.addAttribute("orders", simpleOrderResponses);
         }
 
-        return "/me/cancel-item-list";
+        return "me/cancel-item-list";
     }
 
     @GetMapping("/reviews")
@@ -132,7 +132,7 @@ public class MeController {
             model.addAttribute("reviews", reviewResponses);
         }
 
-        return "/me/reviews";
+        return "me/reviews";
     }
 
     @GetMapping("/browse-history")
@@ -140,7 +140,7 @@ public class MeController {
         final PageDto browseHistories = itemService.getMyBrowseHistories(user, pageable);
         model.addAttribute("items", browseHistories);
 
-        return "/me/browse-history";
+        return "me/browse-history";
     }
 
     @GetMapping("/delete")

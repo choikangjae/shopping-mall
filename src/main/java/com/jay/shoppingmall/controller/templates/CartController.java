@@ -23,12 +23,12 @@ public class CartController {
     @GetMapping
     public String showCart(Model model, @CurrentUser User user) {
         if (user == null) {
-            return "/auth/login";
+            return "auth/login";
         }
         final Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap = cartService.showCartItemsList(user);
         model.addAttribute("sellerResponseListMap", sellerResponseListMap);
         model.addAttribute("user", user);
-        return "/me/cart";
+        return "me/cart";
     }
 
     @PostMapping("/add")

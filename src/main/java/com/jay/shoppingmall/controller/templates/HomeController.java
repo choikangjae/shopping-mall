@@ -26,18 +26,10 @@ public class HomeController {
         PageDto responses = itemService.getAllItems(user, pageable);
         model.addAttribute("items", responses);
 
-//        System.out.println("------------------------------------------------------------------------------------");
-//        System.out.println("responses.getCustomPage().getSize() = " + responses.getCustomPage().getSize());
-//        System.out.println("responses.getCustomPage().getTotalElements() = " + responses.getCustomPage().getTotalElements());
-//        System.out.println("responses.getCustomPage().getOffset() = " + responses.getCustomPage().getOffset());
-//        System.out.println("responses.getCustomPage().getTotalPages() = " + responses.getCustomPage().getTotalPages());
-//        System.out.println("responses.getCustomPage().getNumber() = " + responses.getCustomPage().getNumber());
-//        System.out.println("------------------------------------------------------------------------------------");
-        
         return "home";
     }
     @GetMapping("/index")
     public String index() {
-        return "/chat/index";
+        return "chat/index";
     }
 }
