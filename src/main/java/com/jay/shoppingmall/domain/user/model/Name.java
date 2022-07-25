@@ -6,13 +6,14 @@ import org.springframework.util.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 import java.util.Optional;
 
 @Embeddable
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
-public class Name {
+public class Name implements Serializable {
 
     @NotEmpty
     @Column(name = "last_name", length = 50)

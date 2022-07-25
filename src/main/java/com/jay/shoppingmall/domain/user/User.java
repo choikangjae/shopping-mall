@@ -9,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.io.Serializable;
 import java.util.Optional;
 
 @Getter
@@ -17,7 +18,7 @@ import java.util.Optional;
 @Builder
 @AllArgsConstructor
 @Where(clause = "is_deleted = 0")
-public class User extends BaseTimeEntity {
+public class User extends BaseTimeEntity implements Serializable {
  
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -47,6 +48,7 @@ public class User extends BaseTimeEntity {
     private PhoneNumber phoneNumber;
 
     @Column(columnDefinition = "boolean default 0")
+    @Builder.Default
     private Boolean isDeleted = false;
 
     public User(final Boolean isDeleted) {

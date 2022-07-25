@@ -5,12 +5,13 @@ import lombok.*;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
 @Embeddable
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
-public class PhoneNumber {
+public class PhoneNumber implements Serializable {
 
     @NotEmpty
     @Column(name = "first_phone_number", length = 10)

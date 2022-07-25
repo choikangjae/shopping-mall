@@ -7,6 +7,9 @@ import com.jay.shoppingmall.security.LoginFailureHandler;
 import com.jay.shoppingmall.security.LoginSuccessHandler;
 import com.jay.shoppingmall.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
+import org.springframework.boot.actuate.context.ShutdownEndpoint;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionManager;
@@ -46,7 +49,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers("/css/**","/js/**","/assets/**","item/**");
+        web.ignoring().antMatchers("/actuator/**", "/css/**", "/js/**", "/assets/**", "item/**");
     }
 
     @Override
@@ -61,7 +64,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .userDetailsService(customUserDetailsService)
                 .and()
                 .authorizeRequests()
-
                 .antMatchers("/demo/**", "/random-user-generator", "/api/v1/item/option/add", "/api/v1/page/**", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
                 .antMatchers("/auth/new-password", "/auth/reset**", "/auth/login**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/auth/forgot-password").permitAll()
                 .antMatchers("/item/details/null", "/seller/null", "/admin/null", "/auth/null", "/null").permitAll()
@@ -85,7 +87,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout()
                 .logoutSuccessUrl("/auth/login")
                 .deleteCookies("JSESSIONID", "remember-me")
-                .invalidateHttpSession(true);
+                .invalidateHttpSession(true)
+                ;
     }
 
     @Bean

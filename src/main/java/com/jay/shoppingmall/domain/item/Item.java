@@ -49,6 +49,7 @@ public class Item extends BaseTimeEntity {
     private Image image;
 
     @Column(columnDefinition = "boolean default 0")
+    @Builder.Default
     private Boolean isDeleted = false;
 
     private LocalDateTime deletedDate;

@@ -4,12 +4,13 @@ import lombok.*;
 
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
-public class Address {
+public class Address implements Serializable {
 
     @NotEmpty
     private String zipcode;
