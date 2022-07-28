@@ -45,6 +45,11 @@ dependencies {
 	implementation group: 'nz.net.ultraq.thymeleaf', name: 'thymeleaf-layout-dialect', version: '2.4.1'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-java8time'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation group: 'org.springframework.session', name: 'spring-session-data-redis', version: '2.7.0'
+	//prometheus
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
 	//traffic monitoring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
