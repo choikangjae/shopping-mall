@@ -5,6 +5,7 @@ import com.jay.shoppingmall.domain.model.page.PageDto;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -13,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @org.springframework.stereotype.Controller
+@Slf4j
 @RequiredArgsConstructor
 public class HomeController {
 
@@ -25,6 +27,12 @@ public class HomeController {
     public String write(Model model, @PageableDefault(size = 3, sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @CurrentUser User user) {
         PageDto responses = itemService.getAllItems(user, pageable);
         model.addAttribute("items", responses);
+
+        log.trace("trace message");
+        log.debug("debug message");
+        log.info("info message"); // default
+        log.warn("warn message");
+        log.error("error message");
 
         return "home";
     }

@@ -27,6 +27,5 @@ public class MerchantUidGenerator {
                 LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) +
                 "-" +
                 System.nanoTime();
-//                String.format("%07d", ++i);
     }
 }

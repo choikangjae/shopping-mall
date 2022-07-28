@@ -9,6 +9,10 @@ import com.jay.shoppingmall.dto.response.item.ItemOptionResponse;
 import com.jay.shoppingmall.exception.exceptions.OptionDuplicatedException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.ItemService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,10 +27,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/item")
 @PreAuthorize("hasRole('USER')")
+@Api(tags = "item")
 public class ItemApiController {
 
     private final ItemService itemService;
 
+    @ApiOperation(value = "관심 상품 목록에 추가", notes = "")
     @PostMapping("/zzim")
     public ResponseEntity<?> itemZzim(@Valid @RequestBody ItemZzimRequest request, @CurrentUser User user) {
         if (user == null) {
@@ -36,6 +42,7 @@ public class ItemApiController {
         ZzimResponse zzimResponse = itemService.itemZzim(request, user);
         return ResponseEntity.ok(zzimResponse);
     }
+    @ApiOperation(value = "옵션 선택 상품 세션에 추가", notes = "상품에서 옵션을 고르면 Session에 해당 옵션들이 List 구조로 저장됩니다.")
     @PostMapping("/option/add")
     public ResponseEntity<?> itemOptionCheckAndAdd(@RequestBody ItemOptionRequest request, @CurrentUser User user, HttpSession session) {
         if (user == null) {
@@ -62,6 +69,7 @@ public class ItemApiController {
         return ResponseEntity.ok(itemOptionResponse);
     }
 
+    @ApiOperation(value = "옵션 선택 상품 세션에서 제거", notes = "")
     @PostMapping("/option/delete")
     public ResponseEntity<?> deleteOption(@Valid @RequestBody ItemOptionRequest request, HttpSession session) {
         final Long itemId = request.getItemId();
@@ -78,6 +86,7 @@ public class ItemApiController {
         session.setAttribute("itemOptions", itemOptions);
         return ResponseEntity.ok(null);
     }
+    @ApiOperation(value = "세션의 옵션 선택 상품 변경", notes = "")
     @PostMapping("/option/update")
     public ResponseEntity<?> updateOption(@Valid @RequestBody ItemOptionRequest request, HttpSession session) {
 
@@ -99,6 +108,7 @@ public class ItemApiController {
         
         return ResponseEntity.ok(itemOptionResponse);
     }
+    @ApiOperation(value = "현재 세션의 상품 총합", notes = "세션에 있는 상품 가격의 총합과 개수를 반환합니다.")
     @GetMapping("/option/totals")
     public ResponseEntity<?> returnOptionTotals(HttpSession session) {
         final ItemOptionResponse itemTotalResponse = ItemOptionResponse.builder()

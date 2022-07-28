@@ -55,6 +55,13 @@ public class ReviewService {
     private final PaymentService paymentService;
     private final CommonService commonService;
 
+    /**
+     * 상품 id와 user 정보를 받아 리뷰 작성 가능 여부를 확인 후 상품명과 획득 가능한 포인트를 계산해서 반환합니다.
+     * 포인트는 글만으로 작성될 경우와 사진도 같이 올릴 경우 2가지가 있습니다.
+     * @param orderItemId
+     * @param user
+     * @return
+     */
     @Transactional(readOnly = true)
     public OrderItemForReviewResponse orderItemRequestForReview(final Long orderItemId, final User user) {
         final OrderItem orderItem = reviewAvailableCheck(orderItemId, user);

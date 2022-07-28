@@ -14,6 +14,8 @@ import com.jay.shoppingmall.exception.exceptions.NotValidException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.NotificationService;
 import com.jay.shoppingmall.service.SellerService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/seller")
 @PreAuthorize("hasRole('SELLER')")
+@Api(tags = "seller")
 public class SellerApiController {
 
     private final SellerService sellerService;
@@ -41,6 +44,7 @@ public class SellerApiController {
 
     private final AuthenticationManager authenticationManager;
 
+    @ApiOperation(value = "판매자 옵션 상품 작성", notes = "")
     @PostMapping(value = "/write", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> sellerOptionItemWrite(@Valid @RequestPart ApiWriteItemRequest apiWriteItemRequest,
                                              @RequestParam("mainImage") MultipartFile file,
@@ -64,6 +68,7 @@ public class SellerApiController {
 
         return ResponseEntity.ok(itemId);
     }
+    @ApiOperation(value = "판매자 상품 작성", notes = "옵션없는 상품을 작성하는 경우 사용됩니다.")
     @PostMapping(value = "/write-no-option", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> sellerOneItemWrite(@Valid @RequestPart WriteItemRequest writeItemRequest,
                                              @RequestParam("mainImage") MultipartFile file,
@@ -85,7 +90,7 @@ public class SellerApiController {
 
         return ResponseEntity.ok(itemId);
     }
-
+    @ApiOperation(value = "판매자 기본 설정", notes = "")
     @PostMapping("/settings")
     public ResponseEntity<?> sellerSettingsAction(@Valid @RequestBody SellerDefaultSettingsRequest request, @CurrentUser User user) {
         final String trimmedNumber = request.getContactNumber().trim().replace("-", "");
@@ -97,7 +102,7 @@ public class SellerApiController {
 
         return ResponseEntity.ok(null);
     }
-
+    @ApiOperation(value = "판매자 동의 여부", notes = "")
     @PostMapping("/agree")
     public ResponseEntity<?> agreeCheck(@Valid @RequestBody SellerAgreeRequest sellerAgreeRequest, @CurrentUser User user, HttpServletRequest request) {
         if (user == null) {

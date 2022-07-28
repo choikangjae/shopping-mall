@@ -17,6 +17,7 @@ import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
+import springfox.documentation.service.Tag;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
@@ -36,9 +37,19 @@ public class SwaggerConfig {
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(Predicates.not(PathSelectors.regex("/actuator.*")))
-                .paths(PathSelectors.any())
-                .build();
-//                .useDefaultResponseMessages(true);
+                .paths(PathSelectors.ant("/api/**"))
+                .build()
+                .tags(  new Tag("item", "상품"),
+                        new Tag("cart","장바구니"),
+                        new Tag("user", "사용자"),
+                        new Tag("category", "카테고리"),
+                        new Tag("review", "리뷰"),
+                        new Tag("seller", "판매자"),
+                        new Tag("qna", "Q&A"),
+                        new Tag("payment", "결제"),
+                        new Tag("delivery", "배송"),
+                        new Tag("notification", "알림")
+                );
     }
 
     private ApiInfo swaggerInfo() {

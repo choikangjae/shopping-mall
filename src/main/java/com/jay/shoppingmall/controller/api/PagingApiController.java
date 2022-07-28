@@ -13,11 +13,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RestController
+@ApiIgnore
 public class PagingApiController {
 
     private final QnaService qnaService;
@@ -31,8 +33,8 @@ public class PagingApiController {
 
         PageDto itemQnas = qnaService.getQnas(itemId, targetPage, user, pageable);
 
-        System.out.println("itemQnas.getCustomPage().getNumber() = " + itemQnas.getCustomPage().getNumber());
-        System.out.println("itemQnas.getCustomPage().getTotalPages() = " + itemQnas.getCustomPage().getTotalPages());
+//        System.out.println("itemQnas.getCustomPage().getNumber() = " + itemQnas.getCustomPage().getNumber());
+//        System.out.println("itemQnas.getCustomPage().getTotalPages() = " + itemQnas.getCustomPage().getTotalPages());
 
         return ResponseEntity.ok().body(null);
     }
@@ -45,19 +47,9 @@ public class PagingApiController {
 
         PageDto itemQnas = qnaService.getQnas(itemId, targetPage, user, pageable);
 
-        System.out.println("itemQnas.getCustomPage().getNumber() = " + itemQnas.getCustomPage().getNumber());
-        System.out.println("itemQnas.getCustomPage().getTotalPages() = " + itemQnas.getCustomPage().getTotalPages());
+//        System.out.println("itemQnas.getCustomPage().getNumber() = " + itemQnas.getCustomPage().getNumber());
+//        System.out.println("itemQnas.getCustomPage().getTotalPages() = " + itemQnas.getCustomPage().getTotalPages());
 
         return ResponseEntity.ok().body(itemQnas);
     }
-
-//    @PostMapping
-//    public ResponseEntity<?> pageApi(@Valid @RequestBody QnaPageRequest qnaPageRequest, @CurrentUser User user) {
-//
-//        Pageable pageable = PageRequest.of(qnaPageRequest.getRequestPage() == 0 ? 0 : qnaPageRequest.getRequestPage() - 1, qnaPageRequest.getPerPage(),Sort.by(Sort.Direction.DESC, "id"));
-//
-//        QnaResponseWithPagination qnaResponseWithPagination = qnaService.getQnaListByPaging(qnaPageRequest.getItemId(), user, pageable);
-//
-//        return ResponseEntity.ok(qnaResponseWithPagination);
-//    }
 }

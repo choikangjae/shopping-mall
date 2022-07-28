@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpSession;
 
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpSession;
 @PreAuthorize("hasRole('USER')")
 public class SessionApiController {
 
+    @ApiIgnore
     @GetMapping("/clear")
     public ResponseEntity<?> sessionClear(HttpSession session) {
         session.removeAttribute("itemTotalPrice");

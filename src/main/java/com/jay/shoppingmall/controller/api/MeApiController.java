@@ -14,6 +14,8 @@ import com.jay.shoppingmall.service.AuthService;
 import com.jay.shoppingmall.service.MeService;
 import com.jay.shoppingmall.service.VirtualDeliveryService;
 import com.jay.shoppingmall.service.common.SessionUpdater;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +31,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/api/v1")
 //@PreAuthorize("hasRole('USER')")
+@Api(tags = "user")
 public class MeApiController {
 
     private final MeService meService;
@@ -37,6 +40,7 @@ public class MeApiController {
     private final SessionUpdater sessionUpdater;
     private final VirtualDeliveryService virtualDeliveryService;
 
+    @ApiOperation(value = "사용자 이용 동의", notes = "서비스 이용 동의 (필수)와 마케팅 이용 동의 (선택)을 받아 처리 결과를 반환합니다.")
     @PostMapping("/privacy/agree")
     public ResponseEntity<?> agreeCheck(@Valid @RequestBody AgreeRequest agreeRequest, @CurrentUser User user, HttpServletRequest request) {
         if (user == null) {
@@ -54,6 +58,7 @@ public class MeApiController {
         return ResponseEntity.ok().body(true);
     }
 
+    @ApiOperation(value = "사용자 비밀번호 변경", notes = "")
     @PostMapping("/me/password-update")
     public ResponseEntity<?> passwordUpdate(@Valid @RequestBody PasswordChangeRequest passwordChangeRequest, @CurrentUser User user) {
         if (user == null) {
@@ -72,6 +77,7 @@ public class MeApiController {
         return ResponseEntity.ok(null);
     }
 
+    @ApiOperation(value = "사용자 개인정보 변경", notes = "")
     @PostMapping("/privacy/update")
     public ResponseEntity<ErrorResponse> updateMe(@Valid @RequestBody UserUpdateRequest request, BindingResult bindingResult,
                                                   @CurrentUser User user, HttpServletRequest servletRequest) {
@@ -92,6 +98,7 @@ public class MeApiController {
         return ResponseEntity.ok().body(null);
     }
 
+    @ApiOperation(value = "사용자 전화번호 중복 확인", notes = "")
     @PostMapping("/phone/duplication-check")
     public ResponseEntity<?> phoneDuplicationCheck(@RequestBody Map<String, String> phoneNumberMap) {
 
@@ -101,6 +108,7 @@ public class MeApiController {
 
         return ResponseEntity.ok(null);
     }
+    @ApiOperation(value = "사용자 상품 배송 상태 확인", notes = "운송장 번호로 조회된 결과를 반환합니다. 로그인이 되어있지 않다면 운송장 번호, 익명화된 수취자 이름, 익명화된 전달자 이름만 반환됩니다.")
     @GetMapping("/track-package/{trackingNumber}")
     public ResponseEntity<?> trackMyPackages(@PathVariable("trackingNumber") String trackingNumber, @CurrentUser User user) {
         final TrackPackageResponse trackPackageResponse = virtualDeliveryService.trackMyPackages(trackingNumber, user);

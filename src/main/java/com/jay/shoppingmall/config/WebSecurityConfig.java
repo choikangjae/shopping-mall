@@ -67,11 +67,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/demo/**", "/random-user-generator", "/api/v1/item/option/add", "/api/v1/page/**", "/api/v1/item/zzim", "/api/v1/cart/total", "/api/v1/auth/forgot-password").permitAll()
                 .antMatchers("/auth/new-password", "/auth/reset**", "/auth/login**", "/auth/signup-done", "/auth/seller-signup", "/auth/signup", "/auth/forgot-password").permitAll()
                 .antMatchers("/item/details/null", "/seller/null", "/admin/null", "/auth/null", "/null").permitAll()
-                .antMatchers("/swagger-ui.html#", "/search**",  "/", "/item/**","/item/details/**").permitAll()
+                .antMatchers("/search**",  "/", "/item/**","/item/details/**").permitAll()
 
                 .antMatchers("/me/**", "/seller/start", "/seller/agree").hasRole("USER")
                 .antMatchers("/seller/**").hasRole("SELLER")
-                .antMatchers( "/admin/**").hasRole("ADMIN")
+                .antMatchers( "/swagger-ui.html**", "/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .expressionHandler(expressionHandler())
                 .and()

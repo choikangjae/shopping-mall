@@ -7,6 +7,8 @@ import com.jay.shoppingmall.dto.response.review.OrderItemForReviewResponse;
 import com.jay.shoppingmall.dto.response.review.ReviewResponse;
 import com.jay.shoppingmall.exception.exceptions.ReviewException;
 import com.jay.shoppingmall.service.ReviewService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +23,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/review")
 @PreAuthorize("hasRole('USER')")
+@Api(tags = "review")
 public class ReviewApiController {
 
     private final ReviewService reviewService;
 
+    @ApiOperation(value = "상품 리뷰 작성", notes = "")
     @PostMapping(value = "/write", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> reviewWriteAction(@Valid @RequestPart ReviewWriteRequest request,
                                                @RequestParam(value = "reviewImages", required = false)
@@ -36,6 +40,7 @@ public class ReviewApiController {
 
         return ResponseEntity.ok(reviewResponse);
     }
+    @ApiOperation(value = "리뷰 작성을 위한 상품 정보 조회", notes = "리뷰 작성 가능 여부를 확인하고 리뷰를 작성하면 얻을 수 있는 포인트를 계산해서 반환합니다.")
     @GetMapping("/write/{orderItemId}")
     public ResponseEntity<?> reviewWrite(@PathVariable Long orderItemId, @CurrentUser User user) {
         final OrderItemForReviewResponse orderItemForReviewResponse = reviewService.orderItemRequestForReview(orderItemId, user);

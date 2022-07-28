@@ -222,7 +222,6 @@ public class PaymentService {
 
     public PaymentResponse paymentRecordGenerateBeforePg(final PaymentRequest paymentRequest, final User user) {
         List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
-//                .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다"));
         String merchantUid = merchantUidGenerator.generateMerchantUid();
 
         long totalQuantity = carts.stream().mapToLong(Cart::getQuantity).sum();
@@ -241,8 +240,6 @@ public class PaymentService {
             shippingFeeTotal += cartPricePerSellerResponse.getItemShippingFeePerSeller();
         }
         long amount = cartPriceTotal + shippingFeeTotal;
-
-        //유효성 검사 로직 더 작성할 것.
 
         ReceiverInfo receiverInfo = ReceiverInfo.builder()
                 .receiverAddress(paymentRequest.getBuyerAddr())
