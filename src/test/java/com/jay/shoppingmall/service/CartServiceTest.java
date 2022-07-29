@@ -127,13 +127,22 @@ class CartServiceTest {
 
     @Test
     void cartSaved_Success_addItemOptionsToCart() {
-        when(itemRepository.findById(itemOptionResponse.getItemId())).thenReturn(Optional.of(item));
-        when(itemOptionRepository.findById(itemOptionResponse.getItemOptionId())).thenReturn(Optional.of(itemOption));
+        List<ItemOption> itemOptions = new ArrayList<>();
+
+        ItemOption itemOption1 = ItemOption.builder()
+                .id(0L)
+                .build();
+        ItemOption itemOption2 = ItemOption.builder()
+                .id(0L)
+                .build();
+        itemOptions.add(itemOption1);
+        itemOptions.add(itemOption2);
+
+        when(itemOptionRepository.findByIdIn(any())).thenReturn(itemOptions);
 
         cartService.addOptionItemsToCart(list, user);
 
-        verify(cartRepository, times(1)).save(any());
-        verify(cartRepository, times(1)).findByUserAndItemAndItemOption(user, item, itemOption);
+        verify(cartRepository, times(2)).save(any());
     }
 
     @Test

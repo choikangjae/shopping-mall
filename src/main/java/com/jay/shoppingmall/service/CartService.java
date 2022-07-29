@@ -23,6 +23,7 @@ import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -41,9 +43,9 @@ public class CartService {
     private final ItemRepository itemRepository;
     private final ImageRepository imageRepository;
     private final CartRepository cartRepository;
-    private final FileHandler fileHandler;
     private final ItemOptionRepository itemOptionRepository;
     private final SellerRepository sellerRepository;
+    private final FileHandler fileHandler;
 
     public Map<SellerResponse, List<ItemAndQuantityResponse>> showCartItemsList(User user) {
 
@@ -89,7 +91,6 @@ public class CartService {
                         .optionId(cart.getItemOption().getId())
                         .name(cart.getItem().getName())
                         .priceNow(cart.getItemOption().getItemPrice().getPriceNow())
-//                        .image(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, cart.getItem().getId())))
                         .zzim(cart.getItem().getZzim())
                         .quantity(cart.getQuantity())
                         .isSelected(cart.getIsSelected())
@@ -121,20 +122,22 @@ public class CartService {
     }
 
     public void addOptionItemsToCart(final List<ItemOptionResponse> itemOptions, final User user) {
-        for (ItemOptionResponse itemOptionResponse : itemOptions) {
-            Item item = itemRepository.findById(itemOptionResponse.getItemId())
-                    .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
-            ItemOption itemOption = itemOptionRepository.findById(itemOptionResponse.getItemOptionId())
-                    .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
-
-            if (cartRepository.findByUserAndItemAndItemOption(user, item, itemOption).isPresent()) {
-                throw new AlreadyExistsException("해당 상품이 장바구니에 존재합니다");
+        final List<Long> itemOptionIds = itemOptions.stream().map(ItemOptionResponse::getItemOptionId).collect(Collectors.toList());
+        final List<ItemOption> itemOptionList = itemOptionRepository.findByIdIn(itemOptionIds);
+        for (ItemOption itemOption : itemOptionList) {
+            final Item item = itemOption.getItem();
+            int quantity = 0;
+            for (ItemOptionResponse itemOptionResponse : itemOptions) {
+                if (itemOption.getId().equals(itemOptionResponse.getItemOptionId())) {
+                    quantity = itemOptionResponse.getItemQuantity();
+                    break;
+                }
             }
             Cart cart = Cart.builder()
                     .isSelected(true)
                     .item(item)
                     .itemOption(itemOption)
-                    .quantity(itemOptionResponse.getItemQuantity())
+                    .quantity(quantity)
                     .user(user)
                     .build();
 
@@ -143,7 +146,6 @@ public class CartService {
     }
 
     public CartPriceTotalResponse cartPriceTotal(User user) {
-
         final List<CartPricePerSellerResponse> cartPricePerSellerResponses = cartPricePerSeller(user);
 
         long cartTotalPrice = cartPricePerSellerResponses.stream().mapToLong(CartPricePerSellerResponse::getItemTotalPricePerSeller).sum();

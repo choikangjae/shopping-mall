@@ -16,6 +16,7 @@ import com.jay.shoppingmall.exception.exceptions.TokenExpiredException;
 import com.jay.shoppingmall.exception.exceptions.UserDuplicatedException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -44,6 +46,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+        log.info("A user has been registered. email = '{}'", user.getEmail());
     }
 
     public void sellerSignup(final UserValidationRequest userValidationRequest) {
@@ -69,6 +72,8 @@ public class AuthService {
                 .userId(user.getId())
                 .build();
         sellerRepository.save(seller);
+
+        log.info("A seller has been registered. email = '{}'", user.getEmail());
     }
     public void passwordTokenSender(PasswordResetRequest passwordResetRequest) {
         User user = userRepository.findByEmail(passwordResetRequest.getEmail())
@@ -77,6 +82,7 @@ public class AuthService {
         String token = UUID.randomUUID().toString();
 
         mailService.sendMail(user.getEmail(), token);
+        log.info("PasswordResetToken email sent. email = '{}'", user.getEmail());
 
         PasswordResetToken passwordResetToken = PasswordResetToken.builder()
                 .token(token)
@@ -87,18 +93,24 @@ public class AuthService {
         passwordResetTokenRepository.save(passwordResetToken);
     }
     public void passwordTokenValidator(PasswordResetRequest passwordResetRequest) {
-
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByEmailAndToken(passwordResetRequest.getEmail(), passwordResetRequest.getToken())
-                .orElseThrow(() -> new TokenExpiredException("유효하지 않은 주소입니다. 다시 시도해주세요"));
+                .orElseThrow(() -> {
+                    log.info("Invalid passwordResetToken tried. email = '{}', token = '{}'", passwordResetRequest.getEmail(), passwordResetRequest.getToken());
+                    return new TokenExpiredException("유효하지 않은 주소입니다. 다시 시도해주세요");
+                });
 
         if (LocalDateTime.now().isAfter(passwordResetToken.getExpirationTime())) {
             passwordResetToken.setIsExpired(true);
+            log.info("PasswordResetToken has been expired. email = '{}', token = '{}'", passwordResetRequest.getEmail(), passwordResetRequest.getToken());
             throw new TokenExpiredException("주소가 만료되었습니다");
         }
     }
     public void passwordUpdateAfterReset(UserValidationRequest userValidationRequest) {
         User user = userRepository.findByEmail(userValidationRequest.getEmail())
-                .orElseThrow(() -> new UserNotFoundException("유효하지 않은 이메일입니다"));
+                .orElseThrow(() -> {
+                    log.info("Invalid email tried for user. email = '{}'", userValidationRequest.getEmail());
+                    return new UserNotFoundException("유효하지 않은 이메일입니다");
+                });
         String encryptedPassword = passwordEncoder.encode(userValidationRequest.getPassword());
 
         user.updatePassword(encryptedPassword);
@@ -106,14 +118,20 @@ public class AuthService {
 
     public void passwordChange(final PasswordChangeRequest passwordChangeRequest, User user) {
         User updatedUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new UserNotFoundException("유효하지 않은 접근입니다"));
+                .orElseThrow(() -> {
+                    log.info("Invalid id tried for user. id = '{}'", user.getId());
+                    return new UserNotFoundException("유효하지 않은 접근입니다");
+                });
 
         if (!passwordEncoder.matches(passwordChangeRequest.getPasswordNow(), user.getPassword())) {
+            log.info("Expected password not matches with actual current password. email = '{}'", user.getEmail());
             throw new PasswordInvalidException("현재 비밀번호가 일치하지 않습니다");
         }
         if (passwordEncoder.matches(passwordChangeRequest.getPasswordAfter(), user.getPassword())) {
+            log.info("Current password is exactly equal to the password to be changed. email = '{}'", user.getEmail());
             throw new PasswordInvalidException("현재 비밀번호와 비꿀 비밀번호가 같습니다");
         }
+        log.info("User changed password. email = '{}'", user.getEmail());
         updatedUser.updatePassword(passwordEncoder.encode(passwordChangeRequest.getPasswordAfter()));
     }
 }

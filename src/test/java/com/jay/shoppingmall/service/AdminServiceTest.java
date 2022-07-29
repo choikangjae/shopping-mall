@@ -79,9 +79,19 @@ class AdminServiceTest {
         assertThat(userDetailResponses.size()).isEqualTo(2);
         assertThat(userDetailResponses.get(0).getEmail()).contains("qwe");
     }
+    @Test
+    void ifUserListIsEmpty_ReturnEmptyList_searchUsersByEmail() {
+        List<User> userList = new ArrayList<>();
+
+        when(userRepository.findByEmailContaining("qwe")).thenReturn(userList);
+
+        final List<UserDetailResponse> userDetailResponses = adminService.searchUsersByEmail("qwe");
+
+        assertThat(userDetailResponses.size()).isEqualTo(0);
+    }
 
     @Test
-    void whenParentIsNull_ChildWillBeAdded_categoryAppend() {
+    void whenParentIsNull_ChildWillBeAddedToNull_categoryAppend() {
         CategoryAddRequest request = new CategoryAddRequest(null, "영화");
 
         final CategoryResponse categoryResponse = adminService.categoryAppend(request);
