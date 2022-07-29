@@ -22,6 +22,7 @@ import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -63,9 +65,6 @@ public class MeService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("잘못된 요청입니다"));
 
-//        if (user.getAgree() != null && user.getAgree().getIsMandatoryAgree()) {
-//            throw new AgreeException("잘못된 요청입니다");
-//        }
         if (!agreeRequest.getIsMandatoryAgree()) {
             throw new AgreeException("필수 항목을 반드시 동의하셔야 합니다");
         }

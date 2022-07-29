@@ -45,9 +45,9 @@ public class MailService {
 
         try {
             mailSender.send(simpleMailMessage);
-            log.info("메일 전송 완료");
+            log.info("Mail sent successfully. email = '{}'", email);
         } catch (MailException e) {
-            log.error("메일 전송 오류 발생", e);
+            log.warn("Mail sending failed. message = '{}', email = '{}'", e.getMessage(), email);
             throw new MailNotSentException("Exception occurred when sending mail to " + email);
         }
     }
