@@ -28,12 +28,6 @@ public class HomeController {
         PageDto responses = itemService.getAllItems(user, pageable);
         model.addAttribute("items", responses);
 
-        log.trace("trace message");
-        log.debug("debug message");
-        log.info("info message"); // default
-        log.warn("warn message");
-        log.error("error message");
-
         return "home";
     }
     @GetMapping("/index")
