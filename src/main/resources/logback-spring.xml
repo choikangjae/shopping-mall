@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 콘솔(STDOUT)에 log 기록 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative] %-5level ${PID:-} --- [%15.15thread] %-40.40logger{36} : %msg%n</Pattern>
+        </layout>
+    </appender>
+
+    <!-- log root 레벨 설정 (logging.level.root=info)-->
+    <root level="debug">
+        <!--     참조할 appender 설정 - STDOUT -->
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>
