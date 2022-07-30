@@ -31,6 +31,7 @@ import com.jay.shoppingmall.dto.response.seller.SellerResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -72,7 +74,8 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException("해당하는 주문이 없습니다"));
 
         if (!Objects.equals(user.getId(), order.getUser().getId())) {
-            throw new NotValidException("잘못된 접근입니다");
+            log.info("Session user is not equal to order user. sessionUserId = '{}', orderUserId = '{}'", user.getId(), order.getUser().getId());
+            throw new OrderNotFoundException("잘못된 접근입니다");
         }
         LocalDateTime orderDate = order.getCreatedDate();
 
@@ -85,6 +88,7 @@ public class OrderService {
             boolean isTrackingStarted = false;
             String trackingNumber = "";
             final DeliveryStatus deliveryStatus = orderItem.getOrderDelivery().getDeliveryStatus();
+
             if (deliveryStatus.equals(DeliveryStatus.DELIVERING) || deliveryStatus.equals(DeliveryStatus.SHIPPED) || deliveryStatus.equals(DeliveryStatus.DELIVERED) || deliveryStatus.equals(DeliveryStatus.FINISHED)) {
                 trackingNumber = virtualDeliveryCompanyRepository.findByOrderItemId(orderItem.getId())
                         .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다")).getTrackingNumber();
@@ -96,9 +100,10 @@ public class OrderService {
             final Image image = imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, orderItem.getMainImageId());
             final String mainImage = fileHandler.getStringImage(image);
 
+            //TODO orderItem은 주문한 순간을 저장하는 것이므로 Item 객체의 모든 값을 저장해야한다. 변경 필요.
             OrderItemResponse orderItemResponse = OrderItemResponse.builder()
                     .orderDate(orderDate)
-                    .itemName(orderItem.getItem().getName())
+                    .itemName(orderItem.getItemName())
                     .option1(orderItem.getItemOption().getOption1())
                     .option2(orderItem.getItemOption().getOption2())
                     .mainImage(mainImage)

@@ -1,9 +1,7 @@
 package com.jay.shoppingmall.service;
 
 import com.jay.shoppingmall.domain.browse_history.BrowseHistoryRepository;
-import com.jay.shoppingmall.domain.image.ImageRelation;
 import com.jay.shoppingmall.domain.image.ImageRepository;
-import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.ItemRepository;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
@@ -11,11 +9,9 @@ import com.jay.shoppingmall.domain.user.model.Address;
 import com.jay.shoppingmall.domain.user.model.Agree;
 import com.jay.shoppingmall.domain.user.model.Name;
 import com.jay.shoppingmall.domain.user.model.PhoneNumber;
-import com.jay.shoppingmall.domain.zzim.Zzim;
 import com.jay.shoppingmall.domain.zzim.ZzimRepository;
 import com.jay.shoppingmall.dto.request.AgreeRequest;
 import com.jay.shoppingmall.dto.request.DeleteMeRequest;
-import com.jay.shoppingmall.dto.response.item.ItemResponse;
 import com.jay.shoppingmall.dto.response.MeDetailResponse;
 import com.jay.shoppingmall.dto.request.UserUpdateRequest;
 import com.jay.shoppingmall.exception.exceptions.*;
@@ -27,9 +23,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -78,7 +71,7 @@ public class MeService {
         return true;
     }
 
-    public User updateInfo(final UserUpdateRequest request, final Long id) {
+    public void updateInfo(final UserUpdateRequest request, final Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("잘못된 요청입니다"));
 
@@ -95,23 +88,12 @@ public class MeService {
 
         Agree agree = Agree.builder()
                 .isMandatoryAgree(true)
-//                .isMarketingAgree(isMarketingAgree.equals("true") ? true : false)
                 .isMarketingAgree(request.getIsMarketingAgree())
                 .build();
 
         user.userUpdate(address, name, agree, splitPhoneNumber(request.getPhoneNumber()));
 
-        return userRepository.save(user);
-
-//         UserUpdateResponse.builder()
-//                .address(user.getAddress().getAddress())
-//                .detailAddress(user.getAddress().getDetailAddress())
-//                .extraAddress(user.getAddress().getExtraAddress())
-//                .zipcode(user.getAddress().getZipcode())
-//                .lastName(user.getName().getLast())
-//                .firstName(user.getName().getFirst())
-//                .phoneNumber(user.getPhoneNumber().getFullNumber())
-//                .build();
+        userRepository.save(user);
     }
 
     private PhoneNumber splitPhoneNumber(String phoneNumber) {
@@ -127,7 +109,8 @@ public class MeService {
                 .build();
     }
 
-    public void deleteMe(final DeleteMeRequest request, final User user) {
+    public void deleteMe(final User user) {
+        log.info("User deleted. email = '{}'", user.getEmail());
 
         userRepository.delete(user);
     }

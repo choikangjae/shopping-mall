@@ -37,14 +37,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, errorDetails, headers, errorDetails.getStatus(), request);
     }
 
-//    @ExceptionHandler(ConstraintViolationException.class)
-//    public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException e) {
-//        final ErrorResponse errorResponse = ErrorResponse.builder()
-//                .code("VALIDATION_FAILED")
-//                .message(e.getMessage())
-//                .build();
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//    }
+    @ExceptionHandler(NotificationException.class)
+    public ResponseEntity<?> handleNotificationException(NotificationException e) {
+        final ErrorResponse errorResponse = ErrorResponse.builder()
+                .code("NOTIFICATION_NOT_AVAILABLE")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
     @ExceptionHandler(ReviewException.class)
     public ResponseEntity<?> handleReviewException(ReviewException e) {
         final ErrorResponse errorResponse = ErrorResponse.builder()

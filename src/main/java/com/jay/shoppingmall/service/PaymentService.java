@@ -177,14 +177,12 @@ public class PaymentService {
     }
 
     private void moveCartToOrderItem(final Order order, final List<Cart> carts) {
-        //상품 주문 테이블로 정보 옮기고 장바구니 비우기
         for (Cart cart : carts) {
             OrderDelivery orderDelivery = OrderDelivery.builder()
                     .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
                     .build();
             orderDeliveryRepository.save(orderDelivery);
 
-            //대표 사진 관리에 대한 주체를 OrderItem에게 넘김. 상품이 삭제될 수 있으므로.
             final Long mainImageId = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, cart.getItem().getId()).getId();
             OrderItem orderItem = OrderItem.builder()
                     .mainImageId(mainImageId)

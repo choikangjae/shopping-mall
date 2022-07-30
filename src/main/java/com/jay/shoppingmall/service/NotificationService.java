@@ -16,8 +16,10 @@ import com.jay.shoppingmall.dto.response.notification.MeNotificationResponse;
 import com.jay.shoppingmall.dto.response.notification.NotificationResponse;
 import com.jay.shoppingmall.dto.response.notification.QnaNotificationResponse;
 import com.jay.shoppingmall.exception.exceptions.NotValidException;
+import com.jay.shoppingmall.exception.exceptions.NotificationException;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @AllArgsConstructor
@@ -35,12 +38,12 @@ public class NotificationService {
 
     private final FileHandler fileHandler;
 
-    //exception 구조 변경하기.
     public void notificationReadDone(final Long notificationId, final User user) {
         final Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new NotValidException("알림이 없음"));
+                .orElseThrow(() -> new NotificationException("알림이 없음"));
         if (!notification.getReceiver().getId().equals(user.getId())) {
-            throw new NotValidException("잘못된 요청입니다");
+            log.info("Notification Exception. receiverId = '{}', userId = '{}'", notification.getReceiver().getId(), user.getId());
+            throw new NotificationException("잘못된 요청입니다");
         }
 
         notification.readTrue();

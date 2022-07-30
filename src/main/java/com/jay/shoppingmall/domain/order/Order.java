@@ -28,10 +28,6 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
-//    //TODO 변경할것
-//    @OneToMany(mappedBy = "orders")
-//    private List<OrderItem> orderItems = new ArrayList<>();
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", referencedColumnName = "id", nullable = false)
     private Payment payment;

@@ -17,7 +17,6 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-//한 주문에 들어가는 상품 목록
 public class OrderItem {
 
     @Id
@@ -49,4 +48,8 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     private Seller seller;
+
+    public String getItemName() {
+        return item.getName();
+    }
 }

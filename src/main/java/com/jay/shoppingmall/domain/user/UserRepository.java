@@ -16,10 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByEmailContaining(@Param("q") String email);
 
-//    @Query("SELECT u.phoneNumber FROM User u WHERE u.phoneNumber = :phoneNumber")
-//    Optional<User> findByPhoneNumberFirstPhoneNumberAndPhoneNumberMiddlePhoneNumberAndPhoneNumberLastPhoneNumber(String first, String middle, String last);
-
     @Query("SELECT u.phoneNumber FROM User u WHERE u.phoneNumber.first = :first AND u.phoneNumber.middle = :middle AND u.phoneNumber.last = :last")
     Optional<User> findByPhoneNumber(String first, String middle, String last);
-
 }
