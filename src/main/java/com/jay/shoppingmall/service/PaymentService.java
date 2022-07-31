@@ -13,6 +13,8 @@ import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
 import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
 import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistory;
 import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistoryRepository;
+import com.jay.shoppingmall.domain.notification.Notification;
+import com.jay.shoppingmall.domain.notification.item_notification.ItemNotification;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.order.OrderRepository;
@@ -158,7 +160,7 @@ public class PaymentService {
 
     private void cartsStockManipulation(final List<Cart> carts) {
         for (Cart cart : carts) {
-            final ItemStock itemStock = cart.getItemOption().getItemStock();
+            final ItemStock itemStock = cart.getItemStock();
             final Integer stockMinusQuantity = itemStock.stockMinusQuantity(cart.getQuantity());
 
             //재고 변경 기록 저장
@@ -169,7 +171,7 @@ public class PaymentService {
                     .build();
             itemStockHistoryRepository.save(itemStockHistory);
 
-            if (cart.getItemOption().getItemStock().getStock() == 0) {
+            if (cart.getStockNow() == 0) {
                 //품절일때 로직 작성
                 //seller에게 메시지 보내기
             }
@@ -183,15 +185,22 @@ public class PaymentService {
                     .build();
             orderDeliveryRepository.save(orderDelivery);
 
+            Item item = cart.getItem();
+            ItemOption itemOption = cart.getItemOption();
+            Seller seller = cart.getItemSeller();
             final Long mainImageId = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, cart.getItem().getId()).getId();
             OrderItem orderItem = OrderItem.builder()
                     .mainImageId(mainImageId)
-                    .order(order)
-                    .priceAtPurchase(cart.getItemOption().getItemPrice().getPriceNow())
+                    .itemName(item.getName())
+                    .itemOption1(itemOption.getOption1())
+                    .itemOption2(itemOption.getOption2())
+                    .sellerCompanyName(seller.getCompanyName())
+                    .priceAtPurchase(cart.getPriceNow())
                     .quantity(cart.getQuantity())
                     .itemOption(cart.getItemOption())
+                    .order(order)
                     .item(cart.getItem())
-                    .seller(cart.getItem().getSeller())
+                    .seller(seller)
                     .orderDelivery(orderDelivery)
                     .build();
 

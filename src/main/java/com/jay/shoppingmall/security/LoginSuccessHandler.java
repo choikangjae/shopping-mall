@@ -26,10 +26,10 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Slf4j
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     private String username;
     private String defaultUrl;
@@ -43,14 +43,12 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(final HttpServletRequest request,
                                         final HttpServletResponse response,
                                         final Authentication authentication) throws IOException, ServletException {
-//        String requestUsername = request.getParameter(username);
         clearAuthenticationExceptions(request);
         resultRedirectStrategy(request, response, authentication);
     }
 
 
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
-//    private final RequestCache requestCache = new HttpSessionRequestCache();
 
     protected void resultRedirectStrategy(final HttpServletRequest request,
                                           final HttpServletResponse response,
@@ -64,18 +62,16 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                 redirectStrategy.sendRedirect(request, response, "/admin");
             } else if (request.getSession().getAttribute("requestURI") != null) {
                 String requestURI = (String) request.getSession().getAttribute("requestURI");
-//            System.out.println("requestURI: " + requestURI);
                 redirectStrategy.sendRedirect(request, response, requestURI);
                 request.getSession().removeAttribute("requestURI");
             } else if (savedRequest != null) {
                 String targetUrl = savedRequest.getRedirectUrl();
-//            System.out.println("targetUrl: " + targetUrl);
                 redirectStrategy.sendRedirect(request, response, targetUrl);
             } else {
-//            System.out.println("defaultUrl: " + defaultUrl);
                 redirectStrategy.sendRedirect(request, response, defaultUrl);
             }
         }
+        log.info("User login successfully. username = '{}' ip = '{}'", request.getParameter("username"), request.getRemoteAddr());
     }
 
     //에러 세션 삭제

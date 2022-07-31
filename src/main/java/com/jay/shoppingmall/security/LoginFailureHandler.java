@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Slf4j
 public class LoginFailureHandler implements AuthenticationFailureHandler {
 
     @Override
@@ -27,11 +29,11 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
             errorMsg = "로그인에 실패하였습니다";
         }
 
+        log.info("User login failed. username = '{}' ip = '{}'", request.getParameter("username"), request.getRemoteAddr());
         request.setAttribute("username", request.getParameter("username"));
         request.setAttribute("errorMsg", errorMsg);
         request.setAttribute("autofocus", false);
         String DEFAULT_FAILURE_URL = "/auth/login?error";
         request.getRequestDispatcher(DEFAULT_FAILURE_URL).forward(request, response);
-//        response.sendRedirect(DEFAULT_FAILURE_URL);
     }
 }

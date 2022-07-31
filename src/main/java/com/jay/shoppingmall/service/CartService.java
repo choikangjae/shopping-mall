@@ -27,9 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -122,22 +120,25 @@ public class CartService {
     }
 
     public void addOptionItemsToCart(final List<ItemOptionResponse> itemOptions, final User user) {
-        final List<Long> itemOptionIds = itemOptions.stream().map(ItemOptionResponse::getItemOptionId).collect(Collectors.toList());
-        final List<ItemOption> itemOptionList = itemOptionRepository.findByIdIn(itemOptionIds);
-        for (ItemOption itemOption : itemOptionList) {
-            final Item item = itemOption.getItem();
-            int quantity = 0;
-            for (ItemOptionResponse itemOptionResponse : itemOptions) {
-                if (itemOption.getId().equals(itemOptionResponse.getItemOptionId())) {
-                    quantity = itemOptionResponse.getItemQuantity();
-                    break;
-                }
+
+        for (ItemOptionResponse itemOptionResponse : itemOptions) {
+            Item item = itemRepository.findById(itemOptionResponse.getItemId())
+                    .orElseThrow(() -> {
+                        return new ItemNotFoundException("해당 상품이 존재하지않습니다");
+                    });
+            ItemOption itemOption = itemOptionRepository.findById(itemOptionResponse.getItemOptionId())
+                    .orElseThrow(() -> {
+                        return new ItemNotFoundException("해당 상품이 존재하지않습니다");
+                    });
+
+            if (cartRepository.findByUserAndItemAndItemOption(user, item, itemOption).isPresent()) {
+                throw new AlreadyExistsException("해당 상품이 장바구니에 존재합니다");
             }
             Cart cart = Cart.builder()
                     .isSelected(true)
                     .item(item)
                     .itemOption(itemOption)
-                    .quantity(quantity)
+                    .quantity(itemOptionResponse.getItemQuantity())
                     .user(user)
                     .build();
 

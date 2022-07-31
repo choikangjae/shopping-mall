@@ -27,6 +27,14 @@ public class OrderItem {
 
     private Integer quantity;
 
+    private String itemName;
+
+    private String itemOption1;
+
+    private String itemOption2;
+
+    private String sellerCompanyName;
+
     private Long priceAtPurchase;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,8 +56,4 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     private Seller seller;
-
-    public String getItemName() {
-        return item.getName();
-    }
 }

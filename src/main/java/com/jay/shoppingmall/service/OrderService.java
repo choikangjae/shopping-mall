@@ -48,10 +48,10 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final CartService cartService;
+    private final FileHandler fileHandler;
 
     private final VirtualDeliveryCompanyRepository virtualDeliveryCompanyRepository;
     private final OrderRepository orderRepository;
-    private final FileHandler fileHandler;
     private final ImageRepository imageRepository;
     private final OrderItemRepository orderItemRepository;
     private final PaymentPerSellerRepository paymentPerSellerRepository;
@@ -100,14 +100,13 @@ public class OrderService {
             final Image image = imageRepository.findByImageRelationAndId(ImageRelation.ITEM_MAIN, orderItem.getMainImageId());
             final String mainImage = fileHandler.getStringImage(image);
 
-            //TODO orderItem은 주문한 순간을 저장하는 것이므로 Item 객체의 모든 값을 저장해야한다. 변경 필요.
             OrderItemResponse orderItemResponse = OrderItemResponse.builder()
                     .orderDate(orderDate)
                     .itemName(orderItem.getItemName())
-                    .option1(orderItem.getItemOption().getOption1())
-                    .option2(orderItem.getItemOption().getOption2())
+                    .option1(orderItem.getItemOption1())
+                    .option2(orderItem.getItemOption2())
                     .mainImage(mainImage)
-                    .sellerCompanyName(orderItem.getSeller().getCompanyName())
+                    .sellerCompanyName(orderItem.getSellerCompanyName())
                     .orderItemId(orderItem.getId())
                     .itemPrice(orderItem.getPriceAtPurchase())
                     .quantity(orderItem.getQuantity())
@@ -165,20 +164,16 @@ public class OrderService {
 
         final Page<Order> orders = orderRepository.findByUserId(user.getId(), pageable)
                 .orElseThrow(() -> new OrderNotFoundException("주문 정보 찾을 수 없음"));
-        //todo pageable 처리 나중에 할것
         List<SimpleOrderResponse> simpleOrderResponses = new ArrayList<>();
         for (Order order : orders) {
             Payment payment = order.getPayment();
             if (!payment.getIsValidated()) {
                 throw new PaymentFailedException("결제가 완료되지 않은 내역입니다");
             }
-            //대표 사진
             List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
 
             //주문 상품 중 가장 배송 상태가 빠른 상품을 메인 배송 상태로.
             final List<String> deliveryStatuses = orderItems.stream().map(OrderItem::getOrderDelivery).map(OrderDelivery::getDeliveryStatus).map(DeliveryStatus::getValue).distinct().collect(Collectors.toList());
-            //주문 상품 중 가장 비싼 상품을 메인 사진으로
-            //썸네일 처리.
             final OrderItem mostExpensiveOneAtOrder = orderItems.stream().max(Comparator.comparingLong(OrderItem::getPriceAtPurchase))
                     .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
 
