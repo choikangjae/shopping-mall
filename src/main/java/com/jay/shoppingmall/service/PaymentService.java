@@ -13,6 +13,8 @@ import com.jay.shoppingmall.domain.item.item_price.ItemPrice;
 import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
 import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistory;
 import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistoryRepository;
+import com.jay.shoppingmall.domain.notification.Notification;
+import com.jay.shoppingmall.domain.notification.item_notification.ItemNotification;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
 import com.jay.shoppingmall.domain.order.Order;
 import com.jay.shoppingmall.domain.order.OrderRepository;
@@ -39,6 +41,7 @@ import com.jay.shoppingmall.exception.exceptions.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +53,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -76,6 +80,7 @@ public class PaymentService {
 
         final PaymentPerSeller paymentPerSeller = paymentPerSellerRepository.findByOrderIdAndSellerId(orderItem.getOrder().getId(), seller.getId());
         if (paymentPerSeller.getIsMoneyTransferredToSeller()) {
+            log.info("Transaction tried but was transacted already. companyName = '{}', orderItemId = '{}'", seller.getCompanyName(), orderItem.getId());
             throw new MoneyTransactionException("이미 정산이 완료된 주문입니다");
         }
 
@@ -90,8 +95,8 @@ public class PaymentService {
 
         seller.sellerBankAccountUp(moneyToSellerBankAccount);
         paymentPerSeller.paymentToSellerTrue();
+        log.info("Money transaction done. companyName = '{}', money = '{}'", seller.getCompanyName(), moneyToSellerBankAccount);
     }
-
 
     public PaymentDetailResponse paymentTotal(String imp_uid, final String merchant_uid, User user) throws IOException {
         Payment paymentRecord = validationPayment(imp_uid, merchant_uid);
@@ -155,7 +160,7 @@ public class PaymentService {
 
     private void cartsStockManipulation(final List<Cart> carts) {
         for (Cart cart : carts) {
-            final ItemStock itemStock = cart.getItemOption().getItemStock();
+            final ItemStock itemStock = cart.getItemStock();
             final Integer stockMinusQuantity = itemStock.stockMinusQuantity(cart.getQuantity());
 
             //재고 변경 기록 저장
@@ -166,7 +171,7 @@ public class PaymentService {
                     .build();
             itemStockHistoryRepository.save(itemStockHistory);
 
-            if (cart.getItemOption().getItemStock().getStock() == 0) {
+            if (cart.getStockNow() == 0) {
                 //품절일때 로직 작성
                 //seller에게 메시지 보내기
             }
@@ -174,23 +179,28 @@ public class PaymentService {
     }
 
     private void moveCartToOrderItem(final Order order, final List<Cart> carts) {
-        //상품 주문 테이블로 정보 옮기고 장바구니 비우기
         for (Cart cart : carts) {
             OrderDelivery orderDelivery = OrderDelivery.builder()
                     .deliveryStatus(DeliveryStatus.PAYMENT_DONE)
                     .build();
             orderDeliveryRepository.save(orderDelivery);
 
-            //대표 사진 관리에 대한 주체를 OrderItem에게 넘김. 상품이 삭제될 수 있으므로.
+            Item item = cart.getItem();
+            ItemOption itemOption = cart.getItemOption();
+            Seller seller = cart.getItemSeller();
             final Long mainImageId = imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, cart.getItem().getId()).getId();
             OrderItem orderItem = OrderItem.builder()
                     .mainImageId(mainImageId)
-                    .order(order)
-                    .priceAtPurchase(cart.getItemOption().getItemPrice().getPriceNow())
+                    .itemName(item.getName())
+                    .itemOption1(itemOption.getOption1())
+                    .itemOption2(itemOption.getOption2())
+                    .sellerCompanyName(seller.getCompanyName())
+                    .priceAtPurchase(cart.getPriceNow())
                     .quantity(cart.getQuantity())
                     .itemOption(cart.getItemOption())
+                    .order(order)
                     .item(cart.getItem())
-                    .seller(cart.getItem().getSeller())
+                    .seller(seller)
                     .orderDelivery(orderDelivery)
                     .build();
 
@@ -200,6 +210,14 @@ public class PaymentService {
         }
     }
 
+    /**
+     * PG사에 의해 실제 결제된 금액과 DB에 저장된 금액을 비교합니다.
+     * 금액이 다른 경우 결제가 실패하며 조작 시도 여부가 DB에 저장됩니다.
+     * @param imp_uid
+     * @param merchant_uid
+     * @return
+     * @throws IOException
+     */
     private Payment validationPayment(final String imp_uid, final String merchant_uid) throws IOException {
         String accessToken = getAccessToken();
 
@@ -211,6 +229,8 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentFailedException("결제 정보가 없습니다"));
 
         if (!amountByPg.equals(paymentRecord.getAmount())) {
+            log.warn("Payment manipulation. imp_uid = '{}', merchant_uid = '{}', expectedMoney = '{}', actualMoney = '{}'",
+                    imp_uid, merchant_uid, paymentRecord.getAmount(), amountByPg);
             paymentRecord.isAmountManipulatedTrue();
             throw new PaymentFailedException("결제 정보가 올바르지 않습니다.");
         }
@@ -220,6 +240,13 @@ public class PaymentService {
         return paymentRecord;
     }
 
+    /**
+     * 실제 결제가 되기 전에 미리 DB에 결제 정보를 저장합니다. 이 값은 후에 실제 결제 금액과 비교 대조됩니다.
+     *
+     * @param paymentRequest
+     * @param user
+     * @return
+     */
     public PaymentResponse paymentRecordGenerateBeforePg(final PaymentRequest paymentRequest, final User user) {
         List<Cart> carts = cartRepository.findByUserAndIsSelectedTrue(user);
         String merchantUid = merchantUidGenerator.generateMerchantUid();
@@ -264,6 +291,7 @@ public class PaymentService {
                 .receiverInfo(receiverInfo)
                 .build();
 
+        log.info("Payment has been triggered. email = '{}', amount = '{}', merchantUid = '{}'", user.getEmail(), amount, merchantUid);
         paymentRepository.save(payment);
 
         return PaymentResponse.builder()
@@ -279,7 +307,8 @@ public class PaymentService {
     private String imp_secret;
 
     /**
-     *
+     * iamport사에 POST 요청하여 access token을 받아옵니다.
+     * access token은 getPaymentInfoByToken에서 실제 결제 정보를 받아오는데 사용됩니다.
      * @return access_token
      * @throws IOException
      */
@@ -307,7 +336,6 @@ public class PaymentService {
 
         Gson gson = new Gson();
         String response = gson.fromJson(br.readLine(), Map.class).get("response").toString();
-        System.out.println("response : " + response);
         String token = gson.fromJson(response, Map.class).get("access_token").toString();
 
         br.close();
@@ -317,10 +345,10 @@ public class PaymentService {
     }
 
     /**
-     *
+     * iamport사에 GET 요청하여 실제 결제된 금액을 받아와서 반환합니다.
      * @param imp_uid
      * @param access_token
-     * @return Paid total amount
+     * @return 실제 결제된 총액
      * @throws IOException
      */
     Long getPaymentInfoByToken(String imp_uid, String access_token) throws IOException {

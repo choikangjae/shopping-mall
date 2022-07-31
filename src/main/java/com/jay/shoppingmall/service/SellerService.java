@@ -58,6 +58,7 @@ import com.jay.shoppingmall.dto.response.seller.StatisticsResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +73,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -98,6 +100,14 @@ public class SellerService {
 
     private final FileHandler fileHandler;
 
+    /**
+     * 옵션이 없는 상품을 작성합니다.
+     * @param writeItemRequest 상품에 대한 정보를 담고 있습니다.
+     * @param file null일 수 없습니다.
+     * @param files 상품 설명용 사진이며 nullable.
+     * @param user seller 여부를 확인하기 위한 session 유저입니다.
+     * @return 등록된 상품의 id를 반환합니다.
+     */
     public Long writeItem(WriteItemRequest writeItemRequest, final MultipartFile file, final List<MultipartFile> files, final User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
@@ -133,16 +143,26 @@ public class SellerService {
                 .item(item)
                 .build();
         itemOptionRepository.save(itemOption);
-
+        log.info("No option item has been registered. itemId = '{}', sellerId = '{}'", savedItem, seller.getId());
         return savedItem;
     }
 
+    /**
+     * 옵션이 있는 상품을 작성합니다.
+     * @param apiWriteItemRequest 상품에 대한 정보를 담고 있습니다.
+     * @param optionValues 상품의 옵션을 List로 담고 있습니다.
+     * @param file null일 수 없습니다.
+     * @param files 상품 설명용 사진이며 nullable.
+     * @param user seller 여부를 확인하기 위한 session 유저입니다.
+     * @return 등록된 상품의 id를 반환합니다.
+     */
     public Long writeOptionItem(final ApiWriteItemRequest apiWriteItemRequest, final List<OptionValue> optionValues, final MultipartFile file, final List<MultipartFile> files, final User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
         final long count = optionValues.stream().filter(OptionValue::getIsOptionMainItem).count();
         if (count != 1) {
+            log.info("Seller tried to register item but chosen main item is greater than one. sellerId = '{}', numberOfMainItem = '{}'", seller.getId(), count);
             throw new NotValidException("메인 상품은 하나만 선택할 수 있습니다");
         }
 
@@ -185,6 +205,7 @@ public class SellerService {
                     .build();
             itemOptionRepository.save(itemOption);
         }
+        log.info("Item with options has been registered. itemId = '{}', sellerId = '{}'", savedItem, seller.getId());
         return savedItem.getId();
     }
 
@@ -223,6 +244,7 @@ public class SellerService {
             throw new NotValidException("필수 항목에 동의해주세요");
         }
         if (sellerRepository.findByUserIdAndIsActivatedTrue(user.getId()).isPresent()) {
+            log.info("User tried to register for seller but registered already. userId = '{}'", user.getId());
             throw new AlreadyExistsException("이미 판매자로 가입이 되어있습니다");
         }
 
@@ -235,7 +257,7 @@ public class SellerService {
                 .isActivated(true)
                 .build();
         sellerRepository.save(seller);
-
+        log.info("Seller has been registered. userId = '{}', sellerId = '{}'", user.getId(), seller.getId());
         return true;
     }
 
@@ -246,6 +268,7 @@ public class SellerService {
                 .orElseThrow(() -> new QnaException("Q&A가 존재하지 않습니다"));
 
         if (qna.getIsAnswered()) {
+            log.info("Answer for qna registered already. userId = '{}', qnaId = '{}'", user.getId(), qna.getId());
             throw new AlreadyExistsException("답변이 이미 존재합니다");
         }
         Item item = qna.getItem();
@@ -270,8 +293,15 @@ public class SellerService {
 
             meNotificationRepository.save(meNotification);
         }
+        log.info("Answer has been registered for qna. qnaId = '{}'", qna.getId());
     }
 
+    /**
+     * 판매자의 작성 중이던 상품 정보를 임시 저장합니다.
+     * @param apiWriteItemRequest
+     * @param optionValues
+     * @param user
+     */
     public void temporarySave(final ApiWriteItemRequest apiWriteItemRequest, final List<OptionValue> optionValues, final User user) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
@@ -317,6 +347,12 @@ public class SellerService {
                         .build()).collect(Collectors.toList());
     }
 
+    /**
+     * 해당 상품의 판매자와 현재 session의 유저가 해당 상품의 판매자인지 확인합니다.
+     * @param itemId
+     * @param user
+     * @return
+     */
     public Boolean sellerCheck(final Long itemId, final User user) {
         if (user == null) {
             return false;
@@ -334,6 +370,7 @@ public class SellerService {
 
     public void itemDelete(final User user, final Long itemId) {
         if (!this.sellerCheck(itemId, user)) {
+            log.info("User tried to delete item but id was not matched. userId = '{}', itemId = '{}'", user.getId(), itemId);
             throw new SellerNotFoundException("판매자가 아닙니다");
         }
         itemRepository.deleteById(itemId);
@@ -345,8 +382,10 @@ public class SellerService {
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
         if (sellerRepository.existsByCompanyName(request.getCompanyName())) {
-            if (!seller.getCompanyName().equals(request.getCompanyName()))
+            if (!seller.getCompanyName().equals(request.getCompanyName())) {
+                log.info("Seller tried to save or change its company name but it was duplicated. sellerCompanyName = '{}', requestCompanyName = '{}'", seller.getCompanyName(), request.getCompanyName());
                 throw new AlreadyExistsException("이미 사용 중인 회사명입니다");
+            }
         }
 
         final Address itemReleaseAddress = Address.builder()
@@ -384,6 +423,7 @@ public class SellerService {
                     request.getShippingFeeFreePolicy(),
                     request.getDefaultDeliveryCompany());
         }
+        log.info("Seller registered its default settings. sellerId = '{}'", seller.getId());
     }
 
     @Transactional(readOnly = true)
@@ -419,6 +459,7 @@ public class SellerService {
         return seller.getCompanyName() != null;
     }
 
+    @Transactional(readOnly = true)
     public List<RecentPaymentPerSellerResponse> getSellerRecentOrders(final User user, Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
@@ -477,7 +518,6 @@ public class SellerService {
         boolean isAllItemTrackingNumberIssued = true;
 
         LocalDateTime orderDate = order.getCreatedDate();
-        //상품조회
         final List<OrderItem> orderItems = orderItemRepository.findByOrderIdAndSellerId(orderId, seller.getId());
 
         List<OrderItemResponse> orderItemResponses = new ArrayList<>();
@@ -558,6 +598,11 @@ public class SellerService {
                 .build();
     }
 
+    /**
+     * 판매자의 최근 7일간의 통계를 가져옵니다. 일별 총 판매액, 총 판매개수, 총 주문건수를 반환합니다.
+     * @param user
+     * @return
+     */
     public List<StatisticsResponse> getStatisticsByDay(final User user) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
@@ -583,6 +628,7 @@ public class SellerService {
         return statisticsResponses;
     }
 
+    //TODO
     public void getItemRecentReviews(final User user, final Pageable pageable) {
         Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));

@@ -23,10 +23,6 @@ public class PasswordInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {
-//        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        if (((UserAdapter) authentication.getPrincipal()).getUser().getAgree().getIsMandatoryAgree() == null) {
-//            response.sendRedirect("/me/privacy");
-//        }
         if (request.getSession().getAttribute("password") == null) {
             response.sendRedirect("/me/reconfirm");
         }

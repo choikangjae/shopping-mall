@@ -31,6 +31,7 @@ import com.jay.shoppingmall.dto.response.seller.SellerResponse;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -40,16 +41,17 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 @Service
 public class OrderService {
 
     private final CartService cartService;
+    private final FileHandler fileHandler;
 
     private final VirtualDeliveryCompanyRepository virtualDeliveryCompanyRepository;
     private final OrderRepository orderRepository;
-    private final FileHandler fileHandler;
     private final ImageRepository imageRepository;
     private final OrderItemRepository orderItemRepository;
     private final PaymentPerSellerRepository paymentPerSellerRepository;
@@ -72,7 +74,8 @@ public class OrderService {
                 .orElseThrow(() -> new OrderNotFoundException("해당하는 주문이 없습니다"));
 
         if (!Objects.equals(user.getId(), order.getUser().getId())) {
-            throw new NotValidException("잘못된 접근입니다");
+            log.info("Session user is not equal to order user. sessionUserId = '{}', orderUserId = '{}'", user.getId(), order.getUser().getId());
+            throw new OrderNotFoundException("잘못된 접근입니다");
         }
         LocalDateTime orderDate = order.getCreatedDate();
 
@@ -85,6 +88,7 @@ public class OrderService {
             boolean isTrackingStarted = false;
             String trackingNumber = "";
             final DeliveryStatus deliveryStatus = orderItem.getOrderDelivery().getDeliveryStatus();
+
             if (deliveryStatus.equals(DeliveryStatus.DELIVERING) || deliveryStatus.equals(DeliveryStatus.SHIPPED) || deliveryStatus.equals(DeliveryStatus.DELIVERED) || deliveryStatus.equals(DeliveryStatus.FINISHED)) {
                 trackingNumber = virtualDeliveryCompanyRepository.findByOrderItemId(orderItem.getId())
                         .orElseThrow(() -> new UserNotFoundException("잘못된 접근입니다")).getTrackingNumber();
@@ -98,11 +102,11 @@ public class OrderService {
 
             OrderItemResponse orderItemResponse = OrderItemResponse.builder()
                     .orderDate(orderDate)
-                    .itemName(orderItem.getItem().getName())
-                    .option1(orderItem.getItemOption().getOption1())
-                    .option2(orderItem.getItemOption().getOption2())
+                    .itemName(orderItem.getItemName())
+                    .option1(orderItem.getItemOption1())
+                    .option2(orderItem.getItemOption2())
                     .mainImage(mainImage)
-                    .sellerCompanyName(orderItem.getSeller().getCompanyName())
+                    .sellerCompanyName(orderItem.getSellerCompanyName())
                     .orderItemId(orderItem.getId())
                     .itemPrice(orderItem.getPriceAtPurchase())
                     .quantity(orderItem.getQuantity())
@@ -160,20 +164,16 @@ public class OrderService {
 
         final Page<Order> orders = orderRepository.findByUserId(user.getId(), pageable)
                 .orElseThrow(() -> new OrderNotFoundException("주문 정보 찾을 수 없음"));
-        //todo pageable 처리 나중에 할것
         List<SimpleOrderResponse> simpleOrderResponses = new ArrayList<>();
         for (Order order : orders) {
             Payment payment = order.getPayment();
             if (!payment.getIsValidated()) {
                 throw new PaymentFailedException("결제가 완료되지 않은 내역입니다");
             }
-            //대표 사진
             List<OrderItem> orderItems = orderItemRepository.findByOrderId(order.getId());
 
             //주문 상품 중 가장 배송 상태가 빠른 상품을 메인 배송 상태로.
             final List<String> deliveryStatuses = orderItems.stream().map(OrderItem::getOrderDelivery).map(OrderDelivery::getDeliveryStatus).map(DeliveryStatus::getValue).distinct().collect(Collectors.toList());
-            //주문 상품 중 가장 비싼 상품을 메인 사진으로
-            //썸네일 처리.
             final OrderItem mostExpensiveOneAtOrder = orderItems.stream().max(Comparator.comparingLong(OrderItem::getPriceAtPurchase))
                     .orElseThrow(() -> new ItemNotFoundException("상품이 존재하지 않습니다"));
 

@@ -4,6 +4,7 @@ import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.item.Item;
 import com.jay.shoppingmall.domain.item.item_option.ItemOption;
+import com.jay.shoppingmall.domain.item.item_stock.ItemStock;
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.exception.exceptions.CartEmptyException;
@@ -81,5 +82,11 @@ public class Cart extends BaseTimeEntity {
     }
     public Seller getItemSeller() {
         return item.getSeller();
+    }
+    public ItemStock getItemStock() {
+        return itemOption.getItemStock();
+    }
+    public Integer getStockNow() {
+        return itemOption.getStockNow();
     }
 }

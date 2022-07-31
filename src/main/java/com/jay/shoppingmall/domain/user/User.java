@@ -3,6 +3,7 @@ package com.jay.shoppingmall.domain.user;
 import com.jay.shoppingmall.common.BaseTimeEntity;
 import com.jay.shoppingmall.domain.user.model.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @Builder
 @AllArgsConstructor
 @Where(clause = "is_deleted = 0")
+@SQLDelete(sql = "UPDATE user SET is_deleted = 1, deleted_date = NOW() WHERE id = ?")
 public class User extends BaseTimeEntity implements Serializable {
  
     @Id

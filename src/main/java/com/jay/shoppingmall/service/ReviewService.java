@@ -30,6 +30,7 @@ import com.jay.shoppingmall.exception.exceptions.ReviewException;
 import com.jay.shoppingmall.service.common.CommonService;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -80,6 +82,12 @@ public class ReviewService {
                 .build();
     }
 
+    /**
+     * item의 review 평균값에 따라 스타를 반환합니다. 예를 들어 3.7점이면 꽉 찬 별 3개, 반쪽 별 1개, 빈 별 1개를 반환합니다.
+     * 0.4 <= 소수점 <= 0.7 인 경우에만 반쪽 별이 반환되며 더 낮으면 빈 별로, 더 높으면 꽉 찬 별로 반환합니다.
+     * @param item
+     * @return
+     */
     public ReviewStarCalculationResponse reviewStarCalculation(Item item) {
 
         double reviewAverageRating = item.getReviewAverageRating() == null ? 0.0 : item.getReviewAverageRating();
@@ -105,7 +113,13 @@ public class ReviewService {
                 .build();
     }
 
-
+    /**
+     * 작성된 리뷰를 받아 리뷰가 작성 가능한지 확인한 이후 사진 유무에 따라 차등 포인트를 유저에게 적립한 이후 구매를 확정합니다.
+     * @param request
+     * @param user
+     * @param files
+     * @return
+     */
     public ReviewResponse reviewWrite(final ReviewWriteRequest request, final User user, final List<MultipartFile> files) {
         final OrderItem orderItem = reviewAvailableCheck(request.getOrderItemId(), user);
 
@@ -117,7 +131,6 @@ public class ReviewService {
 
         final Star star = Star.getByValue(request.getStar());
 
-        //Truncated incorrect DOUBLE value 에러 원인 찾지 못함
         final String text = request.getText();
 
         Review review = Review.builder()
@@ -128,6 +141,7 @@ public class ReviewService {
                 .orderItem(orderItem)
                 .build();
         reviewRepository.save(review);
+        log.info("Review has been written. email = '{}', itemName = '{}'", user.getEmail(), review.getItem().getName());
 
         Long foreignId = review.getId();
         ImageRelation imageRelation = ImageRelation.REVIEW;
@@ -183,6 +197,13 @@ public class ReviewService {
         return reviewResponses;
     }
 
+    /**
+     * 해당 유저가 리뷰 작성 가능한지 validation합니다.
+     * @throws ReviewException 해당 orerItemId로 이미 리뷰가 존재하거나 orderItem의 userId가 session의 userId가 같지 않거나 배송이 완료 처리가 되어있지 않은 경우
+     * @param orderItemId
+     * @param user
+     * @return
+     */
     private OrderItem reviewAvailableCheck(final Long orderItemId, final User user) {
         if (reviewRepository.findByUserIdAndOrderItemId(user.getId(), orderItemId).isPresent()) {
             throw new ReviewException("리뷰를 이미 작성하셨습니다");
@@ -198,23 +219,9 @@ public class ReviewService {
         return orderItem;
     }
 
-
-//    private List<String> getStringImages(final List<MultipartFile> files, final ImageRelation imageRelation, final Long foreignId) {
-//        List<String> stringImages = new ArrayList<>();
-//        if (files != null) {
-//            for (MultipartFile file : files) {
-//                final Image image = fileHandler.parseFilesInfo(file, imageRelation, foreignId);
-//                imageRepository.save(image);
-//                stringImages.add(fileHandler.getStringImage(image));
-//            }
-//        }
-//        return stringImages;
-//    }
-
     private void pointCalculation(final User user, final OrderItem orderItem, final double pointPercentage) {
         final Long priceAtPurchase = orderItem.getPriceAtPurchase();
         final Integer quantity = orderItem.getQuantity();
-        //double to int safety 확인 필요.
         final int calculatedPoint = (int) ((priceAtPurchase * quantity) * pointPercentage);
 
         Point point = pointRepository.findByUserId(user.getId());

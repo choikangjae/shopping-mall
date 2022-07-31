@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.domain.item.item_option;
 
+import com.jay.shoppingmall.domain.item.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -14,4 +15,6 @@ public interface ItemOptionRepository extends JpaRepository<ItemOption, Long> {
     ItemOption findByItemIdAndIsOptionMainItemTrue(Long itemId);
 
     ItemOption findByItemPriceId(Long itemPriceId);
+
+    List<ItemOption> findByIdIn(List<Long> itemOptionIds);
 }

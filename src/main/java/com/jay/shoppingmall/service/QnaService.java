@@ -19,6 +19,7 @@ import com.jay.shoppingmall.exception.exceptions.QnaException;
 import com.jay.shoppingmall.exception.exceptions.UserNotFoundException;
 import com.jay.shoppingmall.service.common.CommonService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ import java.util.Objects;
 
 import static java.lang.Boolean.valueOf;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -218,12 +220,9 @@ public class QnaService {
         Qna qna = qnaRepository.findById(id)
                 .orElseThrow(() -> new QnaException("해당 QnA가 존재하지 않습니다"));
         if (!Objects.equals(qna.getUser().getId(), user.getId())) {
+            log.info("User tried to delete qna but the id was not matched. qnaUserId = '{}', sessionUserId = '{}'", qna.getUser().getId(), user.getId());
             throw new UserNotFoundException("유효하지 않은 접근입니다");
         }
         qnaRepository.delete(qna);
     }
-
-    //유저가 있으면 셀러에서 유저id로 찾아보고 유저가 없으면 false.
-    //유저id로 찾아본 셀러와 아이템으로 찾아본 셀러의 id가 같으면 true.
-
 }

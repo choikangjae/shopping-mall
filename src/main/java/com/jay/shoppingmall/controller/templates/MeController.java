@@ -169,7 +169,7 @@ public class MeController {
             model.addAttribute("user", user);
             return "me/delete";
         }
-        meService.deleteMe(deleteMeRequest, user);
+        meService.deleteMe(user);
 
         redirectAttributes.addFlashAttribute("message", "회원탈퇴가 완료되었습니다");
         return "redirect:/logout";

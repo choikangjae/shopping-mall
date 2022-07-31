@@ -23,15 +23,15 @@ import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -41,9 +41,9 @@ public class CartService {
     private final ItemRepository itemRepository;
     private final ImageRepository imageRepository;
     private final CartRepository cartRepository;
-    private final FileHandler fileHandler;
     private final ItemOptionRepository itemOptionRepository;
     private final SellerRepository sellerRepository;
+    private final FileHandler fileHandler;
 
     public Map<SellerResponse, List<ItemAndQuantityResponse>> showCartItemsList(User user) {
 
@@ -89,7 +89,6 @@ public class CartService {
                         .optionId(cart.getItemOption().getId())
                         .name(cart.getItem().getName())
                         .priceNow(cart.getItemOption().getItemPrice().getPriceNow())
-//                        .image(fileHandler.getStringImage(imageRepository.findByImageRelationAndForeignId(ImageRelation.ITEM_MAIN, cart.getItem().getId())))
                         .zzim(cart.getItem().getZzim())
                         .quantity(cart.getQuantity())
                         .isSelected(cart.getIsSelected())
@@ -121,11 +120,16 @@ public class CartService {
     }
 
     public void addOptionItemsToCart(final List<ItemOptionResponse> itemOptions, final User user) {
+
         for (ItemOptionResponse itemOptionResponse : itemOptions) {
             Item item = itemRepository.findById(itemOptionResponse.getItemId())
-                    .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
+                    .orElseThrow(() -> {
+                        return new ItemNotFoundException("해당 상품이 존재하지않습니다");
+                    });
             ItemOption itemOption = itemOptionRepository.findById(itemOptionResponse.getItemOptionId())
-                    .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
+                    .orElseThrow(() -> {
+                        return new ItemNotFoundException("해당 상품이 존재하지않습니다");
+                    });
 
             if (cartRepository.findByUserAndItemAndItemOption(user, item, itemOption).isPresent()) {
                 throw new AlreadyExistsException("해당 상품이 장바구니에 존재합니다");
@@ -143,7 +147,6 @@ public class CartService {
     }
 
     public CartPriceTotalResponse cartPriceTotal(User user) {
-
         final List<CartPricePerSellerResponse> cartPricePerSellerResponses = cartPricePerSeller(user);
 
         long cartTotalPrice = cartPricePerSellerResponses.stream().mapToLong(CartPricePerSellerResponse::getItemTotalPricePerSeller).sum();
@@ -241,8 +244,16 @@ public class CartService {
                 .cartPriceTotalResponse(cartPriceTotalResponse)
                 .build();
     }
+
+    /**
+     * String으로 boolean을 받아 true면 장바구니에 있는 상품 전체 선택, false면 상품 전체 선택을 해제합니다.
+     * 기존 선택 여부와 상관없이 전부 선택되거나 전부 선택 해제되거나 둘 중에 하나의 결과만 반환합니다.
+     * @param check true or false. if not, throw NotValidException
+     * @return
+     */
     public CartPriceResponse cartSelectAll(final String check, final User user) {
         if (!check.equals("false") && !check.equals("true")) {
+            log.info("User sent invalid parameter(not boolean). check = '{}', email = '{}'", check, user.getEmail());
             throw new NotValidException("잘못된 요청입니다");
         }
         List<Cart> carts = cartRepository.findByUser(user);
@@ -265,35 +276,14 @@ public class CartService {
                 .build();
     }
 
-//    public CartResponse updateCart(final CartRequest request, final User user) {
-//
-//        Cart cart = cartRepository.findByUserIdAndItemIdAndItemOptionId(user.getId(), request.getItemId(), request.getOptionId())
-//                .orElseThrow(() -> new AlreadyExistsException("해당 상품이 존재하지 않습니다"));
-//
-//        if (Objects.equals(request.getQuantity(), cart.getQuantity())) {
-//            throw new AlreadyExistsException("상품 개수가 변동되지 않았습니다");
-//        }
-//
-//        final long oldTotalPrice = request.getTotalPrice() - cart.getQuantity() * cart.getItemOption().getItemPrice().getPriceNow();
-//        final long multipliedPrice = cart.manipulateQuantity(request.getQuantity()) * cart.getItemOption().getItemPrice().getPriceNow();
-//        final Long newTotalPrice = oldTotalPrice + multipliedPrice;
-//
-//        cartRepository.save(cart);
-//
-//        return CartResponse.builder()
-//                .id(cart.getId())
-//                .quantity(cart.getQuantity())
-//                .multipliedPrice(multipliedPrice)
-//                .totalPrice(newTotalPrice)
-//                .totalQuantity(this.getTotalQuantity(user))
-//                .build();
-//    }
-
-    //TODO 삭제된 시간과 롤백 기능.
     public CartPriceResponse deleteCart(final CartManipulationRequest request, final User user) {
         final Cart cart = cartRepository.findById(request.getCartId())
-                .orElseThrow(() -> new CartEmptyException("장바구니가 비어있습니다"));
+                .orElseThrow(() -> {
+                    log.info("User expected to delete cart but was empty. cartId = '{}', email = '{}'", request.getCartId(), user.getEmail());
+                    return new CartEmptyException("장바구니가 비어있습니다");
+                });
         if (!cart.getUser().getId().equals(user.getId())) {
+            log.info("User tried to delete not his cart. cartUserId = '{}', userId = '{}', email = '{}'", cart.getUser().getId(), user.getId(), user.getEmail());
             throw new UserNotFoundException("잘못된 접근입니다");
         }
         cartRepository.delete(cart);

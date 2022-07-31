@@ -65,6 +65,7 @@ public class ItemService {
     @Value("${host.url}")
     private String url;
 
+    @Transactional(readOnly = true)
     public PageDto getAllItems(User user, Pageable pageable) {
         final Page<Item> itemPage = itemRepository.findAll(pageable);
         CustomPage customPage = new CustomPage(itemPage, url);
@@ -81,20 +82,18 @@ public class ItemService {
     }
 
     public void setIsZzimed(final User user, final List<ItemResponse> itemResponses) {
-        if (user != null) {
-            final List<Long> itemIds = itemResponses.stream().map(ItemResponse::getItemId).collect(Collectors.toList());
+        if (user == null) return;
 
-            final List<Zzim> zzims = zzimRepository.findByItemIdIn(itemIds);
+        final List<Long> itemIds = itemResponses.stream().map(ItemResponse::getItemId).collect(Collectors.toList());
+        final List<Zzim> zzims = zzimRepository.findByItemIdIn(itemIds);
 
-            for (ItemResponse itemResponse : itemResponses) {
-                for (Zzim zzim : zzims) {
-                    if (itemResponse.getItemId().equals(zzim.getItem().getId())) {
-                        itemResponse.setIsZzimed(zzim.getIsZzimed());
-                        break;
-                    }
+        for (ItemResponse itemResponse : itemResponses) {
+            for (Zzim zzim : zzims) {
+                if (itemResponse.getItemId().equals(zzim.getItem().getId())) {
+                    itemResponse.setIsZzimed(zzim.getIsZzimed());
+                    break;
                 }
             }
-
         }
     }
 

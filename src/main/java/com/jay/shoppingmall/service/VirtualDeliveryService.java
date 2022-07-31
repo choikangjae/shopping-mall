@@ -17,11 +17,13 @@ import com.jay.shoppingmall.exception.exceptions.NotValidException;
 import com.jay.shoppingmall.exception.exceptions.SellerNotFoundException;
 import com.jay.shoppingmall.service.common.CommonService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -33,6 +35,11 @@ public class VirtualDeliveryService {
 
     private final CommonService commonService;
 
+    /**
+     * 주문 상품의 id를 받아 운송장 번호를 발급합니다.
+     * @param orderItemIds
+     * @param user
+     */
     public void issueTrackingNumber(final List<Long> orderItemIds, User user) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
@@ -78,8 +85,16 @@ public class VirtualDeliveryService {
 //            virtualDeliveryCompany.setOrderItem(orderItem);
             virtualDeliveryCompanyRepository.save(virtualDeliveryCompany);
         }
+        log.info("Tracking number issued. trackingNumber = '{}', userId = '{}'", trackingNumber, user.getId());
     }
 
+    /**
+     * 운송장 번호를 받아 배송 정보를 반환합니다.
+     * session의 유저가 주문한 유저가 맞다면 모든 정보를, 주문하지 않은 유저가 조회를 하려하면 익명화된 수취자와 전달자 이름만 반환합니다.
+     * @param trackingNumber
+     * @param user
+     * @return
+     */
     public TrackPackageResponse trackMyPackages(final String trackingNumber, final User user) {
         final VirtualDeliveryCompany virtualDeliveryCompany = virtualDeliveryCompanyRepository.findFirstByTrackingNumber(trackingNumber)
                 .orElseThrow(() -> new NotValidException("해당 운송장이 존재하지 않습니다"));
@@ -122,6 +137,4 @@ public class VirtualDeliveryService {
                 .receiverName(commonService.anonymousName(virtualDeliveryCompany.getReceiverName()))
                 .build();
     }
-
-
 }

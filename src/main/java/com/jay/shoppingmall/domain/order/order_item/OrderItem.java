@@ -17,7 +17,6 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-//한 주문에 들어가는 상품 목록
 public class OrderItem {
 
     @Id
@@ -27,6 +26,14 @@ public class OrderItem {
     private Long mainImageId;
 
     private Integer quantity;
+
+    private String itemName;
+
+    private String itemOption1;
+
+    private String itemOption2;
+
+    private String sellerCompanyName;
 
     private Long priceAtPurchase;
 

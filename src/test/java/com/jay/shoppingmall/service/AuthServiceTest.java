@@ -119,7 +119,7 @@ class AuthServiceTest {
                 .isExpired(false)
                 .build();
         when(passwordResetTokenRepository.findByEmailAndToken(email, token)).thenReturn(Optional.of(passwordResetToken));
-        LocalDateTime defaultTime = LocalDateTime.now().plusMinutes(10);
+        LocalDateTime defaultTime = LocalDateTime.now().plusMinutes(11);
         try (MockedStatic<LocalDateTime> mockedLocalDateTime = mockStatic(LocalDateTime.class)) {
             mockedLocalDateTime.when(LocalDateTime::now).thenReturn(defaultTime);
             assertThrows(TokenExpiredException.class, () -> authService.passwordTokenValidator(passwordResetRequest));

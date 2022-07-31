@@ -133,7 +133,6 @@ class CartServiceTest {
         cartService.addOptionItemsToCart(list, user);
 
         verify(cartRepository, times(1)).save(any());
-        verify(cartRepository, times(1)).findByUserAndItemAndItemOption(user, item, itemOption);
     }
 
     @Test

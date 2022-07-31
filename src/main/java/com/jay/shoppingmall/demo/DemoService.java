@@ -35,6 +35,13 @@ public class DemoService {
     private final VirtualDeliveryCompanyRepository virtualDeliveryCompanyRepository;
     private final OrderRepository orderRepository;
 
+    /**
+     * 데모를 위해 만들어진 기능으로 배송 상태를 직접 요청하여 변경할 수 있습니다.
+     * 이후에 삭제될 기능입니다.
+     * @param user
+     * @param pageable
+     * @return
+     */
     public List<OrderItemResponse> deliveryChange(final User user, Pageable pageable) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자 오류"));
@@ -64,6 +71,12 @@ public class DemoService {
         return orderItemResponses;
     }
 
+    /**
+     * 데모를 위해 만들어진 기능으로 배송 상태를 직접 완료할 수 있습니다.
+     * 이후에 삭제될 기능입니다.
+     * @param user
+     * @param orderItemId
+     */
     public void deliveryDone(final User user, final Long orderItemId) {
         final Seller seller = sellerRepository.findByUserIdAndIsActivatedTrue(user.getId())
                 .orElseThrow(() -> new SellerNotFoundException("판매자 오류"));
