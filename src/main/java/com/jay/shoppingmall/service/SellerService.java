@@ -382,9 +382,10 @@ public class SellerService {
                 .orElseThrow(() -> new SellerNotFoundException("판매자가 아닙니다"));
 
         if (sellerRepository.existsByCompanyName(request.getCompanyName())) {
-            if (!seller.getCompanyName().equals(request.getCompanyName()))
+            if (!seller.getCompanyName().equals(request.getCompanyName())) {
                 log.info("Seller tried to save or change its company name but it was duplicated. sellerCompanyName = '{}', requestCompanyName = '{}'", seller.getCompanyName(), request.getCompanyName());
                 throw new AlreadyExistsException("이미 사용 중인 회사명입니다");
+            }
         }
 
         final Address itemReleaseAddress = Address.builder()
