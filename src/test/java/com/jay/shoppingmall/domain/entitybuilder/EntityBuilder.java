@@ -75,9 +75,9 @@ public class EntityBuilder {
             .build();
 
     static Item item2 = Item.builder()
-            .brandName("나이키")
-            .name("상품명")
-            .description("설명")
+            .brandName("아디다스")
+            .name("상품명2")
+            .description("설명2")
             .seller(seller)
             .build();
 
@@ -92,6 +92,16 @@ public class EntityBuilder {
             .stock(50)
             .build();
 
+    static ItemPrice itemPrice2 = ItemPrice.builder()
+            .priceNow(20000L)
+            .originalPrice(40000L)
+            .isOnSale(false)
+            .build();
+
+    static ItemStock itemStock2 = ItemStock.builder()
+            .stock(30)
+            .build();
+
     static ItemOption itemOption = ItemOption.builder()
             .item(item)
             .itemPrice(itemPrice)
@@ -101,9 +111,9 @@ public class EntityBuilder {
             .option2("option2")
             .build();
     static ItemOption itemOption2 = ItemOption.builder()
-            .item(item)
-            .itemPrice(itemPrice)
-            .itemStock(itemStock)
+            .item(item2)
+            .itemPrice(itemPrice2)
+            .itemStock(itemStock2)
             .isOptionMainItem(false)
             .option1("option1")
             .option2("option2-1")
