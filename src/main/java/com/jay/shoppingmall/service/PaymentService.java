@@ -2,6 +2,7 @@ package com.jay.shoppingmall.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.jay.shoppingmall.config.ExcludeFromJacocoGeneratedReport;
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.image.ImageRelation;
@@ -322,6 +323,7 @@ public class PaymentService {
      * @return access_token
      * @throws IOException
      */
+    @ExcludeFromJacocoGeneratedReport
     String getAccessToken() throws IOException {
 
         HttpsURLConnection conn = null;
@@ -361,6 +363,7 @@ public class PaymentService {
      * @return 실제 결제된 총액
      * @throws IOException
      */
+    @ExcludeFromJacocoGeneratedReport
     Long getPaymentInfoByToken(String imp_uid, String access_token) throws IOException {
         HttpsURLConnection connection = null;
         URL url = new URL("https://api.iamport.kr/payments/" + imp_uid);
