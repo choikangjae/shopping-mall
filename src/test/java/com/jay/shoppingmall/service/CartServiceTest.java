@@ -58,7 +58,7 @@ class CartServiceTest {
     @Mock
     FileHandler fileHandler;
     @Mock
-            ImageRepository imageRepository;
+    ImageRepository imageRepository;
 
     User user;
     Item item;
@@ -187,6 +187,7 @@ class CartServiceTest {
         assertThat(cartPriceTotalResponse.getCartTotalPrice()).isEqualTo(30000);
         assertThat(cartPriceTotalResponse.getCartTotalQuantity()).isEqualTo(10);
     }
+
     @Test
     void whenCartIsSelectedFalse_NotIncluded_cartPriceTotal() {
         Cart cart = Cart.builder()
@@ -258,6 +259,7 @@ class CartServiceTest {
 
         assertThrows(NotValidException.class, () -> cartService.cartSelectAll("notTrueNotFalse", user));
     }
+
     @Test
     void whenCheckIsTrue_SelectAll_cartSelectAll() {
         Cart cart1 = Cart.builder()
@@ -280,6 +282,7 @@ class CartServiceTest {
 
         assertThat(cartPriceResponse.getCartPriceTotalResponse().getCartTotalQuantity()).isEqualTo(8);
     }
+
     @Test
     void whenCheckIsFalse_DeselectAll_cartSelectAll() {
         Cart cart1 = Cart.builder()

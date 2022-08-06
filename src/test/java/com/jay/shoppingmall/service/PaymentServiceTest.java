@@ -1,8 +1,12 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.entitybuilder.EntityBuilder;
+import com.jay.shoppingmall.domain.image.Image;
 import com.jay.shoppingmall.domain.image.ImageRepository;
+import com.jay.shoppingmall.domain.item.Item;
+import com.jay.shoppingmall.domain.item.item_option.ItemOption;
 import com.jay.shoppingmall.domain.item.item_option.ItemOptionRepository;
 import com.jay.shoppingmall.domain.item.item_stock.item_stock_history.ItemStockHistoryRepository;
 import com.jay.shoppingmall.domain.order.DeliveryStatus;
@@ -22,6 +26,9 @@ import com.jay.shoppingmall.domain.payment.payment_per_seller.PaymentPerSellerRe
 import com.jay.shoppingmall.domain.seller.Seller;
 import com.jay.shoppingmall.domain.seller.seller_bank_account_history.SellerBankAccountHistoryRepository;
 import com.jay.shoppingmall.domain.user.User;
+import com.jay.shoppingmall.dto.request.PaymentRequest;
+import com.jay.shoppingmall.dto.response.cart.CartPricePerSellerResponse;
+import com.jay.shoppingmall.dto.response.order.payment.PaymentDetailResponse;
 import com.jay.shoppingmall.exception.exceptions.DeliveryException;
 import com.jay.shoppingmall.exception.exceptions.MoneyTransactionException;
 import com.jay.shoppingmall.exception.exceptions.PaymentFailedException;
@@ -30,11 +37,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,7 +83,7 @@ class PaymentServiceTest {
     @Mock
     MerchantUidGenerator merchantUidGenerator;
 
-
+    User user;
     OrderItem orderItem;
     PaymentPerSeller paymentPerSeller;
     Order order;
@@ -83,7 +91,9 @@ class PaymentServiceTest {
     Payment payment;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
+        user = EntityBuilder.getUser();
+
         seller = EntityBuilder.getSeller();
 
         order = Order.builder()
@@ -163,21 +173,118 @@ class PaymentServiceTest {
     }
     @Test
     void happyPath_paymentTotal() throws IOException {
+        ItemOption itemOption = EntityBuilder.getItemOption();
+        ItemOption itemOption2 = EntityBuilder.getItemOption2();
+
+        final Item item = EntityBuilder.getItem();
+        final Item item2 = EntityBuilder.getItem2();
+
+        List<Cart> cartList = new ArrayList<>();
+        Cart cart = Cart.builder()
+                .item(item)
+                .quantity(10)
+                .itemOption(itemOption)
+                .build();
+        Cart cart2 = Cart.builder()
+                .item(item2)
+                .quantity(20)
+                .itemOption(itemOption2)
+                .build();
+        cartList.add(cart);
+        cartList.add(cart2);
+
+        CartPricePerSellerResponse cartPricePerSellerResponse = CartPricePerSellerResponse.builder()
+                .itemTotalQuantityPerSeller(30)
+                .itemTotalPricePerSeller(0L)
+                .itemShippingFeePerSeller(3000)
+                .build();
+
+        Image image = Image.builder()
+                .build();
 
         doReturn("토큰").when(paymentService).getAccessToken();
         doReturn(10000L).when(paymentService).getPaymentInfoByToken(any(), any());
         when(paymentRepository.findByMerchantUid(any())).thenReturn(Optional.ofNullable(payment));
+        when(cartRepository.findByUserAndIsSelectedTrue(any())).thenReturn(cartList);
+        when(cartService.cartPricePerSeller(any(), any())).thenReturn(cartPricePerSellerResponse);
+        when(imageRepository.findByImageRelationAndForeignId(any(), any())).thenReturn(image);
+        final PaymentDetailResponse paymentDetailResponse = paymentService.paymentTotal(any(), any(), any());
 
-        paymentService.paymentTotal(any(), any(), any());
-
+        assertThat(paymentDetailResponse.getAmount()).isEqualTo(10000L);
         assertThat(payment.getIsValidated()).isTrue();
         assertThat(payment.getIsAmountManipulated()).isNull();
         verify(orderRepository).save(any());
-
-        //테스트 코드 작성
+        verify(orderDeliveryRepository, times(2)).save(any());
     }
 
     @Test
-    void paymentRecordGenerateBeforePg() {
+    void ifTotalPriceIsZero_ThrowPaymentFailedException_paymentRecordGenerateBeforePg() {
+        ItemOption itemOption = EntityBuilder.getItemOption();
+        ItemOption itemOption2 = EntityBuilder.getItemOption2();
+
+        final Item item = EntityBuilder.getItem();
+        final Item item2 = EntityBuilder.getItem2();
+
+        List<Cart> cartList = new ArrayList<>();
+        Cart cart = Cart.builder()
+                .item(item)
+                .quantity(10)
+                .itemOption(itemOption)
+                .build();
+        Cart cart2 = Cart.builder()
+                .item(item2)
+                .quantity(20)
+                .itemOption(itemOption2)
+                .build();
+        cartList.add(cart);
+        cartList.add(cart2);
+
+        CartPricePerSellerResponse cartPricePerSellerResponse = CartPricePerSellerResponse.builder()
+                .itemTotalQuantityPerSeller(30)
+                .itemTotalPricePerSeller(0L)
+                .itemShippingFeePerSeller(3000)
+                .build();
+
+        when(cartRepository.findByUserAndIsSelectedTrue(any())).thenReturn(cartList);
+        when(merchantUidGenerator.generateMerchantUid()).thenReturn("MerchantUid");
+        when(cartService.cartPricePerSeller(any(), any())).thenReturn(cartPricePerSellerResponse);
+
+        assertThrows(PaymentFailedException.class, () -> paymentService.paymentRecordGenerateBeforePg(PaymentRequest.builder().build(), user));
+    }
+    @Test
+    void success_paymentRecordGenerateBeforePg() {
+        ItemOption itemOption = EntityBuilder.getItemOption();
+        ItemOption itemOption2 = EntityBuilder.getItemOption2();
+
+        final Item item = EntityBuilder.getItem();
+        final Item item2 = EntityBuilder.getItem2();
+
+        List<Cart> cartList = new ArrayList<>();
+        Cart cart = Cart.builder()
+                .item(item)
+                .quantity(10)
+                .itemOption(itemOption)
+                .build();
+        Cart cart2 = Cart.builder()
+                .item(item2)
+                .quantity(20)
+                .itemOption(itemOption2)
+                .build();
+        cartList.add(cart);
+        cartList.add(cart2);
+
+        CartPricePerSellerResponse cartPricePerSellerResponse = CartPricePerSellerResponse.builder()
+                .itemTotalQuantityPerSeller(30)
+                .itemTotalPricePerSeller(50000L)
+                .itemShippingFeePerSeller(3000)
+                .build();
+
+        when(cartRepository.findByUserAndIsSelectedTrue(any())).thenReturn(cartList);
+        when(merchantUidGenerator.generateMerchantUid()).thenReturn("MerchantUid");
+        when(cartService.cartPricePerSeller(any(), any())).thenReturn(cartPricePerSellerResponse);
+
+        paymentService.paymentRecordGenerateBeforePg(PaymentRequest.builder().build(), user);
+
+        verify(paymentRepository).save(any());
     }
 }

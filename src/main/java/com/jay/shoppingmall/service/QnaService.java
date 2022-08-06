@@ -121,53 +121,53 @@ public class QnaService {
                 .build();
     }
 
-    public QnaResponseWithPagination getQnaListByPaging(Long itemId, User user, Pageable pageable) {
-        Page<Qna> qnas = qnaRepository.findAllByItemId(itemId, pageable);
-        Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
-
-        List<QnaResponse> qnaResponses = new ArrayList<>();
-        for (Qna qna : qnas) {
-            boolean isQnaOwner = user != null && user.getEmail().equals(qna.getUser().getEmail());
-
-            StringBuilder username = new StringBuilder(qna.getUser().getUsername());
-            username.delete(username.length() / 2, username.length());
-            username.append("*".repeat(username.length() / 2 + 1));
-
-            //비밀글일때
-            QnaResponse qnaResponse = QnaResponse.builder()
-                    .username(String.valueOf(username))
-                    .isAnswered(qna.getIsAnswered())
-                    .isSecret(qna.getIsSecret())
-                    .itemId(qna.getItem().getId())
-                    .qnaCategory(qna.getQnaCategory().value())
-                    .qnaId(qna.getId())
-                    .answer(qna.getIsSecret() ? "" : qna.getAnswer())
-                    .question(qna.getIsSecret() ? "" : qna.getQuestion())
-                    .isEmailNotification(qna.getIsEmailNotification())
-                    .createdDate(qna.getCreatedDate())
-                    .isQnaOwner(isQnaOwner)
-                    .build();
-            //주인일때
-            if (isQnaOwner) {
-                qnaResponse.setQuestion(qna.getQuestion());
-                qnaResponse.setAnswer(qna.getAnswer());
-                qnaResponse.setIsQnaOwner(isQnaOwner);
-            }
-            if (isSellerItem){
-                qnaResponse.setIsSecret(false);
-                qnaResponse.setQuestion(qna.getQuestion());
-                qnaResponse.setAnswer(qna.getAnswer());
-            }
-            qnaResponses.add(qnaResponse);
-        }
-
-        return QnaResponseWithPagination.builder()
-                .isSellerItem(isSellerItem)
-                .totalElements(qnas.getTotalElements())
-                .totalPages(qnas.getTotalPages() == 0 ? 1 : qnas.getTotalPages())
-                .qnaResponses(qnaResponses)
-                .build();
-    }
+//    public QnaResponseWithPagination getQnaListByPaging(Long itemId, User user, Pageable pageable) {
+//        Page<Qna> qnas = qnaRepository.findAllByItemId(itemId, pageable);
+//        Boolean isSellerItem = sellerService.sellerCheck(itemId, user);
+//
+//        List<QnaResponse> qnaResponses = new ArrayList<>();
+//        for (Qna qna : qnas) {
+//            boolean isQnaOwner = user != null && user.getEmail().equals(qna.getUser().getEmail());
+//
+//            StringBuilder username = new StringBuilder(qna.getUser().getUsername());
+//            username.delete(username.length() / 2, username.length());
+//            username.append("*".repeat(username.length() / 2 + 1));
+//
+//            //비밀글일때
+//            QnaResponse qnaResponse = QnaResponse.builder()
+//                    .username(String.valueOf(username))
+//                    .isAnswered(qna.getIsAnswered())
+//                    .isSecret(qna.getIsSecret())
+//                    .itemId(qna.getItem().getId())
+//                    .qnaCategory(qna.getQnaCategory().value())
+//                    .qnaId(qna.getId())
+//                    .answer(qna.getIsSecret() ? "" : qna.getAnswer())
+//                    .question(qna.getIsSecret() ? "" : qna.getQuestion())
+//                    .isEmailNotification(qna.getIsEmailNotification())
+//                    .createdDate(qna.getCreatedDate())
+//                    .isQnaOwner(isQnaOwner)
+//                    .build();
+//            //주인일때
+//            if (isQnaOwner) {
+//                qnaResponse.setQuestion(qna.getQuestion());
+//                qnaResponse.setAnswer(qna.getAnswer());
+//                qnaResponse.setIsQnaOwner(isQnaOwner);
+//            }
+//            if (isSellerItem){
+//                qnaResponse.setIsSecret(false);
+//                qnaResponse.setQuestion(qna.getQuestion());
+//                qnaResponse.setAnswer(qna.getAnswer());
+//            }
+//            qnaResponses.add(qnaResponse);
+//        }
+//
+//        return QnaResponseWithPagination.builder()
+//                .isSellerItem(isSellerItem)
+//                .totalElements(qnas.getTotalElements())
+//                .totalPages(qnas.getTotalPages() == 0 ? 1 : qnas.getTotalPages())
+//                .qnaResponses(qnaResponses)
+//                .build();
+//    }
 
     public PageDto getQnas(Long itemId, String targetPage, User user, Pageable pageable) {
         Page<Qna> qnaPage = qnaRepository.findAllByItemId(itemId, pageable);
