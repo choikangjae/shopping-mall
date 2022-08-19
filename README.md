@@ -31,7 +31,7 @@
 # 프로젝트 회고
 https://middleearth.tistory.com/75
 
-# 프로젝트 구조
+# 프로젝트 구조 (DDD)
 <details>
 <summary>접기/펼치기</summary>
 
