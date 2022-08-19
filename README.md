@@ -35,84 +35,8 @@ https://middleearth.tistory.com/75
 <details>
 <summary>접기/펼치기</summary>
 
-```
-src
-└───shoppingmall
-    ├───common
-    │   └───model
-    ├───config
-    │   └───interceptors
-    ├───controller
-    │   ├───api
-    │   ├───common
-    │   └───templates
-    ├───demo
-    ├───domain
-    │   ├───browse_history
-    │   ├───cart
-    │   ├───category
-    │   ├───image
-    │   ├───item
-    │   │   ├───item_option
-    │   │   ├───item_price
-    │   │   │   ├───model
-    │   │   │   └───price_history
-    │   │   ├───item_stock
-    │   │   │   └───item_stock_history
-    │   │   ├───item_view_history
-    │   │   └───temporary
-    │   ├───model
-    │   │   └───page
-    │   ├───notification
-    │   │   ├───item_notification
-    │   │   ├───me_notification
-    │   │   ├───model
-    │   │   └───qna_notification
-    │   ├───order
-    │   │   └───order_item
-    │   │       └───order_delivery
-    │   ├───payment
-    │   │   ├───model
-    │   │   └───payment_per_seller
-    │   ├───point
-    │   │   └───point_history
-    │   │       └───model
-    │   ├───qna
-    │   ├───review
-    │   ├───seller
-    │   │   └───seller_bank_account_history
-    │   ├───statistics
-    │   ├───token
-    │   │   └───password
-    │   ├───user
-    │   │   └───model
-    │   ├───virtual_delivery_company
-    │   └───zzim
-    ├───dto
-    │   ├───request
-    │   │   ├───admin
-    │   │   │   └───category
-    │   │   ├───password
-    │   │   └───qna
-    │   └───response
-    │       ├───admin
-    │       │   └───category
-    │       ├───cart
-    │       ├───item
-    │       ├───notification
-    │       ├───order
-    │       │   └───payment
-    │       ├───review
-    │       ├───seller
-    │       └───user
-    ├───exception
-    │   └───exceptions
-    ├───security
-    │   └───interceptor
-    └───service
-        ├───common
-        └───handler
-```
+<img src="https://user-images.githubusercontent.com/99468424/185558454-24312822-a378-4fe4-8e82-80955ca14f19.png" height="1500"/>
+
 </details>
 
 
