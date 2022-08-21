@@ -2,6 +2,7 @@ package com.jay.shoppingmall.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.jay.shoppingmall.config.ExcludeFromJacocoGeneratedReport;
 import com.jay.shoppingmall.domain.cart.Cart;
 import com.jay.shoppingmall.domain.cart.CartRepository;
 import com.jay.shoppingmall.domain.image.ImageRelation;
@@ -252,9 +253,14 @@ public class PaymentService {
         String merchantUid = merchantUidGenerator.generateMerchantUid();
 
         long totalQuantity = carts.stream().mapToLong(Cart::getQuantity).sum();
-        Long mostExpensiveOnePriceId = carts.stream().map(Cart::getItemOption).map(ItemOption::getItemPrice).max(Comparator.comparingLong(ItemPrice::getPriceNow)).map(ItemPrice::getId)
-                .orElseThrow(()-> new ItemNotFoundException("상품이 존재하지 않습니다"));
-        String mostExpensiveOne = itemOptionRepository.findByItemPriceId(mostExpensiveOnePriceId).getItem().getName();
+        Long mostExpensivePrice = -1L;
+        String mostExpensiveOne = "";
+        for (Cart cart : carts) {
+            if (cart.getPriceNow() > mostExpensivePrice) {
+                mostExpensivePrice = cart.getPriceNow();
+                mostExpensiveOne = cart.getItem().getName();
+            }
+        }
         String name = totalQuantity == 1 ? mostExpensiveOne : mostExpensiveOne + " 외 " + (totalQuantity - 1) + "건";
 
         long cartPriceTotal = 0;
@@ -267,6 +273,11 @@ public class PaymentService {
             shippingFeeTotal += cartPricePerSellerResponse.getItemShippingFeePerSeller();
         }
         long amount = cartPriceTotal + shippingFeeTotal;
+
+        if (cartPriceTotal == 0 || mostExpensivePrice == -1) {
+            log.warn("payment failed. userId = '{}'", user.getId());
+            throw new PaymentFailedException("가격 오류가 발생하였습니다.");
+        }
 
         ReceiverInfo receiverInfo = ReceiverInfo.builder()
                 .receiverAddress(paymentRequest.getBuyerAddr())
@@ -291,7 +302,7 @@ public class PaymentService {
                 .receiverInfo(receiverInfo)
                 .build();
 
-        log.info("Payment has been triggered. email = '{}', amount = '{}', merchantUid = '{}'", user.getEmail(), amount, merchantUid);
+        log.info("Payment record saved before pg. email = '{}', amount = '{}', merchantUid = '{}', name = '{}'", user.getEmail(), amount, merchantUid, name);
         paymentRepository.save(payment);
 
         return PaymentResponse.builder()
@@ -312,6 +323,7 @@ public class PaymentService {
      * @return access_token
      * @throws IOException
      */
+    @ExcludeFromJacocoGeneratedReport
     String getAccessToken() throws IOException {
 
         HttpsURLConnection conn = null;
@@ -351,6 +363,7 @@ public class PaymentService {
      * @return 실제 결제된 총액
      * @throws IOException
      */
+    @ExcludeFromJacocoGeneratedReport
     Long getPaymentInfoByToken(String imp_uid, String access_token) throws IOException {
         HttpsURLConnection connection = null;
         URL url = new URL("https://api.iamport.kr/payments/" + imp_uid);
@@ -371,11 +384,13 @@ public class PaymentService {
         return response.getResponse().getAmount();
     }
 
+    @ExcludeFromJacocoGeneratedReport
     @ToString
     @Getter
     private static class Response {
         private PaymentInfo response;
     }
+    @ExcludeFromJacocoGeneratedReport
     @ToString
     @Getter
     private static class PaymentInfo {

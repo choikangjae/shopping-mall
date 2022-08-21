@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.config.ExcludeFromJacocoGeneratedReport;
 import com.jay.shoppingmall.domain.user.User;
 import com.jay.shoppingmall.domain.user.UserRepository;
 //import com.jay.shoppingmall.security.CustomUserDetails;
@@ -9,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@ExcludeFromJacocoGeneratedReport
 @RequiredArgsConstructor
 @Service
 @Transactional

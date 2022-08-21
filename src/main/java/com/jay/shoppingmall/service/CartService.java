@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@EqualsAndHashCode
 public class CartService {
 
     private final ItemRepository itemRepository;

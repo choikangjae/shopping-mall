@@ -273,6 +273,51 @@ class SellerServiceTest {
     }
 
     @Test
+    void whenUserSellerIdIsEqualToItemSellerId_ReturnTrue_sellerCheck() {
+        seller = Seller.builder()
+                .id(3L)
+                .build();
+        item = Item.builder()
+                .id(0L)
+                .name(writeItemRequest.getItemName())
+                .description(writeItemRequest.getDescription())
+                .brandName(writeItemRequest.getItemBrandName())
+                .seller(seller)
+                .build();
+
+        when(sellerRepository.findByUserIdAndIsActivatedTrue(any())).thenReturn(Optional.ofNullable(seller));
+        when(itemRepository.findById(any())).thenReturn(Optional.ofNullable(item));
+
+        final Boolean isSeller = sellerService.sellerCheck(item.getId(), user);
+
+        assertThat(isSeller).isTrue();
+    }
+    @Test
+    void whenUserSellerIdIsNotEqualToItemSellerId_ReturnFalse_sellerCheck() {
+        seller = Seller.builder()
+                .id(3L)
+                .build();
+        Seller seller2 = Seller.builder()
+                .id(4L)
+                .build();
+
+        item = Item.builder()
+                .id(0L)
+                .name(writeItemRequest.getItemName())
+                .description(writeItemRequest.getDescription())
+                .brandName(writeItemRequest.getItemBrandName())
+                .seller(seller2)
+                .build();
+
+        when(sellerRepository.findByUserIdAndIsActivatedTrue(any())).thenReturn(Optional.ofNullable(seller));
+        when(itemRepository.findById(any())).thenReturn(Optional.ofNullable(item));
+
+        final Boolean isSeller = sellerService.sellerCheck(item.getId(), user);
+
+        assertThat(isSeller).isFalse();
+    }
+
+    @Test
     void whenIsAnsweredTrue_ThrowAlreadyExistsException_qnaAnswerRegister() {
         Qna qna1 = Qna.builder()
                 .id(0L)

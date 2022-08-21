@@ -1,5 +1,6 @@
 package com.jay.shoppingmall.service;
 
+import com.jay.shoppingmall.config.ExcludeFromJacocoGeneratedReport;
 import com.jay.shoppingmall.domain.browse_history.BrowseHistoryRepository;
 import com.jay.shoppingmall.domain.image.ImageRepository;
 import com.jay.shoppingmall.domain.item.ItemRepository;
@@ -17,7 +18,6 @@ import com.jay.shoppingmall.dto.request.UserUpdateRequest;
 import com.jay.shoppingmall.exception.exceptions.*;
 import com.jay.shoppingmall.service.handler.FileHandler;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@ToString
 public class MeService {
 
     private final PasswordEncoder passwordEncoder;
@@ -40,6 +39,7 @@ public class MeService {
 
     private final FileHandler fileHandler;
 
+    @ExcludeFromJacocoGeneratedReport
     public Boolean passwordCheck(String password, User user) {
 
         return passwordEncoder.matches(password, user.getPassword());
@@ -148,11 +148,4 @@ public class MeService {
             throw new AlreadyExistsException("이미 해당 번호가 존재합니다");
         }
     }
-
-    public boolean userAgreeCheck(final User user) {
-        final User userTemp = userRepository.findById(user.getId())
-                .orElseThrow(() -> new UserNotFoundException("이용자가 아닙니다"));
-        return userTemp.getAgree().getIsMandatoryAgree() != null && userTemp.getAgree().getIsMandatoryAgree();
-    }
-
 }
