@@ -54,6 +54,12 @@ public class CartService {
         final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
 
         //판매자를 기준으로 상품 정렬
+        sortItemsBySeller(user, carts, sellerResponseListMap, sellers);
+
+        return sellerResponseListMap;
+    }
+
+    private void sortItemsBySeller(final User user, final List<Cart> carts, final Map<SellerResponse, List<ItemAndQuantityResponse>> sellerResponseListMap, final List<Seller> sellers) {
         for (Seller seller : sellers) {
             this.cartPricePerSeller(user, seller);
             final List<Cart> cartList = carts.stream().filter(cart -> cart.getItem().getSeller().equals(seller)).collect(Collectors.toList());
@@ -101,7 +107,6 @@ public class CartService {
 
             sellerResponseListMap.put(sellerResponse, itemAndQuantityResponses);
         }
-        return sellerResponseListMap;
     }
 
     private void setImage(final List<Cart> cartList, final List<ItemAndQuantityResponse> itemAndQuantityResponses) {
@@ -121,15 +126,15 @@ public class CartService {
 
     public void addOptionItemsToCart(final List<ItemOptionResponse> itemOptions, final User user) {
 
+        addItemToCart(itemOptions, user);
+    }
+
+    private void addItemToCart(final List<ItemOptionResponse> itemOptions, final User user) {
         for (ItemOptionResponse itemOptionResponse : itemOptions) {
             Item item = itemRepository.findById(itemOptionResponse.getItemId())
-                    .orElseThrow(() -> {
-                        return new ItemNotFoundException("해당 상품이 존재하지않습니다");
-                    });
+                    .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
             ItemOption itemOption = itemOptionRepository.findById(itemOptionResponse.getItemOptionId())
-                    .orElseThrow(() -> {
-                        return new ItemNotFoundException("해당 상품이 존재하지않습니다");
-                    });
+                    .orElseThrow(() -> new ItemNotFoundException("해당 상품이 존재하지않습니다"));
 
             if (cartRepository.findByUserAndItemAndItemOption(user, item, itemOption).isPresent()) {
                 throw new AlreadyExistsException("해당 상품이 장바구니에 존재합니다");
@@ -195,10 +200,16 @@ public class CartService {
     }
 
     public List<CartPricePerSellerResponse> cartPricePerSeller(User user) {
-        List<CartPricePerSellerResponse> cartPricePerSellerResponses = new ArrayList<>();
         final List<Cart> carts = cartRepository.findByUser(user);
 
-        final List<Seller> sellers = carts.stream().map(Cart::getItem).map(Item::getSeller).distinct().collect(Collectors.toList());
+        final List<Seller> sellers = carts.stream().map(Cart::getItem)
+                .map(Item::getSeller).distinct().collect(Collectors.toList());
+
+        return getCartPricePerSellerResponses(carts, sellers);
+    }
+
+    private List<CartPricePerSellerResponse> getCartPricePerSellerResponses(final List<Cart> carts, final List<Seller> sellers) {
+        List<CartPricePerSellerResponse> cartPricePerSellerResponses = new ArrayList<>();
         for (Seller seller : sellers) {
             long cartTotalPricePerSeller = 0;
             int cartTotalQuantityPerSeller = 0;
@@ -256,17 +267,11 @@ public class CartService {
             log.info("User sent invalid parameter(not boolean). check = '{}', email = '{}'", check, user.getEmail());
             throw new NotValidException("잘못된 요청입니다");
         }
+
         List<Cart> carts = cartRepository.findByUser(user);
 
-        if (check.equals("false")) {
-            for (Cart cart : carts) {
-                cart.setIsSelected(false);
-            }
-        } else {
-            for (Cart cart : carts) {
-                cart.setIsSelected(true);
-            }
-        }
+        setCartIsSelected(check, carts);
+
         final List<CartPricePerSellerResponse> cartPricePerSellerResponses = cartPricePerSeller(user);
         final CartPriceTotalResponse cartPriceTotalResponse = cartPriceTotal(cartPricePerSellerResponses);
 
@@ -276,17 +281,20 @@ public class CartService {
                 .build();
     }
 
-    public CartPriceResponse deleteCart(final CartManipulationRequest request, final User user) {
-        final Cart cart = cartRepository.findById(request.getCartId())
-                .orElseThrow(() -> {
-                    log.info("User expected to delete cart but was empty. cartId = '{}', email = '{}'", request.getCartId(), user.getEmail());
-                    return new CartEmptyException("장바구니가 비어있습니다");
-                });
-        if (!cart.getUser().getId().equals(user.getId())) {
-            log.info("User tried to delete not his cart. cartUserId = '{}', userId = '{}', email = '{}'", cart.getUser().getId(), user.getId(), user.getEmail());
-            throw new UserNotFoundException("잘못된 접근입니다");
+    private void setCartIsSelected(final String check, final List<Cart> carts) {
+        if (check.equals("false")) {
+            for (Cart cart : carts) {
+                cart.setIsSelected(false);
+            }
+        } else {
+            for (Cart cart : carts) {
+                cart.setIsSelected(true);
+            }
         }
-        cartRepository.delete(cart);
+    }
+
+    public CartPriceResponse deleteCart(final CartManipulationRequest request, final User user) {
+        final Cart cart = getDeletedCart(request, user);
 
         final CartPricePerSellerResponse cartPricePerSellerResponse = this.cartPricePerSeller(user, cart.getItem().getSeller());
         final CartPriceTotalResponse cartPriceTotalResponse = this.cartPriceTotal(user);
@@ -297,9 +305,27 @@ public class CartService {
                 .build();
     }
 
+    private Cart getDeletedCart(final CartManipulationRequest request, final User user) {
+        final Cart cart = cartRepository.findById(request.getCartId())
+                .orElseThrow(() -> {
+                    log.info("User expected to delete cart but was empty. cartId = '{}', email = '{}'", request.getCartId(), user.getEmail());
+                    return new CartEmptyException("장바구니가 비어있습니다");
+                });
+        if (!cart.getUser().getId().equals(user.getId())) {
+            log.info("User tried to delete not his cart. cartUserId = '{}', userId = '{}', email = '{}'", cart.getUser().getId(), user.getId(), user.getEmail());
+            throw new UserNotFoundException("잘못된 접근입니다");
+        }
+        cartRepository.delete(cart);
+        return cart;
+    }
+
     public Integer getTotalQuantity(final User user) {
         List<Cart> carts = cartRepository.findByUser(user);
 
+        return getTotalQuantity(carts);
+    }
+
+    private Integer getTotalQuantity(final List<Cart> carts) {
         Integer totalQuantity = 0;
         for (Cart cart : carts) {
             totalQuantity += cart.getQuantity();
