@@ -384,11 +384,13 @@ public class PaymentService {
         return response.getResponse().getAmount();
     }
 
+    @ExcludeFromJacocoGeneratedReport
     @ToString
     @Getter
     private static class Response {
         private PaymentInfo response;
     }
+    @ExcludeFromJacocoGeneratedReport
     @ToString
     @Getter
     private static class PaymentInfo {
