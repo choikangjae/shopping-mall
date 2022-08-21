@@ -114,8 +114,6 @@ public class FileHandler {
         }
         return stringImages;
     }
-
-
     public String getStringImage(Image image) {
         String absolutePath = new File("").getAbsolutePath() + File.separator;
         String path = absolutePath + image.getFilePath();
