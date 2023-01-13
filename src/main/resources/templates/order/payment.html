@@ -311,7 +311,7 @@
                             })
                     }
 
-                    fetch(`/api/v1/payment/record`, data)
+                    fetch(baseApi + `/payment/record`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

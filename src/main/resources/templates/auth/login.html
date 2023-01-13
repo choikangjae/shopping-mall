@@ -21,7 +21,7 @@
         <div th:if="${param.error}" class="alert alert-danger" role="alert">
             이메일이나 비밀번호가 일치하지 않습니다
         </div>
-        <a href="/">
+        <a th:href="@{/}">
             <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
         </a>
         <h1 class="h3 mb-3 fw-normal">로그인</h1>

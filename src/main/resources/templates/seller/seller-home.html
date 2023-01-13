@@ -196,7 +196,7 @@
         </div>
         <script>
             function goToItemDetail(itemId, notificationId) {
-                fetch(`/api/v1/notification/` + notificationId)
+                fetch(baseApi + `/notification/` + notificationId)
                     .then(res => {
                         if (!res.ok) {
                             throw res;

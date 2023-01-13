@@ -199,7 +199,7 @@
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/seller/settings`, data)
+                    fetch(baseApi + `/seller/settings`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

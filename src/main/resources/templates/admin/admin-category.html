@@ -70,7 +70,7 @@
         </div>
         <script>
             window.addEventListener('load', () => {
-                fetch(`/api/v1/admin/category`)
+                fetch(baseApi + `/admin/category`)
                 .then(res => res.json())
                 .then(data => {
                     for (let i = 0; i < data.length; i++) {
@@ -121,7 +121,7 @@
                         })
                 }
 
-                fetch(`/api/v1/admin/category/add`, data)
+                fetch(baseApi + `/admin/category/add`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;

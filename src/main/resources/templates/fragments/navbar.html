@@ -8,7 +8,7 @@
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4" th:fragment="navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/">쇼핑몰</a>
+            <a class="navbar-brand" th:href="@{/}">쇼핑몰</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -57,9 +57,6 @@
                                 class="nav-link" th:href="@{/admin}" href="#">어드민</a>
                         </li>
                     </div>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/index}" href="#">채팅</a>
-                    </li>
                     <div sec:authorize="isAuthenticated()">
                         <li class="nav-item text-white">
                             아이디: <span class="text-white" sec:authentication="name"></span>

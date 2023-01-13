@@ -54,7 +54,7 @@
                         }
                     };
 
-                    fetch(`/api/v1/reconfirm`, data)
+                    fetch(baseApi + `/reconfirm`, data)
                         .then(res => {
                             if (!res.ok) {
                                 alert('비밀번호를 확인해주세요');

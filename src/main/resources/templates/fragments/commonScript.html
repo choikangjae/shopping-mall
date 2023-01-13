@@ -3,12 +3,12 @@
 <body>
 
 <div th:fragment="commonScript">
-
     <!-- JavaScript Bundle with Popper -->
     <script th:src="@{/assets/dist/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/get_cart_total_amount.js}"></script>
-    <script>
-        const baseUrl = ${@environment.getProperty('url')};
+    <script th:inline="javascript">
+        const baseUrl = [[${@environment.getProperty('host.url')}]]
+        const baseApi = "/shop/api/v1"
     </script>
 </div>
 

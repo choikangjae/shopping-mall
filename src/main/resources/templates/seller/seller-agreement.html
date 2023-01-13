@@ -69,7 +69,7 @@
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/seller/agree`, agreeData)
+                    fetch(baseApi + `/seller/agree`, agreeData)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

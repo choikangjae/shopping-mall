@@ -1,5 +1,8 @@
 #amd64
-FROM openjdk:11
+#FROM openjdk:11
+
+#arm64
+FROM arm64v8/openjdk:11
 LABEL MAINTAINER="choikj33@gmail.com"
 
 VOLUME /tmp

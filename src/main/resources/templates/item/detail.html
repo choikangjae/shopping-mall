@@ -483,7 +483,7 @@
                         })
                 }
 
-                fetch(`/api/v1/item/option/totals`)
+                fetch(baseApi + `/item/option/totals`)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -565,7 +565,7 @@
                         })
                 }
 
-                fetch(`/api/v1/item/option/update`, data)
+                fetch(baseApi + `/item/option/update`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -606,7 +606,7 @@
                         })
                 }
 
-                fetch(`/api/v1/item/option/delete`, data)
+                fetch(baseApi + `/item/option/delete`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -679,7 +679,7 @@
                         .then(json => alert(json.message));
                 }
 
-                fetch(`/api/v1/item/option/add`, data)
+                fetch(baseApi + `/item/option/add`, data)
                     .then(res => {
                         if (!res.ok) {
                             if (res.status == 400) {
@@ -715,7 +715,7 @@
                         })
                 }
 
-                fetch(`/api/v1/cart/add`)
+                fetch(baseApi + `/cart/add`)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -766,7 +766,7 @@
                             alert(json.message);
                         })
                 }
-                fetch(`/api/v1/qna/write`, data)
+                fetch(baseApi + `/qna/write`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -823,7 +823,7 @@
                         })
                 }
 
-                fetch(`/api/v1/pagination`, data)
+                fetch(baseApi + `/pagination`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -864,7 +864,7 @@
                         })
                 }
 
-                fetch(`/api/v1/qna/` + qnaId, data)
+                fetch(baseApi + `/qna/` + qnaId, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -899,7 +899,7 @@
             //             })
             //     }
 
-            //     fetch(`/api/v1/qna/` + qnaId, data)
+            //     fetch(baseApi + `/qna/` + qnaId, data)
             //         .then(res => {
             //             if (!res.ok) {
             //                 throw res;
@@ -938,7 +938,7 @@
                             })
                     }
 
-                    fetch(`/api/v1/qna/delete`, data)
+                    fetch(baseApi + `/qna/delete`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;
@@ -989,7 +989,7 @@
                         })
                 }
 
-                fetch(`/api/v1/qna/answer/`, data)
+                fetch(baseApi + `/qna/answer/`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;

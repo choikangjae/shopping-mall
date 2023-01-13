@@ -278,7 +278,7 @@
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/seller/write-no-option`, data)
+                    fetch(baseApi + `/seller/write-no-option`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;
@@ -351,7 +351,7 @@
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/seller/write`, data)
+                    fetch(baseApi + `/seller/write`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

@@ -202,7 +202,7 @@
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/privacy/update`, data)
+                    fetch(baseApi + `/privacy/update`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;
@@ -238,7 +238,7 @@
                     .then(json => alert(json.message));
                 }
 
-                fetch(`/api/v1/phone/duplication-check`, data)
+                fetch(baseApi + `/phone/duplication-check`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -282,7 +282,7 @@
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/me/password-update`, data)
+                    fetch(baseApi + `/me/password-update`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

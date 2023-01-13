@@ -70,7 +70,7 @@
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/privacy/agree`, agreeData)
+                    fetch(baseApi + `/privacy/agree`, agreeData)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

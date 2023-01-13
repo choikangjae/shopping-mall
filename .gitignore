@@ -38,3 +38,5 @@ out/
 /src/main/resources/application.properties
 !/images/
 !/docker-compose.yml
+
+docker-compose.yml

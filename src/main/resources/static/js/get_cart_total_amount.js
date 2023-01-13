@@ -23,7 +23,7 @@ window.addEventListener('load', (e) => {
             return res.json().then(json => alert(json.message));
         }
 
-        fetch(`/api/v1/cart/total`, data)
+        fetch(baseApi + `/cart/total`, data)
             .then(res => {
                 if (!res.ok) {
                     throw res;

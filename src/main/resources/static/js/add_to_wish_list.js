@@ -28,7 +28,7 @@ function addToWishList(itemId) {
                         // return res.text().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/item/zzim`, data)
+                    fetch(baseApi + `/item/zzim`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

@@ -222,7 +222,7 @@
                     return res.json().then(json => alert(json.message));
                 }
 
-                fetch(`/api/v1/cart/item/total`)
+                fetch(baseApi + `/cart/item/total`)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -303,7 +303,7 @@
                 }
 
                 if (document.getElementById('selectCartAll').textContent == '전체 선택') {
-                    fetch(`/api/v1/cart/select/` + 'true')
+                    fetch(baseApi + `/cart/select/` + 'true')
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -315,7 +315,7 @@
                         alert(err.message);
                     });
                 } else {
-                    fetch(`/api/v1/cart/select/` + 'false')
+                    fetch(baseApi + `/cart/select/` + 'false')
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -378,7 +378,7 @@
                     return res.json().then(json => alert(json.message));
                 }
 
-                fetch(`/api/v1/cart/item/price` , data)
+                fetch(baseApi + `/cart/item/price` , data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -440,7 +440,7 @@
                     return res.json().then(json => alert(json.message));
                 }
 
-                fetch(`/api/v1/cart/delete`, data)
+                fetch(baseApi + `/cart/delete`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;

@@ -264,7 +264,7 @@
                         return res.json().then(json => alert(json.message));
                     }
 
-                    fetch(`/api/v1/order/receiver-info`, data)
+                    fetch(baseApi + `/order/receiver-info`, data)
                         .then(res => {
                             if (!res.ok) {
                                 throw res;

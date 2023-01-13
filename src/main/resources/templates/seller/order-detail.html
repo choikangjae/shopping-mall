@@ -164,7 +164,7 @@
                         })
                 }
 
-                fetch(`/api/v1/delivery/issue-tracking-number`, data)
+                fetch(baseApi + `/delivery/issue-tracking-number`, data)
                     .then(res => {
                         if (!res.ok) {
                             throw res;

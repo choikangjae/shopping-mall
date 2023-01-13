@@ -235,7 +235,7 @@
                     return res.json().then(json => alert(json.message));
                 }
 
-                fetch(`/api/v1/review/write/` + orderItemId)
+                fetch(baseApi + `/review/write/` + orderItemId)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
@@ -271,7 +271,7 @@
                     return res.json().then(json => alert(json.message));
                 }
 
-                fetch(`/api/v1/track-package/` + trackingNumber)
+                fetch(baseApi + `/track-package/` + trackingNumber)
                     .then(res => {
                         if (!res.ok) {
                             throw res;
